@@ -1,7 +1,7 @@
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import cartReducer from '@/Redux/cartSlice';
-import { createRoot } from 'react-dom/client'
+import favouriteReducer from '@/Redux/FavSlice';
 import {
   persistStore,
   persistReducer,
@@ -11,23 +11,31 @@ import {
   PERSIST,
   PURGE,
   REGISTER,
-} from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
-import { PersistGate } from 'redux-persist/integration/react'
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
-
-const persistConfig = {
-  key: 'root',
+// persist config for cart
+const cartPersistConfig = {
+  key: 'cart',
   version: 1,
   storage,
-}
+};
 
-const persistedReducer = persistReducer(persistConfig, cartReducer)
+// persist config for favourites
+const favouritePersistConfig = {
+  key: 'favourites',
+  version: 1,
+  storage,
+};
 
+// wrap reducers with persist
+const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
+const persistedFavouriteReducer = persistReducer(favouritePersistConfig, favouriteReducer);
 
 export const store = configureStore({
   reducer: {
-    cart: persistedReducer
+    cart: persistedCartReducer,
+    favourites: persistedFavouriteReducer, // 👈 added favourites
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -37,7 +45,9 @@ export const store = configureStore({
     }),
 });
 
-// Infer types from store
+export const persistor = persistStore(store);
+
+// Infer types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 

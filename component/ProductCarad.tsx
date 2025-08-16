@@ -3,7 +3,11 @@
 import React from 'react'
 import Image from 'next/image'
 import { CiHeart } from 'react-icons/ci'
+import { FaHeart } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/Redux/store'
+import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice'
 
 interface ProductData {
   id: string | number;
@@ -20,6 +24,28 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ data, addToCartItem }) => {
   const router = useRouter()
+  const dispatch = useDispatch()
+
+  // get favourites from store
+  const favourites = useSelector((state: RootState) => state.favourites.favourites)
+
+  // check if current product is already in favourites
+  const isFavourite = favourites.some(item => item.id === data.id)
+
+  const toggleFavourite = () => {
+    if (isFavourite) {
+      dispatch(removeFromFavourites(data.id.toString()))
+    } else {
+      dispatch(addToFavourites({
+        id: data.id.toString(),
+        title: data.title,
+        images: data.images || [],
+        category: data.category,
+        price: data.price,
+        stock: 10 // optional: mock stock, or pass from backend
+      }))
+    }
+  }
 
   return (
     <div
@@ -27,10 +53,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ data, addToCartItem }) => {
     >
       {/* Wishlist Icon */}
       <div className="absolute top-3 right-3 z-10">
-        <CiHeart
-          size={34}
-          className="bg-white text-pink-300 hover:text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
-        />
+        {isFavourite ? (
+          <FaHeart
+            size={34}
+            onClick={toggleFavourite}
+            className="bg-white text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
+          />
+        ) : (
+          <CiHeart
+            size={34}
+            onClick={toggleFavourite}
+            className="bg-white text-pink-300 hover:text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
+          />
+        )}
       </div>
 
       {/* Image */}

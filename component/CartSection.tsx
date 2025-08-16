@@ -107,7 +107,10 @@ const CartSection = () => {
                             <span className="text-gray-700">Total</span>
                             <span className="text-gray-700">INR {calculateSubtotal().toFixed(2)}</span>
                         </div>
-                        <button className='mt-4 w-full bg-pink-200 text-gray-700 py-2 rounded hover:bg-pink-300 transition duration-200 font-semibold shadow'>Checkout</button>
+                        <button 
+                        onClick={()=>router.push('/checkout')}
+                        
+                        className='mt-4 w-full bg-pink-200 text-gray-700 py-2 rounded hover:bg-pink-300 transition duration-200 font-semibold shadow'>Checkout</button>
                     </div>
                 </div>
             </div>

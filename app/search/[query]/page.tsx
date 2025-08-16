@@ -6,7 +6,7 @@ import SearchResult from '@/component/SearchResult'
 
 const Page = () => {
   const params = useParams();
-  const query = params?.query; // Safely access 'query'
+  const query = params?.query; 
 
   const {
     products,
