@@ -7,6 +7,7 @@ interface FavouriteItem {
   images: string[];
   description: string;
   stock: number; // optional, just to show "In Stock" / "Out of Stock"
+  category?: string   // ✅ added this
 }
 
 interface FavouriteState {
