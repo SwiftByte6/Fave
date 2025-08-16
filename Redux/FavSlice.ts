@@ -5,7 +5,7 @@ interface FavouriteItem {
   title: string;
   price: number;
   images: string[];
-  description: string;
+  description?: string;
   stock: number; // optional, just to show "In Stock" / "Out of Stock"
   category?: string   // ✅ added this
 }
