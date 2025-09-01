@@ -2,15 +2,18 @@
 import { useSupabase } from '@/hooks/useSupabase';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '@/Redux/cartSlice';
 import Image from 'next/image';
 import { CiHeart } from "react-icons/ci";
+import { FaHeart } from 'react-icons/fa';
+import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import { IoSearch } from "react-icons/io5";
 
 const CollectionPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const favourites = useSelector((state) => state.favourites.favourites);
   const { products, getDataFromSupabase } = useSupabase();
   const [isLoading, setIsLoading] = useState(true);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -275,10 +278,32 @@ const CollectionPage = () => {
                 >
                   {/* Wishlist Icon */}
                   <div className="absolute top-3 right-3 z-10">
-                    <CiHeart
-                      size={34}
-                      className="bg-white text-pink-300 hover:text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
-                    />
+                    {favourites.some(f => f.id === product.id) ? (
+                      <FaHeart
+                        size={34}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(removeFromFavourites(product.id.toString()))
+                        }}
+                        className="bg-white text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
+                      />
+                    ) : (
+                      <CiHeart
+                        size={34}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          dispatch(addToFavourites({
+                            id: product.id.toString(),
+                            title: product.title,
+                            images: product.images || [],
+                            category: product.category,
+                            price: product.price,
+                            stock: 10
+                          }))
+                        }}
+                        className="bg-white text-pink-300 hover:text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
+                      />
+                    )}
                   </div>
 
                   {/* Category Badge */}

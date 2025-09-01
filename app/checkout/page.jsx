@@ -25,6 +25,8 @@ const CheckoutPage = () => {
     country: 'India'
   })
 
+  const [isProcessing, setIsProcessing] = useState(false)
+
   const calculateSubtotal = () => {
     return cart.reduce((total, item) => total + item.price * (item.cartQuantity || 1), 0)
   }
@@ -45,50 +47,70 @@ const CheckoutPage = () => {
       return
     }
 
-    const { data: orderData, error: orderError } = await supabase
-      .from('orders')
-      .insert([
-        {
-          user_id: userId, 
-          ...form,
-          total_amount: calculateSubtotal()
-        }
-      ])
-      .select()
-      .single()
-
-    if (orderError) {
-      console.error(orderError)
-      alert('Error placing order')
+    if (cart.length === 0) {
+      alert('Your cart is empty')
       return
     }
 
-    const orderItems = cart.map(item => ({
-  order_id: orderData.id,
-  title: item.title,
-  price: item.price,
-  quantity: item.cartQuantity || 1
-}))
+    setIsProcessing(true)
 
-const { error: itemsError } = await supabase
-  .from('order_items')
-  .insert(orderItems)
+    try {
+      // Create the order with 'success' status
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([
+          {
+            user_id: userId, 
+            ...form,
+            total_amount: calculateSubtotal(),
+            status: 'success' // Automatically set to success for history
+          }
+        ])
+        .select()
+        .single()
 
-if (itemsError) {
-  console.error('Error inserting order items:', itemsError)
-  alert('Error saving order items')
-  return
-}
+      if (orderError) {
+        console.error(orderError)
+        alert('Error placing order')
+        setIsProcessing(false)
+        return
+      }
 
+      // Create order items with product images
+      const orderItems = cart.map(item => ({
+        order_id: orderData.id,
+        title: item.title,
+        price: item.price,
+        quantity: item.cartQuantity || 1,
+        images: item.images || [] // Include product images for history
+      }))
 
-    alert('Order placed successfully!')
-    dispatch(removeEveryThing())
-    router.push('/order-success')
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
+
+      if (itemsError) {
+        console.error('Error inserting order items:', itemsError)
+        alert('Error saving order items')
+        setIsProcessing(false)
+        return
+      }
+
+      // Clear cart and redirect to success page
+      dispatch(removeEveryThing())
+      alert('Order placed successfully! It will appear in your order history.')
+      router.push('/order-success')
+      
+    } catch (error) {
+      console.error('Error placing order:', error)
+      alert('An unexpected error occurred. Please try again.')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   return (
-   
-        <div className="bg-[#FFF7F5] min-h-screen">
+    <div className="bg-[#FFF7F5] min-h-screen">
       {/* Header */}
       <div className="h-[10vh] md:h-[15vh] bg-[#F8E9F1] flex flex-col justify-center items-center shadow-md">
         <h1 className="text-3xl font-bold md:text-4xl text-gray-700">Checkout</h1>
@@ -100,15 +122,64 @@ if (itemsError) {
         <div className="w-full md:w-[65%] bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Billing & Shipping Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="name" placeholder="Full Name*" value={form.name} onChange={handleChange} className="border p-3 rounded" />
-            <input type="email" name="email" placeholder="Email*" value={form.email} onChange={handleChange} className="border p-3 rounded" />
-            <input type="tel" name="phone" placeholder="Phone*" value={form.phone} onChange={handleChange} className="border p-3 rounded" />
-            <input type="text" name="city" placeholder="City" value={form.city} onChange={handleChange} className="border p-3 rounded" />
+            <input 
+              type="text" 
+              name="name" 
+              placeholder="Full Name*" 
+              value={form.name} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
+            <input 
+              type="email" 
+              name="email" 
+              placeholder="Email*" 
+              value={form.email} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
+            <input 
+              type="tel" 
+              name="phone" 
+              placeholder="Phone*" 
+              value={form.phone} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
+            <input 
+              type="text" 
+              name="city" 
+              placeholder="City" 
+              value={form.city} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
           </div>
-          <textarea name="address" placeholder="Full Address*" value={form.address} onChange={handleChange} className="border p-3 rounded w-full mt-4"></textarea>
+          <textarea 
+            name="address" 
+            placeholder="Full Address*" 
+            value={form.address} 
+            onChange={handleChange} 
+            className="border p-3 rounded w-full mt-4 focus:outline-none focus:ring-2 focus:ring-pink-400"
+            rows={3}
+          ></textarea>
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <input type="text" name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange} className="border p-3 rounded" />
-            <input type="text" name="country" placeholder="Country" value={form.country} onChange={handleChange} className="border p-3 rounded" />
+            <input 
+              type="text" 
+              name="pincode" 
+              placeholder="Pincode" 
+              value={form.pincode} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
+            <input 
+              type="text" 
+              name="country" 
+              placeholder="Country" 
+              value={form.country} 
+              onChange={handleChange} 
+              className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-pink-400" 
+            />
           </div>
         </div>
 
@@ -134,15 +205,25 @@ if (itemsError) {
           </div>
           <button
             onClick={handlePlaceOrder}
-            className="mt-4 w-full bg-pink-200 text-gray-700 py-2 rounded hover:bg-pink-300 transition font-semibold shadow"
+            disabled={isProcessing || cart.length === 0}
+            className={`mt-4 w-full py-3 rounded font-semibold shadow transition ${
+              isProcessing || cart.length === 0
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-pink-200 text-gray-700 hover:bg-pink-300'
+            }`}
           >
-            Place Order
+            {isProcessing ? 'Processing Order...' : 'Place Order'}
           </button>
+          
+          {cart.length > 0 && (
+            <p className="text-xs text-gray-500 mt-2 text-center">
+              Your order will automatically appear in your order history
+            </p>
+          )}
         </div>
       </div>
     </div>
   )
-  
 }
 
 export default CheckoutPage

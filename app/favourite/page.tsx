@@ -1,17 +1,17 @@
 'use client'
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/Redux/store";
-import ProductCard from "@/component/ProductCarad"; // adjust path
-// import { Heart } from "lucide-react";
+import ProductCard from "@/component/ProductCarad";
 
 const FavouritesPage = () => {
   const favourites = useSelector((state: RootState) => state.favourites.favourites);
+  const dispatch = useDispatch();
 
   // cart function placeholder (you already have logic for cart slice)
   const addToCartItem = (product: any) => {
     console.log("Add to cart from favourites:", product);
-    // dispatch(addToCart(product)) if needed
+    // Implement by dispatching addToCart when needed elsewhere
   };
 
   return (
@@ -23,14 +23,17 @@ const FavouritesPage = () => {
       {favourites.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-lg text-gray-600">Your favourites list is empty 💔</p>
-  
         </div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {favourites.map((product) => (
             <ProductCard
               key={product.id}
               data={product}
+              variant="default"
+              showCategoryBadge={false}
+              showWishlist={true}
+              showAddToCart={true}
               addToCartItem={addToCartItem}
             />
           ))}

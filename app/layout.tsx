@@ -6,6 +6,7 @@ import Header from "@/component/Header";
 import Providers from "@/app/provider"; // 👈 import the wrapper
 import { Playfair_Display } from 'next/font/google';
 import Footer from "@/component/Footer"
+import { Toaster } from 'react-hot-toast'
 import {
   ClerkProvider,
   SignInButton,
@@ -51,6 +52,7 @@ export default function RootLayout({
       >
         <Providers> {/* ✅ Redux store provided to your whole app */}
           <Header />
+          <Toaster position="top-center" />
                     
           {children}
           <Footer/>

@@ -6,7 +6,7 @@ interface CartItem {
   price: number;
   images: string[];
   description: string;
-  stock: number;         // renamed from backend's "quantity"
+  stock: number;         // available stock (mapped from backend quantity if provided)
   cartQuantity: number;  // how many in cart
 }
 
@@ -24,10 +24,17 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action: PayloadAction<any>) => {
       const product = action.payload;
-      const existing = state.cart.find(item => item.id === product.id);
+      const normalizedId = String(product.id);
+
+      const existing = state.cart.find(item => String(item.id) === normalizedId);
+
+      // Resolve stock from multiple possible fields, fallback to Infinity if not provided
+      const resolvedStock: number = typeof product.stock === 'number'
+        ? product.stock
+        : (typeof product.quantity === 'number' ? product.quantity : Number.POSITIVE_INFINITY);
 
       if (existing) {
-        if (existing.cartQuantity < existing.stock) {
+        if (!Number.isFinite(existing.stock) || existing.cartQuantity < existing.stock) {
           existing.cartQuantity += 1;
         } else {
           console.log('Stock limit reached');
@@ -35,8 +42,11 @@ const cartSlice = createSlice({
       } else {
         state.cart.push({
           ...product,
-          stock: product.quantity,      // rename backend "quantity" to "stock"
-          cartQuantity: 1               // start with 1 in cart
+          id: normalizedId,
+          stock: resolvedStock,
+          cartQuantity: typeof product.cartQuantity === 'number' && product.cartQuantity > 0
+            ? product.cartQuantity
+            : 1
         });
       }
     },
@@ -49,11 +59,15 @@ const cartSlice = createSlice({
       state.cart = [];
     },
 
-    updateCartQuantity: (state, action: PayloadAction<{ id: string, quantity: number }>) => {
+    updateCartQuantity: (state, action: PayloadAction<{ id: string | number, quantity: number }>) => {
       const { id, quantity } = action.payload;
-      const item = state.cart.find(item => item.id === id);
+      const normalizedId = String(id);
+      const item = state.cart.find(item => String(item.id) === normalizedId);
       if (item) {
-        const clampedQuantity = Math.max(1, Math.min(quantity, item.stock));
+        const atLeastOne = Math.max(1, quantity);
+        const clampedQuantity = Number.isFinite(item.stock)
+          ? Math.max(1, Math.min(atLeastOne, item.stock))
+          : atLeastOne;
         item.cartQuantity = clampedQuantity;
       }
     }

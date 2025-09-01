@@ -19,7 +19,7 @@ const Page = () => {
     if (query) {
       getFilteredData(query.toString());
     }
-  }, []);
+  }, [query]);
 
   return (
     <div>

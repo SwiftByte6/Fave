@@ -7,7 +7,6 @@ import { CiHeart } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Redux/store";
-import { supabase } from "@/lib/supabase/products";
 
 import {
   SignInButton,
@@ -20,7 +19,6 @@ import {
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState<string>("");
-  const [user, setUser] = useState<any>(null);
   const [isActive, setIsActive] = useState<number>(0);
 
 
@@ -34,19 +32,7 @@ const Header = () => {
     }
   };
 
-  useEffect(() => {
-    const getUserData = async () => {
-      const { data: user } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUserData();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    router.push("/signin");
-  };
+  // Clerk manages auth UI; no local Supabase auth here
 
   const subNavbar = [
     "Sarees",
@@ -60,7 +46,7 @@ const Header = () => {
   return (
     <>
       {/* Main Navbar */}
-      <nav className="flex justify-between items-center shadow-md md:px-16 px-4 py-3">
+      <nav className="flex sticky top-0 left-0 justify-between items-center shadow-md md:px-16 px-4 py-3 z-[999]">
         {/* Left: Logo */}
         <div
           className="cursor-pointer text-2xl font-bold text-pink-600"
@@ -70,7 +56,7 @@ const Header = () => {
         </div>
 
         {/* Center: Navigation */}
-        <ul className="hidden md:flex gap-8 items-center text-base font-medium">
+        <ul className="hidden lg:flex gap-8 items-center text-base font-medium">
           <li
             className="cursor-pointer hover:text-pink-600 transition"
             onClick={() => router.push("/")}
@@ -97,6 +83,12 @@ const Header = () => {
           </li>
           <li
             className="cursor-pointer hover:text-pink-600 transition"
+            onClick={() => router.push("/orders")}
+          >
+            Orders
+          </li>
+          <li
+            className="cursor-pointer hover:text-pink-600 transition"
             onClick={() => router.push("/collection")}
           >
             Collection
@@ -104,7 +96,7 @@ const Header = () => {
         </ul>
 
         {/* Right: Search + Icons */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center justify-center gap-5">
           {/* Search Box */}
           <div className="hidden md:flex items-center border border-pink-200 rounded-2xl px-3 w-[220px]">
             <input
@@ -192,13 +184,14 @@ const Header = () => {
             <li onClick={() => router.push("/about")} className="hover:text-pink-600 cursor-pointer">About</li>
             <li onClick={() => router.push("/contact")} className="hover:text-pink-600 cursor-pointer">Contact</li>
             <li onClick={() => router.push("/new-arrival")} className="hover:text-pink-600 cursor-pointer">New Arrival</li>
+            <li onClick={() => router.push("/orders")} className="hover:text-pink-600 cursor-pointer">Orders</li>
             <li onClick={() => router.push("/collection")} className="hover:text-pink-600 cursor-pointer">Collection</li>
           </ul>
         </div>
       )}
 
       {/* Subnavbar */}
-      <div className="bg-[#FFF7F5] border-2 border-gray-200 p-3 hidden md:flex justify-center items-center">
+      {/* <div className="bg-[#FFF7F5] sticky  border-2 border-gray-200 p-3 hidden md:flex justify-center items-center">
         <ul className="flex gap-9 justify-center items-center w-full">
           {subNavbar.map((heading, index) => (
             <li key={index} className="relative group cursor-pointer px-4 py-2 rounded transition-all duration-200">
@@ -212,7 +205,7 @@ const Header = () => {
             </li>
           ))}
         </ul>
-      </div>
+      </div> */}
     </>
   );
 };

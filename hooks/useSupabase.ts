@@ -4,7 +4,7 @@ import { useState } from "react"
 export const useSupabase=  ()=>{
     const [products,setProducts]=useState<any>([]);
     const [filterData,setFilterData]=useState<any>([]);
-    const[filterId,setFilterId]=useState<any>([]);
+    const[filterId,setFilterId]=useState<any>(null);
 
     const getDataFromSupabase= async()=>{
 

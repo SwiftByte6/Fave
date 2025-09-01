@@ -5,12 +5,37 @@
   --foreground: #171717;
 }
 
-@theme inline {
+:root {
+  /* 🎨 Colors */
+  --background: #F9F3ED;      /* Primary background */
+  --background-alt: #E7D8CA;  /* Section alternate */
+  --foreground: #220707;      /* Main body text */
+  --muted: #AC9185;           /* Secondary / muted text */
+  --heading: #531C22;         /* Headings */
+  --accent: #AC9185;          /* Heading accent */
+  --button-primary: #531C22;  /* Primary button bg */
+  --button-primary-text: #F9F3ED;
+  --button-primary-hover: #220707;
+  --button-secondary: transparent;
+  --button-secondary-border: #AC9185;
+  --button-secondary-text: #AC9185;
+  --border: #E7D8CA;          /* Borders, dividers, card outlines */
+  --tag-bg: #531C22;
+  --tag-text: #F9F3ED;
+
+  /* ✨ Fonts */
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Geist Mono', monospace;
+
+  /* 🧩 Aliases */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-body: var(--font-sans);
+  --font-heading: var(--font-serif);
+  --font-mono: var(--font-mono);
 }
+
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -22,4 +47,80 @@ body {
   background: #FFF7F5;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Responsive utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+/* Mobile-first responsive improvements */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+  button, 
+  [role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="search"] {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better focus states for accessibility */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #ec4899;
+  outline-offset: 2px;
+}
+
+.playfair {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+}
+body{
+  background-color: #F9f3ed;
+}
+
+/* Improved mobile typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    color: #220707;
+  }
+  
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  p {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color:#AC9185;
+  }
 }
