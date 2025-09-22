@@ -309,3 +309,4 @@ const SizeGuide = ({ isOpen, onClose, productType = 'general' }: SizeGuideProps)
 }
 
 export default SizeGuide
+

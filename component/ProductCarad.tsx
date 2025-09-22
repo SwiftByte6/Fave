@@ -22,11 +22,12 @@ interface ProductData {
 interface ProductCardProps {
   data: ProductData;
   addToCartItem?: (product: ProductData) => void;
-  variant?: 'default' | 'search' | 'compact';
+  variant?: 'default' | 'search' | 'compact' | 'bestseller';
   showCategoryBadge?: boolean;
   showWishlist?: boolean;
   showAddToCart?: boolean;
   className?: string;
+  currencySymbol?: string;
 }
 
 /**
@@ -79,7 +80,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   showCategoryBadge = false,
   showWishlist = true,
   showAddToCart = true,
-  className = ''
+  className = '',
+  currencySymbol = '₹'
 }) => {
   const router = useRouter()
   const dispatch = useDispatch()
@@ -110,10 +112,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Determine card height based on variant
   const getCardHeight = () => {
     switch (variant) {
+      case 'bestseller':
+        return 'h-[420px] sm:h-[400px] lg:h-[400px]'
       case 'compact':
         return 'h-[400px] sm:h-[450px] lg:h-[500px]'
       case 'search':
-        return 'h-[500px] sm:h-[580px] lg:h-[650px]'
+        return 'h-[400px] sm:h-[400px] lg:h-[400px]'
       case 'default':
       default:
         return 'h-[550px] sm:h-[600px] lg:h-[700px]'
@@ -123,10 +127,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Determine image height based on variant
   const getImageHeight = () => {
     switch (variant) {
+      case 'bestseller':
+        return 'h-[62%]'
       case 'compact':
         return 'h-[70%]'
       case 'search':
-        return 'h-[70%]'
+        return 'h-[65%]'
       case 'default':
       default:
         return 'h-[75%]'
@@ -136,19 +142,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // Determine content height based on variant
   const getContentHeight = () => {
     switch (variant) {
+      case 'bestseller':
+        return 'h-[25%]'
       case 'compact':
         return 'h-[30%]'
       case 'search':
-        return 'h-[30%]'
+        return 'h-[25%]'
       case 'default':
       default:
-        return 'h-[25%]'
+        return 'h-[20%]'
     }
   }
 
   return (
     <div
-      className={`bg-white rounded-2xl lg:rounded-3xl border border-pink-100 shadow-lg overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-pink-200 hover:scale-105 ${className}`}
+      className={`bg-white rounded-2xl lg:rounded-3xl border border-pink-100 shadow-[0_6px_30px_rgba(244,183,199,0.25)] overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-[0_8px_36px_rgba(244,183,199,0.35)] hover:-translate-y-0.5 ${className}`}
     >
       {/* Wishlist Icon */}
       {showWishlist && (
@@ -187,14 +195,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <Image
             src={data.images[0]}
             alt={data.title}
-            width={500}
-            height={500}
+            width={400}
+            height={400}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-gray-400">
             <div className="text-center">
-              <div className="text-4xl mb-2">👗</div>
+              <div className="text-4xl mb-2"></div>
               <p>Image coming soon</p>
             </div>
           </div>
@@ -204,7 +212,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Content */}
       <div className={`p-3 sm:p-4 ${getContentHeight()} flex flex-col justify-between`}>
         <div>
-          <h3 className="text-pink-600 text-base sm:text-lg font-semibold mb-1 line-clamp-2">
+          <h3 className={`text-[#6f5a4d] ${variant === 'bestseller' ? 'text-base sm:text-md' : 'text-base sm:text-md'} font-semibold mb-1 line-clamp-2`}>
             {data.title}
           </h3>
           <p className="text-xs text-pink-400 mb-2 sm:mb-3">
@@ -213,13 +221,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
         
         <div className="flex items-center justify-between">
-          <div className="text-base sm:text-lg lg:text-xl text-gray-800 font-bold">
-            ₹ {data.price?.toLocaleString()}
+          <div className={`font-bold ${variant === 'bestseller' ? 'text-[#f9b8c3]' : 'text-gray-800'} text-base sm:text-lg lg:text-xl`}>
+            {currencySymbol} {data.price?.toLocaleString()}
           </div>
           {showAddToCart && addToCartItem && (
             <button
               onClick={() => addToCartItem(data)}
-              className="bg-pink-100 text-pink-600 font-medium text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl hover:bg-pink-200 transition duration-300"
+              className={`font-medium text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl transition duration-300 ${variant === 'bestseller' ? 'bg-[#f9b8c3] text-white ' : 'bg-[#f9b8c3] text-white hover:bg-pink-200'}`}
             >
               Add to Cart
             </button>

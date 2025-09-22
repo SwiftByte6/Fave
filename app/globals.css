@@ -1,34 +1,56 @@
 @import "tailwindcss";
 
+/* Global design tokens based on the requested palette */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Base & Surfaces */
+  --background: hsl(10, 20%, 98%);            /* warm near-white */
+  --foreground: hsl(25, 25%, 15%);            /* deep warm brown */
+  --card: #ffffff;                             /* pure white */
+  --card-foreground: hsl(25, 25%, 15%);
+  --popover: #ffffff;
+  --popover-foreground: hsl(25, 25%, 15%);
 
-:root {
-  /* 🎨 Colors */
-  --background: #F9F3ED;      /* Primary background */
-  --background-alt: #E7D8CA;  /* Section alternate */
-  --foreground: #220707;      /* Main body text */
-  --muted: #AC9185;           /* Secondary / muted text */
-  --heading: #531C22;         /* Headings */
-  --accent: #AC9185;          /* Heading accent */
-  --button-primary: #531C22;  /* Primary button bg */
-  --button-primary-text: #F9F3ED;
-  --button-primary-hover: #220707;
-  --button-secondary: transparent;
-  --button-secondary-border: #AC9185;
-  --button-secondary-text: #AC9185;
-  --border: #E7D8CA;          /* Borders, dividers, card outlines */
-  --tag-bg: #531C22;
-  --tag-text: #F9F3ED;
+  /* Primary (Blush Pink) */
+  --primary: #F4B7C7;                          /* hsl(350, 85%, 85%) */
+  --primary-soft: hsl(350, 60%, 92%);
+  --primary-foreground: hsl(25, 25%, 15%);
 
-  /* ✨ Fonts */
+  /* Secondary (Cream / Neutrals) */
+  --secondary: hsl(30, 30%, 95%);
+  --secondary-foreground: hsl(25, 25%, 15%);
+
+  /* Accent (Lavender) */
+  --accent: #D9CCEB;                            /* hsl(270, 40%, 88%) */
+  --accent-soft: hsl(270, 25%, 94%);
+  --accent-foreground: hsl(25, 25%, 15%);
+
+  /* Warm Naturals */
+  --warm-beige: #EADFCC;                        /* hsl(35, 25%, 88%) */
+  --warm-beige-soft: hsl(35, 15%, 94%);
+
+  /* Luxury Tone (Rose Gold) */
+  --rose-gold: hsl(15, 65%, 75%);
+  --rose-gold-soft: hsl(15, 45%, 88%);
+
+  /* Muted */
+  --muted: hsl(30, 15%, 92%);
+  --muted-foreground: hsl(25, 20%, 45%);
+
+  /* Destructive */
+  --destructive: #F87171;                       /* warm red */
+  --destructive-foreground: #ffffff;
+
+  /* Borders / Inputs / Ring */
+  --border: hsl(30, 20%, 90%);
+  --input: hsl(30, 20%, 90%);
+  --ring: #F4B7C7;                              /* same as primary */
+
+  /* Fonts (aliases) */
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Playfair Display', serif;
   --font-mono: 'Geist Mono', monospace;
 
-  /* 🧩 Aliases */
+  /* Aliases for convenience */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-body: var(--font-sans);
@@ -36,17 +58,16 @@
   --font-mono: var(--font-mono);
 }
 
-
+/* Optional: dark scheme placeholder (customize later if needed) */
 @media (prefers-color-scheme: dark) {
   :root {
-   
+    /* keep same tokens or invert selectively */
   }
 }
 
 body {
-  background: #FFF7F5;
+  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Responsive utilities */
@@ -93,7 +114,7 @@ button:focus,
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid #ec4899;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -101,9 +122,10 @@ select:focus {
   font-family: 'Playfair Display', serif;
   font-weight: 800;
 }
-body{
-  background-color: #F9f3ed;
+.dancing,h1{
+  font-family: 'Dancing Script',cursive;
 }
+/* body background is controlled by --background */
 
 /* Improved mobile typography */
 @media (max-width: 640px) {

@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 
-// --- Dummy Product Data (replace with API later) ---
-const products = [
+// --- Dummy Product Data (fallback) ---
+const fallbackProducts = [
   {
     id: 1,
     title: "Women Green Sweater",
@@ -66,12 +66,13 @@ const useSlidesPerView = () => {
 };
 
 // --- Slider Component ---
-const Slider = () => {
+export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const slidesPerView = useSlidesPerView();
 
-  const maxIndex = Math.max(0, products.length - slidesPerView);
+  const data = items && items.length ? items : fallbackProducts;
+  const maxIndex = Math.max(0, data.length - slidesPerView);
 
   const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
@@ -86,9 +87,9 @@ const Slider = () => {
   // Autoplay
   useEffect(() => {
     if (isPaused) return;
-    const timer = setTimeout(goToNext, 3000);
+    const timer = setTimeout(goToNext, autoplayMs);
     return () => clearTimeout(timer);
-  }, [currentIndex, goToNext, isPaused]);
+  }, [currentIndex, goToNext, isPaused, autoplayMs]);
 
   return (
     <div
@@ -102,20 +103,23 @@ const Slider = () => {
           className="flex transition-transform ease-in-out duration-500"
           style={{ transform: `translateX(-${(currentIndex * 100) / slidesPerView}%)` }}
         >
-          {products.map((item) => (
+          {data.map((item, idx) => (
             <div
-              key={item.id}
-              className="flex-shrink-0 ml-10 bg-gray-100"
+              key={item.id ?? idx}
+              className="flex-shrink-0 px-3 w-[300px]"
               style={{ flexBasis: `${100 / slidesPerView}%` }}
             >
-              <div className=" rounded-lg  p-3 ">
-                <img
-                  src={item.img}
-                  alt={item.title}
-                  className="w-full h-[370px] object-cover rounded-md"
-                />
-        
-              </div>
+              {renderItem ? (
+                renderItem(item)
+              ) : (
+                <div className="rounded-xl overflow-hidden bg-white shadow">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="w-[300px] h-[360px] object-cover"
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -124,15 +128,13 @@ const Slider = () => {
       {/* Arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute top-1/2 left-0 transform -translate-y-1/2 
-                   bg-white/20 hover:bg-white/40 text-white p-2 rounded-full z-10"
+        className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-white text-[#8A6F5C] hover:bg-rose-50 shadow p-2 rounded-full z-10"
       >
         <ArrowIcon className="h-6 w-6 transform rotate-180" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute top-1/2 right-0 transform -translate-y-1/2 
-                   bg-white/20 hover:bg-white/40 text-white p-2 rounded-full z-10"
+        className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-white text-[#8A6F5C] hover:bg-rose-50 shadow p-2 rounded-full z-10"
       >
         <ArrowIcon className="h-6 w-6" />
       </button>
@@ -144,7 +146,7 @@ const Slider = () => {
             key={idx}
             onClick={() => goToSlide(idx)}
             className={`h-3 w-3 rounded-full transition-colors ${
-              currentIndex === idx ? "bg-rose-500" : "bg-gray-400"
+              currentIndex === idx ? "bg-rose-400" : "bg-gray-300"
             }`}
           />
         ))}
@@ -153,47 +155,3 @@ const Slider = () => {
   );
 };
 
-// --- Whole Section with text + slider ---
-const BestSellerSection = () => {
-  return (
-    <div className="relative flex flex-col md:flex-row items-center justify-between bg-[#531c22] rounded-l-3xl text-white w-full min-h-[50vh] p-6 md:p-12">
-      <div className="md:w-1/3 space-y-6">
-        <h1 className="text-3xl md:text-6xl font-bold">Best Seller Products</h1>
-        <p className="text-gray-300 text-lg md:text-xl">
-          Discover our most popular picks loved by our customers. Trendy, stylish, and perfect for every occasion.
-        </p>
-        <ul className="list-disc pl-5 text-gray-200 text-base md:text-lg space-y-2">
-          <li>Handpicked styles for every season</li>
-          <li>Premium quality at affordable prices</li>
-          <li>Fast shipping & easy returns</li>
-          <li>Thousands of happy customers</li>
-        </ul>
-        <div className="mt-6">
-          <button className="bg-white text-black px-8 py-3 rounded-md font-semibold hover:bg-gray-200 transition">
-            Shop Now
-          </button>
-        </div>
-        <div className="mt-8">
-          <div className="flex items-center space-x-4">
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold">4.8</span>
-              <span className="text-yellow-400">★★★★★</span>
-              <span className="text-xs text-gray-300">Customer Rating</span>
-            </div>
-            <div className="border-l border-gray-500 h-10"></div>
-            <div className="flex flex-col items-center">
-              <span className="text-2xl font-bold">10K+</span>
-              <span className="text-xs text-gray-300">Products Sold</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Right Slider */}
-      <div className="md:w-2/3 mt-8 md:mt-0">
-        <Slider />
-      </div>
-    </div>
-  );
-};
-
-export default BestSellerSection;
