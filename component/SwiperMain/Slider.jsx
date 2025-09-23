@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 
-// --- Dummy Product Data (fallback) ---
 const fallbackProducts = [
   {
     id: 1,
@@ -36,7 +35,6 @@ const fallbackProducts = [
   },
 ];
 
-// --- Arrow SVG Component ---
 const ArrowIcon = ({ className }) => (
   <svg
     className={className}
@@ -50,7 +48,6 @@ const ArrowIcon = ({ className }) => (
   </svg>
 );
 
-// --- Hook for responsive slides ---
 const useSlidesPerView = () => {
   const getSlidesPerView = () => (window.innerWidth < 768 ? 1 : 3);
   const [slidesPerView, setSlidesPerView] = useState(1);
@@ -65,7 +62,6 @@ const useSlidesPerView = () => {
   return slidesPerView;
 };
 
-// --- Slider Component ---
 export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -84,7 +80,6 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
 
   const goToSlide = (idx) => setCurrentIndex(idx);
 
-  // Autoplay
   useEffect(() => {
     if (isPaused) return;
     const timer = setTimeout(goToNext, autoplayMs);
@@ -93,7 +88,7 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
 
   return (
     <div
-      className="relative"
+      className="relative w-full max-w-6xl mx-auto py-10"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -106,18 +101,22 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
           {data.map((item, idx) => (
             <div
               key={item.id ?? idx}
-              className="flex-shrink-0 px-3 w-[300px]"
+              className="flex-shrink-0 px-4"
               style={{ flexBasis: `${100 / slidesPerView}%` }}
             >
               {renderItem ? (
                 renderItem(item)
               ) : (
-                <div className="rounded-xl overflow-hidden bg-white shadow">
+                <div className="rounded-2xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition">
                   <img
                     src={item.img}
                     alt={item.title}
-                    className="w-[300px] h-[360px] object-cover"
+                    className="w-full h-[360px] object-cover"
                   />
+                  <div className="p-4 text-center">
+                    <h3 className="text-sm font-semibold text-gray-800">{item.title}</h3>
+                    <p className="text-rose-500 font-medium">{item.price}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -128,25 +127,25 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
       {/* Arrows */}
       <button
         onClick={goToPrevious}
-        className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-white text-[#8A6F5C] hover:bg-rose-50 shadow p-2 rounded-full z-10"
+        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
       >
         <ArrowIcon className="h-6 w-6 transform rotate-180" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-white text-[#8A6F5C] hover:bg-rose-50 shadow p-2 rounded-full z-10"
+        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
       >
         <ArrowIcon className="h-6 w-6" />
       </button>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-4 space-x-2">
+      <div className="flex justify-center mt-6 space-x-2">
         {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
           <button
             key={idx}
             onClick={() => goToSlide(idx)}
             className={`h-3 w-3 rounded-full transition-colors ${
-              currentIndex === idx ? "bg-rose-400" : "bg-gray-300"
+              currentIndex === idx ? "bg-rose-500" : "bg-gray-300"
             }`}
           />
         ))}
@@ -154,4 +153,3 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
     </div>
   );
 };
-

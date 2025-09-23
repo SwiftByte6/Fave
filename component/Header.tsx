@@ -72,6 +72,12 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-4 md:gap-6">
+            <button
+              className="hidden md:block text-sm px-3 py-1.5 rounded-full bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90"
+              onClick={() => router.push("/orders")}
+            >
+              Orders
+            </button>
             <CiUser
               size={26}
               className="hidden md:block text-[#8A6F5C] cursor-pointer"
@@ -165,6 +171,12 @@ const Header = () => {
               </button>
             ))}
           </div>
+          <button
+            className="self-start px-4 py-2 rounded-full bg-[#F4DCDC] text-[#6f5a4d]"
+            onClick={() => { setIsOpen(false); router.push("/orders"); }}
+          >
+            View Orders
+          </button>
         </div>
       )}
     </>

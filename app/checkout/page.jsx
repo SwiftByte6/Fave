@@ -55,48 +55,24 @@ const CheckoutPage = () => {
     setIsProcessing(true)
 
     try {
-      // Create the order with 'success' status
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert([
-          {
-            user_id: userId, 
-            ...form,
-            total_amount: calculateSubtotal(),
-            status: 'success' // Automatically set to success for history
-          }
-        ])
-        .select()
-        .single()
-
-      if (orderError) {
-        console.error(orderError)
-        alert('Error placing order')
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form,
+          items: cart,
+          total: calculateSubtotal(),
+          status: 'success'
+        })
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        console.error(json)
+        alert(json?.error || 'Error placing order')
         setIsProcessing(false)
         return
       }
 
-      // Create order items with product images
-      const orderItems = cart.map(item => ({
-        order_id: orderData.id,
-        title: item.title,
-        price: item.price,
-        quantity: item.cartQuantity || 1,
-        images: item.images || [] // Include product images for history
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems)
-
-      if (itemsError) {
-        console.error('Error inserting order items:', itemsError)
-        alert('Error saving order items')
-        setIsProcessing(false)
-        return
-      }
-
-      // Clear cart and redirect to success page
       dispatch(removeEveryThing())
       alert('Order placed successfully! It will appear in your order history.')
       router.push('/order-success')

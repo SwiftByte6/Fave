@@ -3,7 +3,7 @@
 
 -- 1. Create orders table (if not exists)
 CREATE TABLE IF NOT EXISTS orders (
-  id BIGSERIAL PRIMARY KEY,
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL,
   total_amount DECIMAL(10,2) NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'success', 'cancelled')),
@@ -14,19 +14,19 @@ CREATE TABLE IF NOT EXISTS orders (
   city TEXT,
   pincode TEXT,
   country TEXT DEFAULT 'India',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
 -- 2. Create order_items table (if not exists)
 CREATE TABLE IF NOT EXISTS order_items (
-  id BIGSERIAL PRIMARY KEY,
-  order_id BIGINT REFERENCES orders(id) ON DELETE CASCADE,
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id uuid REFERENCES orders(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1,
   images TEXT[] DEFAULT '{}',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
 -- 3. Create indexes for better performance
@@ -127,5 +127,30 @@ GROUP BY o.id;
 -- 11. Grant necessary permissions
 GRANT ALL ON orders TO authenticated;
 GRANT ALL ON order_items TO authenticated;
-GRANT USAGE ON SEQUENCE orders_id_seq TO authenticated;
-GRANT USAGE ON SEQUENCE order_items_id_seq TO authenticated;
+-- UUID uses gen_random_uuid(), no sequence grants needed
+
+-- 12. Profiles table for user info used in account page
+CREATE TABLE IF NOT EXISTS profiles (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT UNIQUE NOT NULL,
+  name TEXT,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  pincode TEXT,
+  country TEXT DEFAULT 'India',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
+
+CREATE POLICY "Users can view own profile" ON profiles
+  FOR SELECT USING (auth.uid()::text = user_id);
+CREATE POLICY "Users can upsert own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid()::text = user_id);
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid()::text = user_id);
+
+GRANT ALL ON profiles TO authenticated;

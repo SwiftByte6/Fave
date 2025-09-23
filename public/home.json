@@ -1,0 +1,24 @@
+{
+  "hero": {
+    "titleTop": "Lovable",
+    "titleAccent": "Fashion",
+    "subtitle": "Discover your unique style with our curated collection of timeless pieces",
+    "bgImage": "/banner.png",
+    "features": ["Free Shipping", "Easy Returns", "24/7 Support"],
+    "primaryCta": { "label": "Shop Collection", "href": "/collection" },
+    "secondaryCta": { "label": "Learn More", "href": "/about" }
+  },
+  "newArrivals": {
+    "title": "New Arrival",
+    "ctaLabel": "View All Products",
+    "ctaHref": "/collection",
+    "limit": 6
+  },
+  "slider": {
+    "title": "Things You'll Love",
+    "description": "Handpicked just for you based on your style preferences",
+    "filterCategory": null,
+    "filterIds": [],
+    "limit": 8
+  }
+}

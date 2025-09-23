@@ -4,8 +4,8 @@ import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase/products";
 
 interface OrderItem {
-  id: number;
-  order_id: number;
+  id: string;
+  order_id: string;
   title: string;
   price: number;
   quantity: number;
@@ -13,7 +13,7 @@ interface OrderItem {
 }
 
 interface OrderRow {
-  id: number;
+  id: string;
   created_at?: string;
   total_amount: number;
   status?: string; // pending | processing | shipped | delivered | success | cancelled
@@ -64,7 +64,7 @@ const OrdersPage: React.FC = () => {
         console.error(itemsError);
       }
 
-      const itemsByOrderId: Record<number, OrderItem[]> = {};
+      const itemsByOrderId: Record<string, OrderItem[]> = {};
       (itemRows || []).forEach((it) => {
         if (!itemsByOrderId[it.order_id]) itemsByOrderId[it.order_id] = [];
         itemsByOrderId[it.order_id].push(it);
