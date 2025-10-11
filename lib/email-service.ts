@@ -4,7 +4,6 @@ import nodemailer from 'nodemailer'
 const createTransporter = async () => {
   // Option 1: Use Gmail SMTP if credentials are provided
   if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    console.log('📧 Using Gmail SMTP for email sending.')
     return nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -16,9 +15,7 @@ const createTransporter = async () => {
 
   // Option 2: For development/testing without real credentials, use Ethereal Email
   if (process.env.NODE_ENV === 'development' || !process.env.SMTP_HOST) {
-    console.log('📧 Using Ethereal Email (fake SMTP) for development testing.')
     const testAccount = await nodemailer.createTestAccount()
-    console.log('Ethereal Test Account:', { user: testAccount.user, pass: testAccount.pass })
     return nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
@@ -31,7 +28,6 @@ const createTransporter = async () => {
   }
 
   // Option 3: For production, use configured SMTP
-  console.log('📧 Using configured SMTP for email sending.')
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -68,14 +64,6 @@ interface OrderEmailData {
 
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   try {
-    console.log('📧 Starting email send process...')
-    console.log('📧 Email data:', {
-      customerEmail: data.customerEmail,
-      customerName: data.customerName,
-      orderNumber: data.orderNumber || data.orderId,
-      totalAmount: data.totalAmount
-    })
-
     const transporter = await createTransporter()
     const emailHtml = generateOrderConfirmationHTML(data)
     
@@ -90,18 +78,10 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
       html: emailHtml,
     }
 
-    console.log('📧 Mail options:', {
-      from: mailOptions.from,
-      to: mailOptions.to,
-      subject: mailOptions.subject
-    })
-
     // Send email
     const info = await transporter.sendMail(mailOptions)
     
-    console.log('✅ Order confirmation email sent successfully!')
-    console.log('📧 Message ID:', info.messageId)
-    console.log('📧 Response:', info.response)
+    console.log('✅ Order confirmation email sent to:', data.customerEmail)
     
     return { 
       success: true, 
@@ -109,12 +89,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
       message: `Email sent successfully to ${data.customerEmail}`
     }
   } catch (error: any) {
-    console.error('❌ Email sending error:', error)
-    console.error('❌ Error details:', {
-      message: error.message,
-      code: error.code,
-      command: error.command
-    })
+    console.error('❌ Email sending error:', error.message)
     return { success: false, error: error.message }
   }
 }
