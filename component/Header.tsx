@@ -72,17 +72,37 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-4 md:gap-6">
-            <button
-              className="hidden md:block text-sm px-3 py-1.5 rounded-full bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90"
-              onClick={() => router.push("/orders")}
-            >
-              Orders
-            </button>
-            <CiUser
-              size={26}
-              className="hidden md:block text-[#8A6F5C] cursor-pointer"
-              onClick={() => router.push("/account")}
-            />
+            {/* Authentication */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="hidden md:block text-sm px-3 py-1.5 rounded-full bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="hidden md:block text-sm px-3 py-1.5 rounded-full bg-black text-white hover:opacity-90">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            
+            <SignedIn>
+              <button
+                className="hidden md:block text-sm px-3 py-1.5 rounded-full bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90"
+                onClick={() => router.push("/orders")}
+              >
+                Orders
+              </button>
+              <UserButton 
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8"
+                  }
+                }}
+              />
+            </SignedIn>
+            
             <CiHeart
               size={26}
               onClick={() => router.push("/favourite")}
@@ -171,12 +191,31 @@ const Header = () => {
               </button>
             ))}
           </div>
-          <button
-            className="self-start px-4 py-2 rounded-full bg-[#F4DCDC] text-[#6f5a4d]"
-            onClick={() => { setIsOpen(false); router.push("/orders"); }}
-          >
-            View Orders
-          </button>
+          
+          {/* Mobile Authentication */}
+          <div className="flex gap-2">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-2 rounded-full bg-[#F4DCDC] text-[#6f5a4d] text-sm">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="px-4 py-2 rounded-full bg-black text-white text-sm">
+                  Sign Up
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            
+            <SignedIn>
+              <button
+                className="px-4 py-2 rounded-full bg-[#F4DCDC] text-[#6f5a4d] text-sm"
+                onClick={() => { setIsOpen(false); router.push("/orders"); }}
+              >
+                View Orders
+              </button>
+            </SignedIn>
+          </div>
         </div>
       )}
     </>

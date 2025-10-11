@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase/products'
 import { removeEveryThing } from '@/Redux/cartSlice'
+import RazorpayPayment from '@/component/RazorpayPayment'
+import toast from 'react-hot-toast'
 
 const CheckoutPage = () => {
   const router = useRouter()
@@ -29,6 +31,8 @@ const CheckoutPage = () => {
   })
 
   const [isProcessing, setIsProcessing] = useState(false)
+  const [orderId, setOrderId] = useState(null)
+  const [showPayment, setShowPayment] = useState(false)
 
   const calculateSubtotal = () =>
     cart.reduce((total, item) => total + item.price * (item.cartQuantity || 1), 0)
@@ -37,33 +41,56 @@ const CheckoutPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handlePlaceOrder = async () => {
+  const handleCreateOrder = async () => {
     // Validation
     if (!form.name || !form.email || !form.phone || !form.address) {
-      alert('Please fill in all required fields')
+      toast.error('Please fill in all required fields')
       return
     }
 
     if (!supabaseUrl || !supabaseAnon) {
-      alert('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.')
+      toast.error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.')
       return
     }
 
     if (!isLoaded || !userId) {
-      alert('Please login to place an order')
+      toast.error('Please login to place an order')
       router.push('/signin')
       return
     }
 
     if (!cart.length) {
-      alert('Your cart is empty')
+      toast.error('Your cart is empty')
       return
     }
 
     setIsProcessing(true)
 
     try {
-      // Create order
+      // Generate order number
+      const orderNumber = `ORD-${Date.now().toString().slice(-6)}`
+
+      // Prepare cart items for database insertion
+      const cartItems = cart.map((item) => ({
+        id: item.id || Math.random().toString(36).substr(2, 9),
+        title: item.title || item.name || 'Unknown Product',
+        price: parseFloat(item.price) || 0,
+        quantity: parseInt(item.cartQuantity) || 1,
+        images: Array.isArray(item.images)
+          ? item.images
+          : (item.image ? [item.image] : (item.thumbnail ? [item.thumbnail] : [])),
+        description: item.description || '',
+        category: item.category || '',
+        size: item.size || '',
+        color: item.color || '',
+        sku: item.sku || '',
+        total_price: parseFloat(item.price) * (parseInt(item.cartQuantity) || 1)
+      }))
+
+      console.log('Cart items being inserted:', cartItems)
+      console.log('Total cart items:', cartItems.length)
+
+      // Create order with items as JSON
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([
@@ -71,6 +98,10 @@ const CheckoutPage = () => {
             user_id: userId,
             total_amount: calculateSubtotal(),
             status: 'pending',
+            payment_status: 'pending',
+            payment_method: 'razorpay',
+            order_number: orderNumber,
+            items: cartItems,
             ...form,
           },
         ])
@@ -79,42 +110,66 @@ const CheckoutPage = () => {
 
       if (orderError || !order) {
         console.error('Order insert error:', orderError)
-        alert(orderError?.message || 'Failed to create order. Please try again.')
+        toast.error(orderError?.message || 'Failed to create order. Please try again.')
         setIsProcessing(false)
         return
       }
 
-      // Create order items
-      const itemsPayload = cart.map((item) => ({
-        order_id: order.id,
-        title: item.title,
-        price: item.price,
-        quantity: item.cartQuantity || 1,
-        images: Array.isArray(item.images)
-          ? item.images
-          : (item.image ? [item.image] : (item.thumbnail ? [item.thumbnail] : [])),
-      }))
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(itemsPayload)
-
-      if (itemsError) {
-        console.error('Order items insert error:', itemsError)
-        alert(itemsError?.message || 'Failed to create order items. Please try again.')
-        setIsProcessing(false)
-        return
-      }
-
-      dispatch(removeEveryThing())
-      alert('Order placed successfully!')
-      router.push('/order-success')
+      console.log('Order created successfully:', order)
+      console.log('Order items:', order.items)
+      console.log('Items count:', order.items?.length || 0)
+      
+      setOrderId(order.id)
+      setShowPayment(true)
+      setIsProcessing(false)
+      toast.success('Order created! Please complete payment.')
     } catch (error) {
-      console.error('Error placing order:', error)
-      alert('An unexpected error occurred. Please try again.')
-    } finally {
+      console.error('Error creating order:', error)
+      toast.error('An unexpected error occurred. Please try again.')
       setIsProcessing(false)
     }
+  }
+
+  const handlePaymentSuccess = async (paymentData) => {
+    try {
+      // Verify payment with backend
+      const response = await fetch('/api/razorpay/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          razorpay_order_id: paymentData.razorpay_order_id,
+          razorpay_payment_id: paymentData.razorpay_payment_id,
+          razorpay_signature: paymentData.razorpay_signature,
+          order_id: orderId,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Payment verification failed')
+      }
+
+      const result = await response.json()
+      
+      // Store order details for success page
+      localStorage.setItem('lastOrder', JSON.stringify({
+        orderNumber: result.order_number,
+        paymentId: paymentData.razorpay_payment_id
+      }))
+
+      dispatch(removeEveryThing())
+      toast.success('Payment successful! Order confirmed.')
+      router.push(`/order-success?order=${result.order_number}&payment=${paymentData.razorpay_payment_id}`)
+    } catch (error) {
+      console.error('Payment verification error:', error)
+      toast.error('Payment verification failed. Please contact support.')
+    }
+  }
+
+  const handlePaymentError = (error) => {
+    console.error('Payment error:', error)
+    toast.error('Payment failed. Please try again.')
   }
 
   return (
@@ -194,17 +249,39 @@ const CheckoutPage = () => {
             <span>Total</span>
             <span>INR {calculateSubtotal().toFixed(2)}</span>
           </div>
-          <button
-            onClick={handlePlaceOrder}
-            disabled={isProcessing || cart.length === 0}
-            className={`mt-4 w-full py-3 rounded-full font-semibold shadow-sm transition ${
-              isProcessing || cart.length === 0
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90'
-            }`}
-          >
-            {isProcessing ? 'Processing Order...' : 'Place Order'}
-          </button>
+          {!showPayment ? (
+            <button
+              onClick={handleCreateOrder}
+              disabled={isProcessing || cart.length === 0}
+              className={`mt-4 w-full py-3 rounded-full font-semibold shadow-sm transition ${
+                isProcessing || cart.length === 0
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90'
+              }`}
+            >
+              {isProcessing ? 'Creating Order...' : 'Proceed to Payment'}
+            </button>
+          ) : (
+            <div className="mt-4">
+              <RazorpayPayment
+                amount={calculateSubtotal()}
+                orderId={orderId}
+                userDetails={{
+                  name: form.name,
+                  email: form.email,
+                  phone: form.phone,
+                }}
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+              <button
+                onClick={() => setShowPayment(false)}
+                className="mt-2 w-full py-2 text-sm text-[#8A6F5C] hover:text-[#6f5a4d] transition"
+              >
+                ← Back to Order Details
+              </button>
+            </div>
+          )}
 
           {cart.length > 0 && (
             <p className="text-xs text-[#8A6F5C] mt-2 text-center">

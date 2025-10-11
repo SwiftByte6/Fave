@@ -40,6 +40,15 @@ export async function POST(request: Request) {
           user_id: userId,
           total_amount: totalAmount,
           status,
+          payment_status: 'pending',
+          payment_method: 'razorpay',
+          items: items.map((it: any) => ({
+            id: it.id || Math.random().toString(36).substr(2, 9),
+            title: it.title,
+            price: it.price,
+            quantity: it.quantity || it.cartQuantity || 1,
+            images: Array.isArray(it.images) ? it.images : (it.image ? [it.image] : (it.thumbnail ? [it.thumbnail] : [])),
+          })),
           name: form.name,
           email: form.email,
           phone: form.phone,
@@ -55,23 +64,6 @@ export async function POST(request: Request) {
     if (orderError || !order) {
       console.error('Order insert error:', orderError)
       return NextResponse.json({ error: orderError?.message || 'Failed to create order' }, { status: 500 })
-    }
-
-    const orderItems = items.map((it: any) => ({
-      order_id: order.id,
-      title: it.title,
-      price: it.price,
-      quantity: it.quantity || it.cartQuantity || 1,
-      images: Array.isArray(it.images) ? it.images : (it.image ? [it.image] : (it.thumbnail ? [it.thumbnail] : [])),
-    }))
-
-    const { error: itemsError } = await supabaseAdmin
-      .from('order_items')
-      .insert(orderItems)
-
-    if (itemsError) {
-      console.error('Order items insert error:', itemsError)
-      return NextResponse.json({ error: itemsError.message || 'Failed to create order items' }, { status: 500 })
     }
 
     return NextResponse.json({ orderId: order.id }, { status: 200 })

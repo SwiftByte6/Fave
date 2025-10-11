@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase/products";
+import PaymentStatus from "@/component/PaymentStatus";
 
 interface OrderItem {
   id: string;
@@ -23,6 +24,9 @@ interface OrderRow {
   city?: string;
   pincode?: string;
   country?: string;
+  payment_id?: string;
+  payment_method?: string;
+  razorpay_order_id?: string;
   items: OrderItem[]; // Items stored directly in orders table as JSON
 }
 
@@ -38,7 +42,7 @@ const OrdersPage: React.FC = () => {
 
       const { data: orderRows, error } = await supabase
         .from("orders")
-        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country, items")
+        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country, payment_id, payment_method, razorpay_order_id, items")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -188,6 +192,15 @@ const OrdersPage: React.FC = () => {
                             </div>
                             <p className="text-lg font-bold text-gray-800 mt-1">₹ {order.total_amount?.toLocaleString()}</p>
                           </div>
+                        </div>
+
+                        {/* Payment Status */}
+                        <div className="mb-4">
+                          <PaymentStatus 
+                            status={order.status || 'pending'} 
+                            paymentId={order.payment_id}
+                            paymentMethod={order.payment_method}
+                          />
                         </div>
 
                         {/* Order Progress */}
