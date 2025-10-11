@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { CiHeart } from 'react-icons/ci';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
+import ShareButton from './ShareButton';
 import { RootState } from '@/Redux/store';
 import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import toast from 'react-hot-toast';
@@ -27,6 +28,8 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalImageIndex, setModalImageIndex] = useState(0);
     const favourites = useSelector((state: RootState) => state.favourites.favourites);
     const { user } = useUser();
 
@@ -147,6 +150,51 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
         }
     }
 
+    // Modal handlers for image zoom
+    const openModal = (imageIndex: number = currentImageIndex) => {
+        setModalImageIndex(imageIndex);
+        setIsModalOpen(true);
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        document.body.style.overflow = 'unset'; // Restore scrolling
+    };
+
+    const nextImage = () => {
+        if (productData?.images && productData.images.length > 1) {
+            setModalImageIndex((prev) => (prev + 1) % productData.images.length);
+        }
+    };
+
+    const prevImage = () => {
+        if (productData?.images && productData.images.length > 1) {
+            setModalImageIndex((prev) => (prev - 1 + productData.images.length) % productData.images.length);
+        }
+    };
+
+    // Handle keyboard navigation for modal
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isModalOpen) {
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') prevImage();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isModalOpen]);
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
     if (isLoading) {
         return (
             <div className='w-full min-h-screen flex items-center justify-center'>
@@ -181,15 +229,26 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                 <div className='flex flex-col lg:flex-row gap-6 sm:gap-8 rounded-2xl overflow-hidden bg-white/95 shadow-sm border border-[#F0E7DE]'>
                     {/* Product Image Section */}
                     <div className="lg:w-1/2 w-full p-4 sm:p-6">
-                        <div className='w-full h-[350px] sm:h-[400px] lg:h-[560px] flex items-center justify-center bg-[#FBF1F4] rounded-xl lg:rounded-2xl overflow-hidden'>
+                        <div className='w-full h-[350px] sm:h-[400px] lg:h-[560px] flex items-center justify-center bg-[#FBF1F4] rounded-xl lg:rounded-2xl overflow-hidden cursor-zoom-in relative group'>
                             {productData?.images?.[currentImageIndex] ? (
-                                <Image
-                                    src={productData.images[currentImageIndex]}
-                                    alt={productData.title}
-                                    width={600}
-                                    height={600}
-                                    className='w-full h-full object-cover'
-                                />
+                                <>
+                                    <Image
+                                        src={productData.images[currentImageIndex]}
+                                        alt={productData.title}
+                                        width={600}
+                                        height={600}
+                                        className='w-full h-full object-cover transition-transform duration-300 group-hover:scale-105'
+                                        onClick={() => openModal(currentImageIndex)}
+                                    />
+                                    {/* Zoom overlay hint */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <div className="bg-white bg-opacity-90 rounded-full p-2 sm:p-3">
+                                            <svg className="w-4 h-4 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </>
                             ) : (
                                 <div className="text-center text-gray-400">
                                     <div className="text-4xl sm:text-6xl mb-2 sm:mb-4">👗</div>
@@ -204,12 +263,15 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                                 {productData.images.map((url: string, index: number) => (
                                     <div
                                         key={index}
-                                        className={`relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                                        className={`relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 cursor-pointer rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
                                             currentImageIndex === index 
                                                 ? 'border-rose-300' 
                                                 : 'border-[#F0E7DE] hover:border-rose-200'
                                         }`}
-                                        onClick={() => setCurrentImageIndex(index)}
+                                        onClick={() => {
+                                            setCurrentImageIndex(index);
+                                            openModal(index);
+                                        }}
                                     >
                                         <Image
                                             src={url}
@@ -290,6 +352,10 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                                     <CiHeart size={20} className="sm:w-6 sm:h-6" />
                                     Add To Wishlist
                                 </button>
+                                
+                            </div>
+                            <div className='pt-2 '>
+                                <ShareButton product={productData} />
                             </div>
                         </div>
 
@@ -380,6 +446,100 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                     </div>
                 </div>
             </div>
+
+            {/* Image Zoom Modal */}
+            {isModalOpen && productData?.images && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+                    {/* Close button */}
+                    <button
+                        onClick={closeModal}
+                        className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors z-60"
+                        aria-label="Close modal"
+                    >
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+
+                    {/* Previous button */}
+                    {productData.images.length > 1 && (
+                        <button
+                            onClick={prevImage}
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-60 bg-black bg-opacity-50 rounded-full p-2"
+                            aria-label="Previous image"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                    )}
+
+                    {/* Next button */}
+                    {productData.images.length > 1 && (
+                        <button
+                            onClick={nextImage}
+                            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors z-60 bg-black bg-opacity-50 rounded-full p-2"
+                            aria-label="Next image"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    )}
+
+                    {/* Modal content */}
+                    <div className="max-w-4xl max-h-full w-full h-full flex items-center justify-center">
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <Image
+                                src={productData.images[modalImageIndex]}
+                                alt={`${productData.title} - Full view`}
+                                width={1200}
+                                height={1200}
+                                className="max-w-full max-h-full object-contain"
+                                priority
+                            />
+                        </div>
+                    </div>
+
+                    {/* Image counter */}
+                    {productData.images.length > 1 && (
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                            {modalImageIndex + 1} / {productData.images.length}
+                        </div>
+                    )}
+
+                    {/* Thumbnail navigation for larger screens */}
+                    {productData.images.length > 1 && (
+                        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 hidden sm:flex gap-2 max-w-sm overflow-x-auto">
+                            {productData.images.map((url: string, index: number) => (
+                                <div
+                                    key={index}
+                                    className={`relative h-12 w-12 flex-shrink-0 cursor-pointer rounded overflow-hidden border-2 transition-all ${
+                                        modalImageIndex === index 
+                                            ? 'border-white' 
+                                            : 'border-transparent hover:border-gray-300'
+                                    }`}
+                                    onClick={() => setModalImageIndex(index)}
+                                >
+                                    <Image
+                                        src={url}
+                                        alt={`Thumbnail ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Click outside to close */}
+                    <div 
+                        className="absolute inset-0 -z-10" 
+                        onClick={closeModal}
+                        aria-label="Click to close"
+                    />
+                </div>
+            )}
         </div>
     )
 }

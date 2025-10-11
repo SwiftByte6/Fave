@@ -15,6 +15,7 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import Script from "next/script";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -54,6 +55,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased  ${playfair.variable}`}
         >

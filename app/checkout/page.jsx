@@ -70,7 +70,7 @@ const CheckoutPage = () => {
           {
             user_id: userId,
             total_amount: calculateSubtotal(),
-            status: 'success',
+            status: 'pending',
             ...form,
           },
         ])
