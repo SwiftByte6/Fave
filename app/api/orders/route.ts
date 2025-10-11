@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       console.error('Missing Supabase env: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
       return NextResponse.json({ error: 'Server not configured. Contact support.' }, { status: 500 })
     }
-    const { userId } = auth()
+    const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
