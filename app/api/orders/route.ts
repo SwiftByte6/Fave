@@ -2,13 +2,21 @@ import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-)
+export const runtime = 'nodejs'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined
+
+const supabaseAdmin = supabaseUrl && serviceKey
+  ? createClient(supabaseUrl, serviceKey)
+  : null
 
 export async function POST(request: Request) {
   try {
+    if (!supabaseAdmin) {
+      console.error('Missing Supabase env: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
+      return NextResponse.json({ error: 'Server not configured. Contact support.' }, { status: 500 })
+    }
     const { userId } = auth()
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -45,6 +53,7 @@ export async function POST(request: Request) {
       .single()
 
     if (orderError || !order) {
+      console.error('Order insert error:', orderError)
       return NextResponse.json({ error: orderError?.message || 'Failed to create order' }, { status: 500 })
     }
 
@@ -61,13 +70,19 @@ export async function POST(request: Request) {
       .insert(orderItems)
 
     if (itemsError) {
+      console.error('Order items insert error:', itemsError)
       return NextResponse.json({ error: itemsError.message || 'Failed to create order items' }, { status: 500 })
     }
 
     return NextResponse.json({ orderId: order.id }, { status: 200 })
   } catch (e: any) {
+    console.error('API /api/orders error:', e)
     return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 })
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ ok: true, route: '/api/orders' }, { status: 200 })
 }
 
 

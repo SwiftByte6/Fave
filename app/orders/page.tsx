@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabase/products";
 
 interface OrderItem {
   id: string;
-  order_id: string;
   title: string;
   price: number;
   quantity: number;
@@ -24,11 +23,12 @@ interface OrderRow {
   city?: string;
   pincode?: string;
   country?: string;
+  items: OrderItem[]; // Items stored directly in orders table as JSON
 }
 
 const OrdersPage: React.FC = () => {
   const { user } = useUser();
-  const [orders, setOrders] = useState<Array<OrderRow & { items: OrderItem[] }>>([]);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'orders' | 'history'>('orders');
 
@@ -38,7 +38,7 @@ const OrdersPage: React.FC = () => {
 
       const { data: orderRows, error } = await supabase
         .from("orders")
-        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country")
+        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country, items")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -48,34 +48,8 @@ const OrdersPage: React.FC = () => {
         return;
       }
 
-      const orderIds = (orderRows || []).map((o) => o.id);
-      if (orderIds.length === 0) {
-        setOrders([]);
-        setIsLoading(false);
-        return;
-      }
-
-      const { data: itemRows, error: itemsError } = await supabase
-        .from("order_items")
-        .select("id, order_id, title, price, quantity, images")
-        .in("order_id", orderIds);
-
-      if (itemsError) {
-        console.error(itemsError);
-      }
-
-      const itemsByOrderId: Record<string, OrderItem[]> = {};
-      (itemRows || []).forEach((it) => {
-        if (!itemsByOrderId[it.order_id]) itemsByOrderId[it.order_id] = [];
-        itemsByOrderId[it.order_id].push(it);
-      });
-
-      const merged = (orderRows || []).map((o) => ({
-        ...o,
-        items: itemsByOrderId[o.id] || [],
-      }));
-
-      setOrders(merged);
+      // Orders now contain items directly as JSON, no need for separate query
+      setOrders(orderRows || []);
       setIsLoading(false);
   }, [user?.id]);
 

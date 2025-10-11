@@ -3,17 +3,20 @@
 import React, { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase/products'
-import { useAuth } from '@clerk/nextjs'  // ✅ client-safe
-import {removeEveryThing} from '@/Redux/cartSlice'
-import { removeCart, updateCartQuantity } from '@/Redux/cartSlice'
+import { removeEveryThing } from '@/Redux/cartSlice'
 
 const CheckoutPage = () => {
   const router = useRouter()
-  const dispatch=useDispatch();
+  const dispatch = useDispatch()
   const cart = useSelector((state) => state.cart.cart)
 
-  const { userId, isLoaded } = useAuth() // ✅ works in client component
+  const { userId, isLoaded } = useAuth() // ✅ safe in client component
+
+  // Quick runtime sanity checks for Supabase client config (anon key usage)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   const [form, setForm] = useState({
     name: '',
@@ -27,27 +30,32 @@ const CheckoutPage = () => {
 
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const calculateSubtotal = () => {
-    return cart.reduce((total, item) => total + item.price * (item.cartQuantity || 1), 0)
-  }
+  const calculateSubtotal = () =>
+    cart.reduce((total, item) => total + item.price * (item.cartQuantity || 1), 0)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handlePlaceOrder = async () => {
+    // Validation
     if (!form.name || !form.email || !form.phone || !form.address) {
       alert('Please fill in all required fields')
       return
     }
 
-    if (!isLoaded || !userId) {
-      alert('Please login to place an order')
-      router.push('/sign-in')
+    if (!supabaseUrl || !supabaseAnon) {
+      alert('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.')
       return
     }
 
-    if (cart.length === 0) {
+    if (!isLoaded || !userId) {
+      alert('Please login to place an order')
+      router.push('/signin')
+      return
+    }
+
+    if (!cart.length) {
       alert('Your cart is empty')
       return
     }
@@ -55,28 +63,52 @@ const CheckoutPage = () => {
     setIsProcessing(true)
 
     try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          form,
-          items: cart,
-          total: calculateSubtotal(),
-          status: 'success'
-        })
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        console.error(json)
-        alert(json?.error || 'Error placing order')
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert([
+          {
+            user_id: userId,
+            total_amount: calculateSubtotal(),
+            status: 'success',
+            ...form,
+          },
+        ])
+        .select()
+        .single()
+
+      if (orderError || !order) {
+        console.error('Order insert error:', orderError)
+        alert(orderError?.message || 'Failed to create order. Please try again.')
+        setIsProcessing(false)
+        return
+      }
+
+      // Create order items
+      const itemsPayload = cart.map((item) => ({
+        order_id: order.id,
+        title: item.title,
+        price: item.price,
+        quantity: item.cartQuantity || 1,
+        images: Array.isArray(item.images)
+          ? item.images
+          : (item.image ? [item.image] : (item.thumbnail ? [item.thumbnail] : [])),
+      }))
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(itemsPayload)
+
+      if (itemsError) {
+        console.error('Order items insert error:', itemsError)
+        alert(itemsError?.message || 'Failed to create order items. Please try again.')
         setIsProcessing(false)
         return
       }
 
       dispatch(removeEveryThing())
-      alert('Order placed successfully! It will appear in your order history.')
+      alert('Order placed successfully!')
       router.push('/order-success')
-      
     } catch (error) {
       console.error('Error placing order:', error)
       alert('An unexpected error occurred. Please try again.')
@@ -97,72 +129,53 @@ const CheckoutPage = () => {
 
       <div className="flex flex-col md:flex-row w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 pb-10 gap-6">
         {/* Billing Form */}
-        <div className="w-full md:w-[65%] bg-white/95 p-6 rounded-xl shadow-sm border border-[#F0E7DE]">
+        <div className="w-full md:w-[65%] bg-white p-6 rounded-xl shadow-sm border border-[#F0E7DE]">
           <h2 className="text-xl font-semibold mb-4 text-[#6f5a4d]">Billing & Shipping Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input 
-              type="text" 
-              name="name" 
-              placeholder="Full Name*" 
-              value={form.name} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
-            />
-            <input 
-              type="email" 
-              name="email" 
-              placeholder="Email*" 
-              value={form.email} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
-            />
-            <input 
-              type="tel" 
-              name="phone" 
-              placeholder="Phone*" 
-              value={form.phone} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
-            />
-            <input 
-              type="text" 
-              name="city" 
-              placeholder="City" 
-              value={form.city} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
-            />
+            {['name', 'email', 'phone', 'city'].map((field) => (
+              <input
+                key={field}
+                type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                name={field}
+                placeholder={field.charAt(0).toUpperCase() + field.slice(1) + (['name', 'email', 'phone'].includes(field) ? '*' : '')}
+                value={form[field]}
+                onChange={handleChange}
+                className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
+              />
+            ))}
           </div>
-          <textarea 
-            name="address" 
-            placeholder="Full Address*" 
-            value={form.address} 
-            onChange={handleChange} 
-            className="border border-[#F0E7DE] p-3 rounded w-full mt-4 focus:outline-none focus:ring-2 focus:ring-rose-200"
+
+          <textarea
+            name="address"
+            placeholder="Full Address*"
+            value={form.address}
+            onChange={handleChange}
             rows={3}
+            className="border border-[#F0E7DE] p-3 rounded w-full mt-4 focus:outline-none focus:ring-2 focus:ring-rose-200"
           ></textarea>
+
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <input 
-              type="text" 
-              name="pincode" 
-              placeholder="Pincode" 
-              value={form.pincode} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
+            <input
+              type="text"
+              name="pincode"
+              placeholder="Pincode"
+              value={form.pincode}
+              onChange={handleChange}
+              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
             />
-            <input 
-              type="text" 
-              name="country" 
-              placeholder="Country" 
-              value={form.country} 
-              onChange={handleChange} 
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200" 
+            <input
+              type="text"
+              name="country"
+              placeholder="Country"
+              value={form.country}
+              onChange={handleChange}
+              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
             />
           </div>
         </div>
 
         {/* Order Summary */}
-        <div className="w-full md:w-[35%] bg-white/95 border border-[#F0E7DE] p-6 rounded-xl shadow-sm">
+        <div className="w-full md:w-[35%] bg-white border border-[#F0E7DE] p-6 rounded-xl shadow-sm">
           <h2 className="text-xl font-semibold mb-4 text-[#6f5a4d]">Order Summary</h2>
           <div className="space-y-3">
             {cart.length > 0 ? (
@@ -192,7 +205,7 @@ const CheckoutPage = () => {
           >
             {isProcessing ? 'Processing Order...' : 'Place Order'}
           </button>
-          
+
           {cart.length > 0 && (
             <p className="text-xs text-[#8A6F5C] mt-2 text-center">
               Your order will automatically appear in your order history

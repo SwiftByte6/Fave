@@ -1,7 +1,7 @@
--- Database Schema for Orders and History System
+-- Database Schema for Orders System (Single Table)
 -- Run these SQL commands in your Supabase SQL editor
 
--- 1. Create orders table (if not exists)
+-- 1. Create orders table with cart items stored as JSON
 CREATE TABLE IF NOT EXISTS orders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL,
@@ -14,32 +14,28 @@ CREATE TABLE IF NOT EXISTS orders (
   city TEXT,
   pincode TEXT,
   country TEXT DEFAULT 'India',
+  items JSONB NOT NULL DEFAULT '[]', -- Store cart items as JSON array
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 2. Create order_items table (if not exists)
-CREATE TABLE IF NOT EXISTS order_items (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id uuid REFERENCES orders(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  price DECIMAL(10,2) NOT NULL,
-  quantity INTEGER NOT NULL DEFAULT 1,
-  images TEXT[] DEFAULT '{}',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-);
+-- 2. Drop order_items table if it exists (since we're moving to single table)
+DROP TABLE IF EXISTS order_items;
 
 -- 3. Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
-CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_items ON orders USING GIN (items); -- GIN index for JSONB
 
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 
 -- 5. Create RLS policies for orders table
+DROP POLICY IF EXISTS "Users can view their own orders" ON orders;
+DROP POLICY IF EXISTS "Users can insert their own orders" ON orders;
+DROP POLICY IF EXISTS "Users can update their own orders" ON orders;
+
 CREATE POLICY "Users can view their own orders" ON orders
   FOR SELECT USING (auth.uid()::text = user_id);
 
