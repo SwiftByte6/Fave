@@ -19,7 +19,7 @@ const AboutPage = () => {
           <h2 className="text-4xl font-bold text-pink-600 mb-6 text-center">Our Story</h2>
           <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
             <p>
-              Elegance Boutique was born from a passion for preserving the timeless beauty of Indian ethnic wear while embracing modern sensibilities. 
+              Elegance Boutique was born from a passion for ok preserving the timeless beauty of Indian ethnic wear while embracing modern sensibilities. 
               Every saree and lehenga we curate tells a story of tradition, culture, and grace.
             </p>
             <p>
