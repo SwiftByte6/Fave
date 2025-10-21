@@ -16,6 +16,8 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Script from "next/script";
+import { PerformanceMonitor } from "@/component/PerformanceMonitor";
+import { ResourcePreloader } from "@/component/ResourcePreloader";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -42,9 +44,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Elegance Boutique - Premium Sarees & Lehengas",
+  title: "Favee - Premium Fashion & Style",
   description:
-    "Discover the finest collection of traditional Indian sarees and lehengas. Elegance Boutique brings you premium ethnic wear for every occasion.",
+    "Discover the finest collection of contemporary fashion and style. Favee brings you premium clothing and accessories for every occasion.",
 };
 
 export default function RootLayout({
@@ -55,13 +57,34 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <Script src="https://checkout.razorpay.com/v1/checkout.js"></Script>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload"></Script>
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                      console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                      console.log('SW registration failed: ', registrationError);
+                    });
+                });
+              }
+            `,
+          }}
+        />
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased  ${playfair.variable}`}
         >
           <Providers>
             {" "}
             {/* ✅ Redux store provided to your whole app */}
+            <ResourcePreloader />
+            <PerformanceMonitor />
             <Header />
             <Toaster position="top-center" />
             {children}
@@ -70,5 +93,5 @@ export default function RootLayout({
         </body>
       </html>
     </ClerkProvider>
-  );
+  ); 
 }

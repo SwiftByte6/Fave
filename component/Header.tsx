@@ -47,7 +47,7 @@ const Header = () => {
               className="dancing text-[1.4rem] md:text-[1.8rem] text-[#f4b7c7]"
               onClick={() => router.push("/")}
             >
-              Lovable Fashion
+              Favee Fashion
             </button>
           </div>
 
@@ -64,7 +64,7 @@ const Header = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="p-1.5 w-full text-[#5b4a3f] bg-transparent outline-none placeholder:text-[#b79f92]"
+                className="no-focus p-1.5 w-full text-[#5b4a3f] bg-transparent outline-none focus:outline-none focus:outline-transparent focus:outline-offset-0 placeholder:text-[#b79f92]"
                 placeholder="Search for your perfect look..."
               />
             </div>
@@ -139,7 +139,7 @@ const Header = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="p-1.5 w-full text-[#5b4a3f] bg-transparent outline-none placeholder:text-[#b79f92]"
+              className="no-focus p-1.5 w-full text-[#5b4a3f] bg-transparent outline-none focus:outline-none focus:outline-transparent focus:outline-offset-0 placeholder:text-[#b79f92]"
               placeholder="Search for your perfect look..."
             />
           </div>

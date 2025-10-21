@@ -1,5 +1,5 @@
 import HomePage from "@/component/HomePage";
-import PaymentButton from "@/component/PaymentButton";
+// import DeferredPaymentButton from "@/component/DeferredPaymentButton";
 import Image from "next/image";
 
 
@@ -8,7 +8,7 @@ export default function Home() {
   <>
 
     <HomePage/>
-    <PaymentButton/>
+  {/* <DeferredPaymentButton/> */}
   </>
   );
 }

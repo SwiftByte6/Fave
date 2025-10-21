@@ -113,14 +113,18 @@ const OrdersPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Your Orders & History</h1>
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+      <div className="flex items-center justify-center mb-6">
+        <div className="px-6 py-2 rounded-full bg-[#F4DCDC] shadow-sm">
+          <h1 className="dancing text-[2rem] md:text-[3rem] text-[#6f5a4d] font-bold">Your Orders & History</h1>
+        </div>
+      </div>
       
       <SignedOut>
-        <div className="bg-white shadow rounded-lg p-6">
-          <p className="mb-4 text-gray-600">Please sign in to view your orders and history.</p>
+        <div className="bg-white/90 shadow-sm rounded-xl p-6 border border-[#F0E7DE]">
+          <p className="mb-4 text-[#8A6F5C]">Please sign in to view your orders and history.</p>
           <SignInButton>
-            <button className="text-sm font-medium px-4 py-2 rounded-full bg-pink-600 text-white hover:bg-pink-700 transition">
+            <button className="text-sm font-medium px-5 py-2.5 rounded-full bg-[#F4B7C7] text-[#3a2a24] hover:bg-[#f1aabf] transition">
               Sign In
             </button>
           </SignInButton>
@@ -129,23 +133,23 @@ const OrdersPage: React.FC = () => {
       
       <SignedIn>
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+        <div className="flex space-x-1 bg-[#F4DCDC]/60 p-1 rounded-full mb-8 border border-[#F0E7DE]">
           <button
             onClick={() => setActiveTab('orders')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
+            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition ${
               activeTab === 'orders'
-                ? 'bg-white text-pink-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'bg-white text-[#6f5a4d] shadow-sm'
+                : 'text-[#8A6F5C] hover:text-[#6f5a4d]'
             }`}
           >
             Current Orders ({currentOrders.length})
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition ${
+            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition ${
               activeTab === 'history'
-                ? 'bg-white text-pink-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'bg-white text-[#6f5a4d] shadow-sm'
+                : 'text-[#8A6F5C] hover:text-[#6f5a4d]'
             }`}
           >
             Order History ({historyOrders.length})
@@ -153,9 +157,9 @@ const OrdersPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="bg-white shadow rounded-lg p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-2"></div>
-            <p className="text-gray-600">Loading orders...</p>
+          <div className="bg-white/90 shadow-sm rounded-xl p-6 text-center border border-[#F0E7DE]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#F4B7C7] mx-auto mb-2"></div>
+            <p className="text-[#8A6F5C]">Loading orders...</p>
           </div>
         ) : (
           <>
@@ -163,19 +167,19 @@ const OrdersPage: React.FC = () => {
             {activeTab === 'orders' && (
               <div>
                 {currentOrders.length === 0 ? (
-                  <div className="bg-white shadow rounded-lg p-8 text-center">
+                  <div className="bg-white/90 shadow-sm rounded-xl p-8 text-center border border-[#F0E7DE]">
                     <div className="text-4xl mb-4">📦</div>
-                    <h3 className="text-lg font-medium text-gray-800 mb-2">No Active Orders</h3>
-                    <p className="text-gray-600">You don't have any pending orders at the moment.</p>
+                    <h3 className="text-lg font-semibold text-[#6f5a4d] mb-2">No Active Orders</h3>
+                    <p className="text-[#8A6F5C]">You don't have any pending orders at the moment.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {currentOrders.map((order) => (
-                      <div key={order.id} className="bg-white shadow rounded-lg p-6">
+                      <div key={order.id} className="bg-white/90 shadow-sm rounded-xl p-6 border border-[#F0E7DE]">
                         <div className="flex items-center justify-between mb-4">
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-800">Order #{order.id}</h3>
-                            <p className="text-sm text-gray-500">
+                            <h3 className="text-lg font-semibold text-[#6f5a4d]">Order #{order.id}</h3>
+                            <p className="text-sm text-[#8A6F5C]">
                               {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',
@@ -190,7 +194,7 @@ const OrdersPage: React.FC = () => {
                               <span className="mr-2">{getStatusIcon(order.status || 'pending')}</span>
                               {order.status || 'pending'}
                             </div>
-                            <p className="text-lg font-bold text-gray-800 mt-1">₹ {order.total_amount?.toLocaleString()}</p>
+                            <p className="text-lg font-bold text-[#6f5a4d] mt-1">₹ {order.total_amount?.toLocaleString()}</p>
                           </div>
                         </div>
 
@@ -203,35 +207,36 @@ const OrdersPage: React.FC = () => {
                           />
                         </div>
 
-                        {/* Order Progress */}
+                        {/* Order Progress */
+                        }
                         <div className="mb-4">
-                          <div className="w-full bg-gray-200 h-2 rounded-full">
+                          <div className="w-full bg-[#F7F2EE] h-2 rounded-full">
                             <div
-                              className="bg-pink-500 h-2 rounded-full transition-all duration-500"
+                              className="bg-[#F4B7C7] h-2 rounded-full transition-all duration-500"
                               style={{ 
                                 width: `${(['pending','processing','shipped','delivered'].indexOf((order.status||'pending'))+1)/4*100}%` 
                               }}
                             />
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-2">
-                            <span className={order.status === 'pending' ? 'text-pink-600 font-medium' : ''}>Pending</span>
-                            <span className={order.status === 'processing' ? 'text-pink-600 font-medium' : ''}>Processing</span>
-                            <span className={order.status === 'shipped' ? 'text-pink-600 font-medium' : ''}>Shipped</span>
-                            <span className={order.status === 'delivered' ? 'text-pink-600 font-medium' : ''}>Delivered</span>
+                          <div className="flex justify-between text-xs text-[#8A6F5C] mt-2">
+                            <span className={order.status === 'pending' ? 'text-[#6f5a4d] font-medium' : ''}>Pending</span>
+                            <span className={order.status === 'processing' ? 'text-[#6f5a4d] font-medium' : ''}>Processing</span>
+                            <span className={order.status === 'shipped' ? 'text-[#6f5a4d] font-medium' : ''}>Shipped</span>
+                            <span className={order.status === 'delivered' ? 'text-[#6f5a4d] font-medium' : ''}>Delivered</span>
                           </div>
                         </div>
 
                         {/* Order Items */}
                         <div className="border-t pt-4">
-                          <h4 className="font-medium text-gray-800 mb-3">Order Items:</h4>
+                          <h4 className="font-medium text-[#6f5a4d] mb-3">Order Items:</h4>
                           <div className="space-y-2">
                             {order.items.map((item) => (
-                              <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 p-3 rounded">
+                              <div key={item.id} className="flex items-center justify-between text-sm bg-[#F7F2EE] p-3 rounded-md">
                                 <div className="flex items-center space-x-3">
-                                  <div className="text-gray-700 font-medium">{item.title}</div>
-                                  <span className="text-gray-500">x{item.quantity}</span>
+                                  <div className="text-[#6f5a4d] font-medium">{item.title}</div>
+                                  <span className="text-[#8A6F5C]">x{item.quantity}</span>
                                 </div>
-                                <div className="text-gray-700 font-medium">₹ {(item.price * item.quantity).toLocaleString()}</div>
+                                <div className="text-[#6f5a4d] font-medium">₹ {(item.price * item.quantity).toLocaleString()}</div>
                               </div>
                             ))}
                           </div>
@@ -240,8 +245,8 @@ const OrdersPage: React.FC = () => {
                         {/* Shipping Details */}
                         {order.address && (
                           <div className="border-t pt-4 mt-4">
-                            <h4 className="font-medium text-gray-800 mb-3">Shipping Details:</h4>
-                            <div className="text-sm text-gray-600">
+                            <h4 className="font-medium text-[#6f5a4d] mb-3">Shipping Details:</h4>
+                            <div className="text-sm text-[#8A6F5C]">
                               <p><strong>{order.name}</strong></p>
                               <p>{order.address}</p>
                               <p>{order.city}, {order.pincode}</p>
@@ -261,66 +266,66 @@ const OrdersPage: React.FC = () => {
             {activeTab === 'history' && (
               <div>
                 {historyOrders.length === 0 ? (
-                  <div className="bg-white shadow rounded-lg p-8 text-center">
+                  <div className="bg-white/90 shadow-sm rounded-xl p-8 text-center border border-[#F0E7DE]">
                     <div className="text-4xl mb-4">📚</div>
-                    <h3 className="text-lg font-medium text-gray-800 mb-2">No Order History</h3>
-                    <p className="text-gray-600">Your completed orders will appear here.</p>
+                    <h3 className="text-lg font-semibold text-[#6f5a4d] mb-2">No Order History</h3>
+                    <p className="text-[#8A6F5C]">Your completed orders will appear here.</p>
                   </div>
                 ) : (
-                  <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="bg-white/90 shadow-sm rounded-xl overflow-hidden border border-[#F0E7DE]">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-[#F0E7DE]">
+                        <thead className="bg-[#FFF7F9]">
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-[#8A6F5C] uppercase tracking-wider">
                               Order Details
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-[#8A6F5C] uppercase tracking-wider">
                               Items
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-[#8A6F5C] uppercase tracking-wider">
                               Total
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-[#8A6F5C] uppercase tracking-wider">
                               Date
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-[#8A6F5C] uppercase tracking-wider">
                               Status
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-[#F0E7DE]">
                           {historyOrders.map((order) => (
-                            <tr key={order.id} className="hover:bg-gray-50">
+                            <tr key={order.id} className="hover:bg-[#FFF7F9]">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">#{order.id}</div>
+                                  <div className="text-sm font-semibold text-[#6f5a4d]">#{order.id}</div>
                                   {order.name && (
-                                    <div className="text-sm text-gray-500">{order.name}</div>
+                                    <div className="text-sm text-[#8A6F5C]">{order.name}</div>
                                   )}
                                 </div>
                               </td>
                               <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">
+                                <div className="text-sm text-[#6f5a4d]">
                                   {order.items.slice(0, 2).map((item, index) => (
                                     <div key={item.id} className="mb-1">
                                       {item.title} x{item.quantity}
                                     </div>
                                   ))}
                                   {order.items.length > 2 && (
-                                    <div className="text-gray-500 text-xs">
+                                    <div className="text-[#8A6F5C] text-xs">
                                       +{order.items.length - 2} more items
                                     </div>
                                   )}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
+                                <div className="text-sm font-semibold text-[#6f5a4d]">
                                   ₹ {order.total_amount?.toLocaleString()}
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">
+                                <div className="text-sm text-[#6f5a4d]">
                                   {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'short',

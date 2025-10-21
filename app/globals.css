@@ -96,6 +96,14 @@ body {
     min-height: 44px;
     min-width: 44px;
   }
+  /* Override for tiny pagination dots in sliders */
+  .slider-dot {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    width: 0.5rem !important; /* 8px */
+    height: 0.5rem !important; /* 8px */
+    padding: 0 !important;
+  }
   
   input[type="text"],
   input[type="email"],
@@ -116,6 +124,59 @@ textarea:focus,
 select:focus {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* Ensure input fields are always interactive */
+input[type="text"],
+input[type="email"],
+input[type="search"],
+textarea {
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Fix for mobile input zoom */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  textarea {
+    font-size: 16px !important;
+    transform: translateZ(0);
+  }
+}
+
+/* Force input fields to be interactive */
+input[type="text"]:not([disabled]) {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Override any potential blocking styles */
+.comment-input {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+/* Utility to remove focus outline for specific inputs (use sparingly) */
+input.no-focus:focus {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 .playfair {
@@ -150,3 +211,30 @@ select:focus {
   .glow-effect:hover::before {
     left: 100%;
   }
+
+/* Mobile Filter Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out;
+}

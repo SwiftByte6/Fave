@@ -8,7 +8,7 @@ const Footer = () => {
 
           {/* Brand & About */}
           <div>
-            <h2 className="dancing text-[1.5rem] text-[#f4b7c7] mb-3">Lovable Fashion</h2>
+            <h2 className="dancing text-[1.5rem] text-[#f4b7c7] mb-3">Favee</h2>
             <p className="text-xs sm:text-sm text-[#8A6F5C]">
               Creating beautiful, sustainable fashion that makes you feel confident and loved.
             </p>
@@ -60,11 +60,15 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-[#F0E7DE] text-center text-xs sm:text-sm text-[#8A6F5C] py-4">
-          © 2024 Lovable Fashion. All rights reserved.
+          © 2024 Favee. All rights reserved.
           <div className="flex flex-col sm:flex-row justify-center gap-3 mt-2 text-xs">
-            <a href="#" className="hover:text-[#6f5a4d] transition">Privacy Policy</a>
-            <a href="#" className="hover:text-[#6f5a4d] transition">Terms of Service</a>
-            <a href="#" className="hover:text-[#6f5a4d] transition">Cookies</a>
+            <a href="/privacy-policy" className="hover:text-[#6f5a4d] transition">Privacy Policy</a>
+            <a href="/terms-of-service" className="hover:text-[#6f5a4d] transition">Terms of Service</a>
+            <a href="/return-refund-policy" className="hover:text-[#6f5a4d] transition">Returns & Refunds</a>
+            <a href="/shipping-delivery-policy" className="hover:text-[#6f5a4d] transition">Shipping</a>
+            <a href="/payment-policy" className="hover:text-[#6f5a4d] transition">Payments</a>
+            <a href="/cookie-policy" className="hover:text-[#6f5a4d] transition">Cookies</a>
+            <a href="/disclaimer" className="hover:text-[#6f5a4d] transition">Disclaimer</a>
           </div>
         </div>
       </footer>

@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 
 const Hero = ({
-  titleTop = 'Lovable',
+  titleTop = 'Favee',
   titleAccent = 'Fashion',
   subtitle = 'Discover your unique style with our curated collection of timeless pieces',
   bgImage = '/banner.png',
@@ -20,9 +20,14 @@ const Hero = ({
         <div className="absolute inset-0 z-0">
           <Image
             fill
+            priority
+            sizes="100vw"
             src={bgImage}
             alt="Fashion Banner"
             className='object-cover opacity-60'
+            quality={85}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
           />
         </div>
         
@@ -30,7 +35,7 @@ const Hero = ({
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
           {/* Main Title */}
           <h1 className="playfair text-3xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold text-[#6f5a4d] mb-3 sm:mb-5 leading-tight">
-            {titleTop}
+            Favee
             <span className="block text-[#f9b8c3]">{titleAccent}</span>
           </h1>
           

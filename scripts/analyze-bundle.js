@@ -1,6 +1,10 @@
-import type { NextConfig } from "next";
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
-const nextConfig: NextConfig = {
+module.exports = withBundleAnalyzer({
+  // Your existing Next.js config
   images: {
     domains: ['rtuhyoiiezensxfdswhx.supabase.co'],
     formats: ['image/webp', 'image/avif'],
@@ -9,6 +13,7 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
   },
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: ['react-icons', 'lucide-react'],
   },
   compiler: {
@@ -16,6 +21,5 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-};
-
-export default nextConfig;
+  swcMinify: true,
+});

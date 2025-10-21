@@ -62,7 +62,16 @@ const useSlidesPerView = () => {
   return slidesPerView;
 };
 
-export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
+export const Slider = ({
+  items,
+  renderItem,
+  autoplayMs = 3500,
+  showPagination = false,
+  showArrows = true,
+  paginationDotClassName = "h-2 w-2 sm:h-3 sm:w-3 rounded-full p-0",
+  paginationActiveClassName = "bg-rose-500",
+  paginationInactiveClassName = "bg-gray-300",
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const slidesPerView = useSlidesPerView();
@@ -125,31 +134,42 @@ export const Slider = ({ items, renderItem, autoplayMs = 3500 }) => {
       </div>
 
       {/* Arrows */}
-      <button
-        onClick={goToPrevious}
-        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
-      >
-        <ArrowIcon className="h-6 w-6 transform rotate-180" />
-      </button>
-      <button
-        onClick={goToNext}
-        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
-      >
-        <ArrowIcon className="h-6 w-6" />
-      </button>
-
-      {/* Pagination */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+      {showArrows && (
+        <>
           <button
-            key={idx}
-            onClick={() => goToSlide(idx)}
-            className={`h-3 w-3 rounded-full transition-colors ${
-              currentIndex === idx ? "bg-rose-500" : "bg-gray-300"
-            }`}
-          />
-        ))}
-      </div>
+            onClick={goToPrevious}
+            className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
+          >
+            <ArrowIcon className="h-6 w-6 transform rotate-180" />
+          </button>
+          <button
+            onClick={goToNext}
+            className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white text-rose-400 hover:bg-rose-50 shadow p-2 rounded-full z-10"
+          >
+            <ArrowIcon className="h-6 w-6" />
+          </button>
+        </>
+      )}
+
+      {/* Pagination Dots (optional) */}
+      {showPagination && (
+        <div className="flex justify-center mt-6 space-x-2">
+          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+            <button
+              key={idx}
+              aria-label={`Go to slide ${idx + 1}`}
+              onClick={() => goToSlide(idx)}
+              className={`slider-dot ${paginationDotClassName} transition-colors inline-flex items-center justify-center ${
+                currentIndex === idx ? paginationActiveClassName : paginationInactiveClassName
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+
+
+
     </div>
   );
 };

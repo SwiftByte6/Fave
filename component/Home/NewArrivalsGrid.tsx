@@ -31,7 +31,6 @@ const NewArrivalsGrid: React.FC<Props> = ({ addToCartItem, products, title = "Ne
            <h1 className="text-[#f9b8c3] text-center dancing mb-5 text-[2.5rem] md:text-[4rem] leading-tight md:leading-none">
           {title}
         </h1>
-        h1
           <p className="text-center">Fresh styles that speak to your heart. Discover pieces that make you feel confident and beautiful.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
@@ -44,7 +43,7 @@ const NewArrivalsGrid: React.FC<Props> = ({ addToCartItem, products, title = "Ne
               showCategoryBadge={false}
               showAddToCart={true}
               addToCartItem={addToCartItem}
-              currencySymbol="$"
+              currencySymbol="₹"
             />
           ))}
         </div>

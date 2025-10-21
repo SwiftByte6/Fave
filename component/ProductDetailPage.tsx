@@ -3,7 +3,6 @@ import { useSupabase } from '@/hooks/useSupabase'
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Playfair_Display } from 'next/font/google';
-import { supabase } from '@/lib/supabase/products'
 import { useUser } from '@clerk/nextjs'
 import { addToCart } from '@/Redux/cartSlice';
 import { useDispatch } from 'react-redux';
@@ -14,6 +13,8 @@ import ShareButton from './ShareButton';
 import { RootState } from '@/Redux/store';
 import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import toast from 'react-hot-toast';
+import ProductComments from './ProductComments';
+import RelatedProductCard from './RelatedProductCard';
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['800'] });
 
@@ -22,7 +23,7 @@ interface ProductDetailPageProps {
 }
 
 const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
-    const { getProductById, filterId: productData } = useSupabase();
+    const { getProductById, filterId: productData, getRelatedProducts, relatedProducts } = useSupabase();
     const dispatch = useDispatch();
     const router = useRouter();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -32,20 +33,6 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
     const [modalImageIndex, setModalImageIndex] = useState(0);
     const favourites = useSelector((state: RootState) => state.favourites.favourites);
     const { user } = useUser();
-
-    // Comments state
-    type ProductComment = {
-        id: string;
-        product_id: number;
-        user_id: string;
-        content: string;
-        user_name?: string | null;
-        created_at?: string;
-    }
-    const [comments, setComments] = useState<ProductComment[]>([]);
-    const [commentText, setCommentText] = useState('');
-    const [isLoadingComments, setIsLoadingComments] = useState(false);
-    const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
     useEffect(() => {
         if (filterId) {
@@ -57,61 +44,10 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
     useEffect(() => {
         if (productData) {
             setIsLoading(false);
+            // Fetch related products when product data is loaded
+            getRelatedProducts(productData, 4);
         }
-    }, [productData]);
-
-    // Fetch comments for this product
-    useEffect(() => {
-        const loadComments = async () => {
-            if (!filterId) return;
-            setIsLoadingComments(true);
-            const { data, error } = await supabase
-                .from('product_comments')
-                .select('id, product_id, user_id, content, user_name, created_at')
-                .eq('product_id', filterId)
-                .order('created_at', { ascending: false });
-            if (error) {
-                console.error('Load comments error:', error);
-            }
-            setComments(data || []);
-            setIsLoadingComments(false);
-        };
-        loadComments();
-    }, [filterId]);
-
-    const handleSubmitComment = async () => {
-        if (!filterId) return;
-        if (!user?.id) {
-            toast.error('Please sign in to comment');
-            return;
-        }
-        if (!commentText.trim()) {
-            toast('Write something first');
-            return;
-        }
-        setIsSubmittingComment(true);
-        const payload = {
-            product_id: filterId,
-            user_id: user.id,
-            content: commentText.trim(),
-            user_name: user.fullName || user.username || user.primaryEmailAddress?.emailAddress || null,
-        } as const;
-        const { data, error } = await supabase
-            .from('product_comments')
-            .insert([payload])
-            .select()
-            .single();
-        if (error) {
-            console.error('Add comment error:', error);
-            toast.error(error.message || 'Failed to add comment');
-            setIsSubmittingComment(false);
-            return;
-        }
-        setComments((prev) => [data as ProductComment, ...prev]);
-        setCommentText('');
-        setIsSubmittingComment(false);
-        toast.success('Comment added');
-    };
+    }, [productData, getRelatedProducts]);
 
     const handleQuantityChange = (type: 'increase' | 'decrease') => {
         if (type === 'increase') {
@@ -381,69 +317,31 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                     </div>
                 </div>
 
-                {/* Customer Review Section */
-                // Uses Supabase anon client + Clerk identity. Requires table public.product_comments
-                // with columns: id uuid default gen_random_uuid(), product_id int, user_id text,
-                // content text, user_name text null, created_at timestamptz default now().
-                }
+                {/* Test Input Section */}
                 <div className='mt-8 sm:mt-12 p-4 sm:p-6 bg-white/95 rounded-xl lg:rounded-2xl shadow-sm border border-[#F0E7DE]'>
-                    <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#6f5a4d] ${playfair.className}`}>Customer Reviews</h2>
-                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
-                        <input
-                            type='text'
-                            placeholder={user?.id ? 'Write your review...' : 'Sign in to write a review'}
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            disabled={!user?.id || isSubmittingComment}
-                            className='flex-1 border border-[#F0E7DE] rounded-xl px-3 sm:px-4 py-2 sm:py-3 focus:outline-none focus:ring-2 focus:ring-rose-200 text-sm sm:text-base disabled:bg-gray-100 disabled:text-gray-400'
-                        />
-                        <button
-                            onClick={handleSubmitComment}
-                            disabled={!user?.id || isSubmittingComment}
-                            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full transition text-sm sm:text-base ${(!user?.id || isSubmittingComment) ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90'}`}
-                        >
-                            {isSubmittingComment ? 'Posting...' : 'Submit'}
-                        </button>
-                    </div>
-
-                    <div className='space-y-4'>
-                        {isLoadingComments ? (
-                            <div className="text-center text-[#8A6F5C] py-6 sm:py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-2"></div>
-                                <p className="text-sm sm:text-base">Loading comments...</p>
-                            </div>
-                        ) : comments.length === 0 ? (
-                            <div className="text-center text-[#8A6F5C] py-6 sm:py-8">
-                                <div className="text-3xl sm:text-4xl mb-2">💬</div>
-                                <p className="text-sm sm:text-base">Be the first to review this product!</p>
-                            </div>
-                        ) : (
-                            comments.map((c) => (
-                                <div key={c.id} className='border border-[#F0E7DE] rounded-xl p-3 sm:p-4'>
-                                    <div className='flex items-center justify-between mb-1'>
-                                        <span className='text-[#6f5a4d] font-semibold text-sm sm:text-base'>
-                                            {c.user_name || 'Customer'}
-                                        </span>
-                                        <span className='text-xs text-[#8A6F5C]'>
-                                            {c.created_at ? new Date(c.created_at).toLocaleString() : ''}
-                                        </span>
-                                    </div>
-                                    <p className='text-sm sm:text-base text-[#6f5a4d]'>{c.content}</p>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                    <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#6f5a4d] ${playfair.className}`}>Test Input</h2>
+                
+                   
                 </div>
+
+                {/* Customer Review Section */}
+                {filterId && <ProductComments productId={filterId} />}
 
                 {/* Related Products Section */}
                 <div className='mt-8 sm:mt-12 p-4 sm:p-6 bg-white/95 rounded-xl lg:rounded-2xl shadow-sm border border-[#F0E7DE]'>
                     <h2 className={`text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-[#6f5a4d] ${playfair.className}`}>You May Also Like</h2>
-                    <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+                    {relatedProducts && relatedProducts.length > 0 ? (
+                        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6'>
+                            {relatedProducts.map((product: any) => (
+                                <RelatedProductCard key={product.id} product={product} />
+                            ))}
+                        </div>
+                    ) : (
                         <div className="text-center text-[#8A6F5C] py-6 sm:py-8">
                             <div className="text-3xl sm:text-4xl mb-2">👗</div>
-                            <p className="text-sm sm:text-base">More products coming soon!</p>
+                            <p className="text-sm sm:text-base">Loading similar products...</p>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 

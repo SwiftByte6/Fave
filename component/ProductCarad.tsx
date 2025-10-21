@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo, useCallback } from "react";
 import Image from "next/image";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
@@ -73,7 +73,7 @@ interface ProductCardProps {
  *   showAddToCart={false}
  * />
  */
-const ProductCard: React.FC<ProductCardProps> = ({
+const ProductCard: React.FC<ProductCardProps> = memo(({
   data,
   addToCartItem,
   variant = "default",
@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   // check if current product is already in favourites
   const isFavourite = favourites.some((item) => item.id === data.id);
 
-  const toggleFavourite = () => {
+  const toggleFavourite = useCallback(() => {
     if (isFavourite) {
       dispatch(removeFromFavourites(data.id.toString()));
       toast("Removed from wishlist!");
@@ -111,7 +111,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
       );
       toast.success("Added to wishlist!");
     }
-  };
+  }, [isFavourite, dispatch, data.id, data.title, data.images, data.category, data.price]);
+
+  const handleAddToCart = useCallback(() => {
+    if (addToCartItem) {
+      addToCartItem(data);
+      toast.success("Added to cart!");
+    }
+  }, [addToCartItem, data]);
+
+  const handleProductClick = useCallback(() => {
+    router.push(`/products/${data.id}`);
+  }, [router, data.id]);
 
   // Determine card height based on variant
   const getCardHeight = () => {
@@ -193,7 +204,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Image */}
       <div
         className={`${getImageHeight()} bg-pink-50 cursor-pointer overflow-hidden`}
-        onClick={() => router.push(`/products/${data.id}`)}
+        onClick={handleProductClick}
       >
         {data?.images?.[0] ? (
           <Image
@@ -202,6 +213,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
             width={400}
             height={400}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
           />
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-gray-400">
@@ -243,7 +258,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
           {showAddToCart && addToCartItem && (
             <button
-              onClick={() => addToCartItem(data)}
+              onClick={handleAddToCart}
               className={`
     relative overflow-hidden
     font-medium text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 
@@ -265,6 +280,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

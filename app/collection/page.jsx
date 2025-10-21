@@ -4,11 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '@/Redux/cartSlice';
-import Image from 'next/image';
-import { CiHeart } from "react-icons/ci";
-import { FaHeart } from 'react-icons/fa';
+import ProductCard from '@/component/ProductCarad';
 import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
-import { IoSearch } from "react-icons/io5";
+import { IoSearch, IoClose } from "react-icons/io5";
+import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
 const CollectionPage = () => {
   const router = useRouter();
@@ -22,7 +21,8 @@ const CollectionPage = () => {
   const [selectedFabric, setSelectedFabric] = useState('All');
   const [selectedOccasion, setSelectedOccasion] = useState('All');
   const [priceRange, setPriceRange] = useState(50000);
-  const [sortBy, setSortBy] = useState('newest');
+  const [sortBy, setSortBy] = useState('random');
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +71,13 @@ const CollectionPage = () => {
 
     // Sorting
     switch (sortBy) {
+      case 'random':
+        // Fisher-Yates shuffle
+        for (let i = filtered.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+        break;
       case 'price-low':
         filtered.sort((a, b) => a.price - b.price);
         break;
@@ -105,26 +112,26 @@ const CollectionPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBF8F6]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-lg font-semibold text-pink-600">Loading our beautiful collection...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#f9b8c3] mx-auto mb-4"></div>
+          <p className="playfair text-lg font-semibold text-[#6f5a4d]">Loading our beautiful collection...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-pink-50">
+    <div className="min-h-screen bg-[#FBF8F6]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-pink-100 to-pink-200 py-16 px-6 lg:px-16">
+      <div className="bg-gradient-to-r from-[#F4DCDC] to-[#F0E7DE] py-16 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-pink-600 mb-4">Our Collection</h1>
-          <p className="text-xl text-gray-700 mb-8">
+          <h1 className="playfair text-4xl md:text-6xl font-bold text-[#6f5a4d] mb-4">Our Collection</h1>
+          <p className="text-xl text-[#8A6F5C] mb-8">
             Discover our complete range of exquisite sarees and lehengas
           </p>
           <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <div className="relative flex-1">
+            {/* <div className="relative flex-1">
               <input
                 type="text"
                 value={searchQuery}
@@ -133,20 +140,158 @@ const CollectionPage = () => {
                 className="w-full px-4 py-3 pl-12 border-2 border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
               />
               <IoSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-400" size={20} />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 p-6 lg:p-16">
+        {/* Mobile Filter Button */}
+        <div className="lg:hidden fixed bottom-6 right-6 z-50">
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className="bg-[#f9b8c3] text-white p-4 rounded-full shadow-xl hover:bg-[#f7a8b8] transition-all duration-300 flex items-center gap-2"
+          >
+            <HiOutlineAdjustmentsHorizontal size={24} />
+            <span className="font-semibold">Filters</span>
+          </button>
+        </div>
+
+        {/* Mobile Filter Overlay */}
+        {showMobileFilters && (
+          <div className="lg:hidden fixed inset-0 bg-black/50 z-[60] animate-fadeIn" onClick={() => setShowMobileFilters(false)}>
+            <div 
+              className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-2xl overflow-y-auto animate-slideInRight"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 bg-white z-10 p-6 border-b border-[#F0E7DE] flex justify-between items-center">
+                <h2 className="playfair text-2xl font-bold text-[#6f5a4d]">Filters</h2>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="text-[#8A6F5C] hover:text-[#6f5a4d] transition"
+                >
+                  <IoClose size={32} />
+                </button>
+              </div>
+              <div className="p-6">
+                {/* Clear All Button */}
+                <button
+                  onClick={() => {
+                    clearFilters();
+                    setShowMobileFilters(false);
+                  }}
+                  className="w-full mb-6 py-3 bg-[#F4DCDC] text-[#6f5a4d] rounded-xl font-semibold hover:bg-[#F0E7DE] transition"
+                >
+                  Clear All Filters
+                </button>
+
+                {/* Sort By */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Sort By</h3>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full p-3 border border-[#F0E7DE] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f9b8c3]"
+                  >
+                    <option value="random">Random</option>
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+                </div>
+
+                {/* Categories */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Categories</h3>
+                  {['All', 'Saree', 'Lehenga', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
+                    <label key={category} className="flex items-center gap-3 mb-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="mobile-category"
+                        value={category}
+                        checked={selectedCategory === category}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
+                      />
+                      <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{category}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Fabric Type */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Fabric</h3>
+                  {['All', 'Silk', 'Cotton', 'Georgette', 'Chiffon', 'Crepe', 'Velvet'].map((fabric) => (
+                    <label key={fabric} className="flex items-center gap-3 mb-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="mobile-fabric"
+                        value={fabric}
+                        checked={selectedFabric === fabric}
+                        onChange={(e) => setSelectedFabric(e.target.value)}
+                        className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
+                      />
+                      <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{fabric}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Occasion */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Occasion</h3>
+                  {['All', 'Wedding', 'Party', 'Casual', 'Office', 'Festival', 'Bridal'].map((occasion) => (
+                    <label key={occasion} className="flex items-center gap-3 mb-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="mobile-occasion"
+                        value={occasion}
+                        checked={selectedOccasion === occasion}
+                        onChange={(e) => setSelectedOccasion(e.target.value)}
+                        className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
+                      />
+                      <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{occasion}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* Price Range */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Price Range</h3>
+                  <input
+                    type="range"
+                    min="0"
+                    max="50000"
+                    value={priceRange}
+                    onChange={(e) => setPriceRange(parseInt(e.target.value))}
+                    className="w-full h-2 bg-[#F4DCDC] rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between mt-2 text-sm text-[#8A6F5C]">
+                    <span>₹0</span>
+                    <span>₹{priceRange.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* Apply Button */}
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="w-full py-3 bg-[#f9b8c3] text-white rounded-xl font-semibold hover:bg-[#f7a8b8] transition"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sidebar Filters */}
-        <div className="lg:w-80 w-full">
+        <div className="hidden lg:block lg:w-80 w-full">
           <div className="bg-white rounded-3xl p-6 shadow-lg sticky top-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-pink-600">Filters</h2>
+              <h2 className="playfair text-2xl font-bold text-[#6f5a4d]">Filters</h2>
               <button
                 onClick={clearFilters}
-                className="text-pink-600 hover:text-pink-700 text-sm font-medium"
+                className="text-[#6f5a4d] hover:text-[#8A6F5C] text-sm font-medium"
               >
                 Clear All
               </button>
@@ -154,12 +299,13 @@ const CollectionPage = () => {
 
             {/* Sort By */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Sort By</h3>
+              <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Sort By</h3>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full p-3 border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-400"
+                className="w-full p-3 border border-[#F0E7DE] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f9b8c3]"
               >
+                <option value="random">Random</option>
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="price-low">Price: Low to High</option>
@@ -169,7 +315,7 @@ const CollectionPage = () => {
 
             {/* Categories */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Categories</h3>
+              <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Categories</h3>
               {['All', 'Saree', 'Lehenga', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
                 <label key={category} className="flex items-center gap-3 mb-2 cursor-pointer">
                   <input
@@ -178,16 +324,16 @@ const CollectionPage = () => {
                     value={category}
                     checked={selectedCategory === category}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-4 h-4 text-pink-600 focus:ring-pink-500"
+                    className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
                   />
-                  <span className="text-gray-700 hover:text-pink-600 transition">{category}</span>
+                  <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{category}</span>
                 </label>
               ))}
             </div>
 
             {/* Fabric Type */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Fabric</h3>
+              <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Fabric</h3>
               {['All', 'Silk', 'Cotton', 'Georgette', 'Chiffon', 'Crepe', 'Velvet'].map((fabric) => (
                 <label key={fabric} className="flex items-center gap-3 mb-2 cursor-pointer">
                   <input
@@ -196,16 +342,16 @@ const CollectionPage = () => {
                     value={fabric}
                     checked={selectedFabric === fabric}
                     onChange={(e) => setSelectedFabric(e.target.value)}
-                    className="w-4 h-4 text-pink-600 focus:ring-pink-500"
+                    className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
                   />
-                  <span className="text-gray-700 hover:text-pink-600 transition">{fabric}</span>
+                  <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{fabric}</span>
                 </label>
               ))}
             </div>
 
             {/* Occasion */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Occasion</h3>
+              <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Occasion</h3>
               {['All', 'Wedding', 'Party', 'Casual', 'Office', 'Festival', 'Bridal'].map((occasion) => (
                 <label key={occasion} className="flex items-center gap-3 mb-2 cursor-pointer">
                   <input
@@ -214,25 +360,25 @@ const CollectionPage = () => {
                     value={occasion}
                     checked={selectedOccasion === occasion}
                     onChange={(e) => setSelectedOccasion(e.target.value)}
-                    className="w-4 h-4 text-pink-600 focus:ring-pink-500"
+                    className="w-4 h-4 text-[#f9b8c3] focus:ring-[#f9b8c3]"
                   />
-                  <span className="text-gray-700 hover:text-pink-600 transition">{occasion}</span>
+                  <span className="text-[#8A6F5C] hover:text-[#6f5a4d] transition">{occasion}</span>
                 </label>
               ))}
             </div>
 
             {/* Price Range */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-700 mb-3">Price Range</h3>
+              <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Price Range</h3>
               <input
                 type="range"
                 min="0"
                 max="50000"
                 value={priceRange}
                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
-                className="w-full h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-2 bg-[#F4DCDC] rounded-lg appearance-none cursor-pointer"
               />
-              <div className="flex justify-between mt-2 text-sm text-gray-500">
+              <div className="flex justify-between mt-2 text-sm text-[#8A6F5C]">
                 <span>₹0</span>
                 <span>₹{priceRange.toLocaleString()}</span>
               </div>
@@ -246,20 +392,21 @@ const CollectionPage = () => {
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-pink-600 mb-2">
+                <h2 className="playfair text-2xl font-bold text-[#6f5a4d] mb-2">
                   {filteredProducts.length} Products Found
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-[#8A6F5C]">
                   Showing {filteredProducts.length} of {products.length} products
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-500">Sort by:</span>
+                <span className="text-sm text-[#8A6F5C]">Sort by:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-2 border border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="px-3 py-2 border border-[#F0E7DE] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#f9b8c3]"
                 >
+                  <option value="random">Random</option>
                   <option value="newest">Newest</option>
                   <option value="price-low">Price: Low to High</option>
                   <option value="price-high">Price: High to Low</option>
@@ -271,101 +418,26 @@ const CollectionPage = () => {
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white rounded-3xl border border-pink-100 shadow-lg overflow-hidden h-[650px] relative transition-all duration-300 hover:shadow-pink-200 hover:scale-105"
-                >
-                  {/* Wishlist Icon */}
-                  <div className="absolute top-3 right-3 z-10">
-                    {favourites.some(f => f.id === product.id) ? (
-                      <FaHeart
-                        size={34}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          dispatch(removeFromFavourites(product.id.toString()))
-                        }}
-                        className="bg-white text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
-                      />
-                    ) : (
-                      <CiHeart
-                        size={34}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          dispatch(addToFavourites({
-                            id: product.id.toString(),
-                            title: product.title,
-                            images: product.images || [],
-                            category: product.category,
-                            price: product.price,
-                            stock: 10
-                          }))
-                        }}
-                        className="bg-white text-pink-300 hover:text-pink-500 p-2 rounded-full shadow-sm cursor-pointer transition"
-                      />
-                    )}
-                  </div>
-
-                  {/* Category Badge */}
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      {product.category || 'Elegance Boutique'}
-                    </span>
-                  </div>
-
-                  {/* Image */}
-                  <div
-                    className="h-[70%] bg-pink-50 cursor-pointer overflow-hidden"
-                    onClick={() => router.push(`/products/${product.id}`)}
-                  >
-                    {product?.images?.[0] ? (
-                      <Image
-                        src={product.images[0]}
-                        alt={product.title}
-                        width={500}
-                        height={500}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-sm text-gray-400">
-                        <div className="text-center">
-                          <div className="text-4xl mb-2">👗</div>
-                          <p>Image coming soon</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-4 h-[30%] flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-pink-600 text-lg font-semibold mb-1 line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <p className="text-xs text-pink-400 mb-2">{product.category || 'Elegance Boutique'}</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-xl text-gray-800 font-bold">₹ {product.price?.toLocaleString()}</div>
-                      <button
-                        onClick={() => addToCartItem(product)}
-                        className="bg-pink-100 text-pink-600 font-medium text-sm px-4 py-2 rounded-xl hover:bg-pink-200 transition duration-300"
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
+              {filteredProducts.map((p) => (
+                <ProductCard
+                  key={p.id}
+                  data={p}
+                  variant="bestseller"
+                  showCategoryBadge={false}
+                  showAddToCart={true}
+                  addToCartItem={addToCartItem}
+                  currencySymbol="₹"
+                />
               ))}
             </div>
           ) : (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">👗</div>
-              <h2 className="text-2xl font-bold text-pink-600 mb-2">No products found</h2>
-              <p className="text-gray-600 mb-6">Try adjusting your filters or search criteria</p>
+              <h2 className="playfair text-2xl font-bold text-[#6f5a4d] mb-2">No products found</h2>
+              <p className="text-[#8A6F5C] mb-6">Try adjusting your filters or search criteria</p>
               <button 
                 onClick={clearFilters}
-                className="bg-pink-600 text-white px-6 py-3 rounded-full hover:bg-pink-700 transition"
+                className="bg-[#f9b8c3] text-white px-6 py-3 rounded-full hover:bg-[#f7a8b8] transition"
               >
                 Clear Filters
               </button>

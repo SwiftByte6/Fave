@@ -41,7 +41,7 @@ const ThingsULike: React.FC<ThingsULikeProps> = ({
         showArrows={true}
         paginationActiveClassName="bg-pink-500"
         paginationInactiveClassName="bg-gray-300"
-        renderItem={(item) => (
+        renderItem={(item: any) => (
           <ProductCard
             data={item}
             variant='bestseller'
