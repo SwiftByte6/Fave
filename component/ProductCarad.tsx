@@ -1,7 +1,6 @@
 "use client";
 
 import React, { memo, useCallback } from "react";
-import Image from "next/image";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/Redux/store";
 import { addToFavourites, removeFromFavourites } from "@/Redux/FavSlice";
 import toast from "react-hot-toast";
+import ImageFallback from "./ImageFallback";
 
 interface ProductData {
   id: string | number;
@@ -207,21 +207,19 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
         onClick={handleProductClick}
       >
         {data?.images?.[0] ? (
-          <Image
+          <ImageFallback
             src={data.images[0]}
             alt={data.title}
             width={400}
             height={400}
             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-            loading="lazy"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            placeholder="blur"
-            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+            onClick={handleProductClick}
           />
         ) : (
           <div className="flex items-center justify-center h-full text-sm text-gray-400">
             <div className="text-center">
-              <div className="text-4xl mb-2"></div>
+              <div className="text-4xl mb-2">🖼️</div>
               <p>Image coming soon</p>
             </div>
           </div>

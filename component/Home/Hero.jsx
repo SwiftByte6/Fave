@@ -35,7 +35,7 @@ const Hero = ({
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
           {/* Main Title */}
           <h1 className="playfair text-3xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl font-bold text-[#6f5a4d] mb-3 sm:mb-5 leading-tight">
-            Favee
+            {titleTop}
             <span className="block text-[#f9b8c3]">{titleAccent}</span>
           </h1>
           

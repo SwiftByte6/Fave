@@ -9,7 +9,7 @@ export const useSupabase=  ()=>{
 
     const getDataFromSupabase= async()=>{
 
-        let{data,error}=await supabase.from('product').select("*")
+        let{data,error}=await supabase.from('product').select("id, title, price, images, category, description, created_at, rating, quantity, sizes")
         if(data){
             setProducts(data);
          
@@ -19,7 +19,7 @@ export const useSupabase=  ()=>{
     }
     const getFilteredData= async(query:string)=>{
 
-        let{data,error}=await supabase.from('product').select("*").or(`title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
+        let{data,error}=await supabase.from('product').select("id, title, price, images, category, description, created_at, rating, quantity, sizes").or(`title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)
         if(data){
             setFilterData(data);
             
@@ -32,7 +32,7 @@ export const useSupabase=  ()=>{
         const getProductById = async (id: number) => {
             const { data, error } = await supabase
               .from('product')
-              .select('*')
+              .select('id, title, price, images, category, description, created_at, rating, quantity, sizes')
               .eq('id', id)
               .single();
         
@@ -52,7 +52,7 @@ export const useSupabase=  ()=>{
             // 1. First, get products with same category
             const { data: categoryProducts, error: categoryError } = await supabase
                 .from('product')
-                .select('*')
+                .select('id, title, price, images, category, description, created_at, rating, quantity, sizes')
                 .eq('category', currentProduct.category)
                 .neq('id', currentProduct.id)
                 .limit(limit);
@@ -68,7 +68,7 @@ export const useSupabase=  ()=>{
                 if (titleWords.length > 0) {
                     const { data: titleProducts, error: titleError } = await supabase
                         .from('product')
-                        .select('*')
+                        .select('id, title, price, images, category, description, created_at, rating, quantity, sizes')
                         .neq('id', currentProduct.id)
                         .neq('category', currentProduct.category) // Avoid duplicates from category search
                         .or(titleWords.map((word: string) => `title.ilike.%${word}%`).join(','))
@@ -86,7 +86,7 @@ export const useSupabase=  ()=>{
             if (related.length < limit) {
                 const { data: randomProducts, error: randomError } = await supabase
                     .from('product')
-                    .select('*')
+                    .select('id, title, price, images, category, description, created_at, rating, quantity, sizes')
                     .neq('id', currentProduct.id)
                     .limit(limit - related.length);
 

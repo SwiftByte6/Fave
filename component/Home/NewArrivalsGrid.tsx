@@ -43,7 +43,7 @@ const NewArrivalsGrid: React.FC<Props> = ({ addToCartItem, products, title = "Ne
               showCategoryBadge={false}
               showAddToCart={true}
               addToCartItem={addToCartItem}
-              currencySymbol="₹"
+              currencySymbol="$"
             />
           ))}
         </div>

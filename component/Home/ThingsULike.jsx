@@ -4,13 +4,8 @@ import dynamic from 'next/dynamic'
 import ProductCard from '@/component/ProductCarad'
 const Slider = dynamic(() => import('@/component/SwiperMain/Slider').then(m => m.Slider), { ssr: false })
 
-interface ThingsULikeProps {
-  title?: string;
-  description?: string;
-  products?: any[];
-}
 
-const ThingsULike: React.FC<ThingsULikeProps> = ({
+const ThingsULike= ({
   title = "Things You'll Love",
   description = 'Handpicked just for you based on your style preferences',
   products = [],

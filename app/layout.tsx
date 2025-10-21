@@ -16,8 +16,6 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Script from "next/script";
-import { PerformanceMonitor } from "@/component/PerformanceMonitor";
-import { ResourcePreloader } from "@/component/ResourcePreloader";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -58,33 +56,12 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload"></Script>
-        <Script
-          id="sw-register"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then(function(registration) {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
-                    });
-                });
-              }
-            `,
-          }}
-        />
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased  ${playfair.variable}`}
         >
           <Providers>
             {" "}
             {/* ✅ Redux store provided to your whole app */}
-            <ResourcePreloader />
-            <PerformanceMonitor />
             <Header />
             <Toaster position="top-center" />
             {children}
