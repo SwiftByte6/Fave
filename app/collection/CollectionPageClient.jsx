@@ -9,7 +9,7 @@ import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import { IoSearch, IoClose } from "react-icons/io5";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
-const CollectionPage = () => {
+const CollectionPageClient = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const favourites = useSelector((state) => state.favourites.favourites);
@@ -449,4 +449,4 @@ const CollectionPage = () => {
   );
 };
 
-export default CollectionPage;
+export default CollectionPageClient;

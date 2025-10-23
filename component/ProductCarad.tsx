@@ -212,7 +212,7 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
             alt={data.title}
             width={400}
             height={400}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onClick={handleProductClick}
           />

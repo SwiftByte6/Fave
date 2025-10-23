@@ -1,4 +1,14 @@
 import React from 'react'
+import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = generateSEOMetadata({
+  title: "About Us - Favee Fashion",
+  description: "Learn about Favee's mission to bring you premium fashion and style. Discover our story, values, and commitment to quality women's clothing and accessories.",
+  canonical: "/about",
+  keywords: ["about favee", "fashion brand", "women clothing", "premium quality", "our story", "mission"],
+  ogType: "website",
+})
 
 const AboutPage = () => {
   return (

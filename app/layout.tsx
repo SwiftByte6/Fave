@@ -16,6 +16,9 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import Script from "next/script";
+import { generateMetadata as generateSEOMetadata, defaultSEO } from "@/lib/seo";
+import { OrganizationStructuredData, WebsiteStructuredData } from "@/lib/structured-data";
+import PerformanceMonitor from "@/component/PerformanceMonitor";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -41,11 +44,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Favee - Premium Fashion & Style",
-  description:
-    "Discover the finest collection of contemporary fashion and style. Favee brings you premium clothing and accessories for every occasion.",
-};
+export const metadata: Metadata = generateSEOMetadata(defaultSEO);
 
 export default function RootLayout({
   children,
@@ -55,13 +54,36 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload"></Script>
+        <head>
+          <OrganizationStructuredData />
+          <WebsiteStructuredData />
+          <Script
+            src="https://checkout.razorpay.com/v1/checkout.js"
+            strategy="lazyOnload"
+          />
+          {/* Google Analytics */}
+          <Script
+            src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'GA_MEASUREMENT_ID');
+            `}
+          </Script>
+          {/* Google Search Console */}
+          <meta name="google-site-verification" content="YOUR_GOOGLE_SEARCH_CONSOLE_VERIFICATION_CODE" />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased  ${playfair.variable}`}
         >
           <Providers>
             {" "}
             {/* ✅ Redux store provided to your whole app */}
+            <PerformanceMonitor />
             <Header />
             <Toaster position="top-center" />
             {children}

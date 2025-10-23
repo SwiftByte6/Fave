@@ -60,7 +60,7 @@ const HomePage = () => {
 
 	return (
 		<>
-			<div>
+			<main>
 					  <Hero
 					  titleTop={homeConfig?.hero?.titleTop ?? "Favee"}
 					  titleAccent={homeConfig?.hero?.titleAccent ?? "Fashion"}
@@ -71,28 +71,32 @@ const HomePage = () => {
 					  secondaryCta={homeConfig?.hero?.secondaryCta ?? { label: "Learn More", href: "/about" }}
 					/>
             {/* New Arrivals section above Things You'll Love */}
-            <NewArrivalsGrid
-              addToCartItem={addToCartItem}
-              products={products}
-              title={homeConfig?.newArrivals?.title ?? "New Arrival"}
-              ctaLabel={homeConfig?.newArrivals?.ctaLabel ?? "View All Products"}
-              ctaHref={homeConfig?.newArrivals?.ctaHref ?? "/collection"}
-              limit={homeConfig?.newArrivals?.limit ?? 6}
-            />
-            <ThingsULike
-              title={homeConfig?.slider?.title ?? "Things You'll Love"}
-              description={homeConfig?.slider?.description ?? 'Handpicked just for you based on your style preferences'}
-              products={products}
-            />
+            <section aria-labelledby="new-arrivals-heading">
+              <NewArrivalsGrid
+                addToCartItem={addToCartItem}
+                products={products}
+                title={homeConfig?.newArrivals?.title ?? "New Arrival"}
+                ctaLabel={homeConfig?.newArrivals?.ctaLabel ?? "View All Products"}
+                ctaHref={homeConfig?.newArrivals?.ctaHref ?? "/collection"}
+                limit={homeConfig?.newArrivals?.limit ?? 6}
+              />
+            </section>
+            <section aria-labelledby="things-youll-love-heading">
+              <ThingsULike
+                title={homeConfig?.slider?.title ?? "Things You'll Love"}
+                description={homeConfig?.slider?.description ?? 'Handpicked just for you based on your style preferences'}
+                products={products}
+              />
+            </section>
           {/* Best Seller */}
-          <section className="py-12 flex flex-col items-center gap-6">
+          <section className="py-12 flex flex-col items-center gap-6" aria-labelledby="bestsellers-heading">
             <div className="px-6 py-2 rounded-full bg-[#F4DCDC] shadow-sm">
-              <h2 className="dancing text-[2rem] md:text-[3.4rem] text-[#6f5a4d] font-bold">Bestsellers</h2>
+              <h2 id="bestsellers-heading" className="dancing text-[2rem] md:text-[3.4rem] text-[#6f5a4d] font-bold">Bestsellers</h2>
             </div>
             <p className="text-center text-[#8A6F5C] max-w-3xl">
               The pieces our community can't stop talking about. These favorites are loved for a reason.
             </p>
-            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" role="list">
               {bestSellers.map((p: any) => (
                 <ProductCard
                   key={p.id}
@@ -112,7 +116,7 @@ const HomePage = () => {
             </div>
           </section>
         <Story/>
-			</div>
+			</main>
 		</>
 	);
 };
