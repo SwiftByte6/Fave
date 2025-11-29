@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase/products";
 import PaymentStatus from "@/component/PaymentStatus";
+import OrderTracking from "@/component/OrderTracking";
 
 interface OrderItem {
   id: string;
@@ -28,6 +29,13 @@ interface OrderRow {
   payment_method?: string;
   razorpay_order_id?: string;
   items: OrderItem[]; // Items stored directly in orders table as JSON
+  // Shiprocket fields
+  shipping_status?: string;
+  awb_code?: string;
+  courier_name?: string;
+  tracking_url?: string;
+  expected_delivery_date?: string;
+  actual_delivery_date?: string;
 }
 
 const OrdersPage: React.FC = () => {
@@ -42,7 +50,7 @@ const OrdersPage: React.FC = () => {
 
       const { data: orderRows, error } = await supabase
         .from("orders")
-        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country, payment_id, payment_method, razorpay_order_id, items")
+        .select("id, created_at, total_amount, status, name, email, phone, address, city, pincode, country, payment_id, payment_method, razorpay_order_id, items, shipping_status, awb_code, courier_name, tracking_url, expected_delivery_date, actual_delivery_date")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -207,8 +215,7 @@ const OrdersPage: React.FC = () => {
                           />
                         </div>
 
-                        {/* Order Progress */
-                        }
+                        {/* Order Progress */}
                         <div className="mb-4">
                           <div className="w-full bg-[#F7F2EE] h-2 rounded-full">
                             <div
@@ -225,6 +232,19 @@ const OrdersPage: React.FC = () => {
                             <span className={order.status === 'delivered' ? 'text-[#6f5a4d] font-medium' : ''}>Delivered</span>
                           </div>
                         </div>
+
+                        {/* Shiprocket Tracking */}
+                        {(order.shipping_status && order.shipping_status !== 'pending') && (
+                          <OrderTracking order={{
+                            id: order.id,
+                            shipping_status: order.shipping_status,
+                            awb_code: order.awb_code,
+                            courier_name: order.courier_name,
+                            tracking_url: order.tracking_url,
+                            expected_delivery_date: order.expected_delivery_date,
+                            actual_delivery_date: order.actual_delivery_date
+                          }} />
+                        )}
 
                         {/* Order Items */}
                         <div className="border-t pt-4">

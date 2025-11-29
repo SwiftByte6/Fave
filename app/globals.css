@@ -2,48 +2,73 @@
 
 /* Global design tokens based on the requested palette */
 :root {
+  /* ⭐ Fav Brand Colors - Primary */
+  --fav-maroon: #7A1F2A;
+  --fav-gold: #C78A2B;
+  --fav-soft-gold: #E7C278;
+
+  /* ⭐ Fav Brand Colors - Secondary Shades */
+  --fav-blush: #E8C7C8;
+  --fav-beige: #F6EFE5;
+  --fav-rust: #B04332;
+
+  /* ⭐ Fav Brand Colors - Neutrals */
+  --fav-charcoal: #2A2A2A;
+  --fav-warm-gray: #6C6C6C;
+  --fav-off-white: #FFFCF8;
+
+  /* ⭐ Fav Brand Colors - Accent Colors */
+  --fav-plum: #4C1A38;
+  --fav-rose-gold: #CE9274;
+  --fav-olive: #867C4F;
+
+  /* ⭐ Fav Gradients */
+  --fav-gradient-primary: linear-gradient(135deg, #7A1F2A 0%, #B04332 100%);
+  --fav-gradient-gold: linear-gradient(135deg, #C78A2B 0%, #E7C278 100%);
+  --fav-gradient-rose: linear-gradient(135deg, #E8C7C8 0%, #F6EFE5 100%);
+
   /* Base & Surfaces */
-  --background: hsl(10, 20%, 98%);            /* warm near-white */
-  --foreground: hsl(25, 25%, 15%);            /* deep warm brown */
+  --background: var(--fav-off-white);          /* warm near-white */
+  --foreground: var(--fav-charcoal);           /* deep warm brown */
   --card: #ffffff;                             /* pure white */
-  --card-foreground: hsl(25, 25%, 15%);
+  --card-foreground: var(--fav-charcoal);
   --popover: #ffffff;
-  --popover-foreground: hsl(25, 25%, 15%);
+  --popover-foreground: var(--fav-charcoal);
 
-  /* Primary (Blush Pink) */
-  --primary: #F4B7C7;                          /* hsl(350, 85%, 85%) */
-  --primary-soft: hsl(350, 60%, 92%);
-  --primary-foreground: hsl(25, 25%, 15%);
+  /* Primary (Updated to use Fav colors) */
+  --primary: var(--fav-maroon);
+  --primary-soft: var(--fav-blush);
+  --primary-foreground: var(--fav-off-white);
 
-  /* Secondary (Cream / Neutrals) */
-  --secondary: hsl(30, 30%, 95%);
-  --secondary-foreground: hsl(25, 25%, 15%);
+  /* Secondary (Updated to use Fav colors) */
+  --secondary: var(--fav-beige);
+  --secondary-foreground: var(--fav-charcoal);
 
-  /* Accent (Lavender) */
-  --accent: #D9CCEB;                            /* hsl(270, 40%, 88%) */
-  --accent-soft: hsl(270, 25%, 94%);
-  --accent-foreground: hsl(25, 25%, 15%);
+  /* Accent (Updated to use Fav colors) */
+  --accent: var(--fav-gold);
+  --accent-soft: var(--fav-soft-gold);
+  --accent-foreground: var(--fav-charcoal);
 
-  /* Warm Naturals */
-  --warm-beige: #EADFCC;                        /* hsl(35, 25%, 88%) */
-  --warm-beige-soft: hsl(35, 15%, 94%);
+  /* Warm Naturals (Updated) */
+  --warm-beige: var(--fav-beige);
+  --warm-beige-soft: var(--fav-off-white);
 
-  /* Luxury Tone (Rose Gold) */
-  --rose-gold: hsl(15, 65%, 75%);
-  --rose-gold-soft: hsl(15, 45%, 88%);
+  /* Luxury Tone (Updated) */
+  --rose-gold: var(--fav-rose-gold);
+  --rose-gold-soft: var(--fav-blush);
 
   /* Muted */
-  --muted: hsl(30, 15%, 92%);
-  --muted-foreground: hsl(25, 20%, 45%);
+  --muted: var(--fav-beige);
+  --muted-foreground: var(--fav-warm-gray);
 
   /* Destructive */
-  --destructive: #F87171;                       /* warm red */
-  --destructive-foreground: #ffffff;
+  --destructive: var(--fav-rust);
+  --destructive-foreground: var(--fav-off-white);
 
   /* Borders / Inputs / Ring */
-  --border: hsl(30, 20%, 90%);
-  --input: hsl(30, 20%, 90%);
-  --ring: #F4B7C7;                              /* same as primary */
+  --border: var(--fav-blush);
+  --input: var(--fav-beige);
+  --ring: var(--fav-gold);
 
   /* Fonts (aliases) */
   --font-sans: 'Inter', sans-serif;
@@ -237,4 +262,74 @@ input.no-focus:focus {
 
 .animate-slideInRight {
   animation: slideInRight 0.3s ease-out;
+}
+
+/* ⭐ Fav Brand Color Utilities */
+.bg-fav-maroon { background-color: var(--fav-maroon); }
+.bg-fav-gold { background-color: var(--fav-gold); }
+.bg-fav-soft-gold { background-color: var(--fav-soft-gold); }
+.bg-fav-blush { background-color: var(--fav-blush); }
+.bg-fav-beige { background-color: var(--fav-beige); }
+.bg-fav-rust { background-color: var(--fav-rust); }
+.bg-fav-charcoal { background-color: var(--fav-charcoal); }
+.bg-fav-warm-gray { background-color: var(--fav-warm-gray); }
+.bg-fav-off-white { background-color: var(--fav-off-white); }
+.bg-fav-plum { background-color: var(--fav-plum); }
+.bg-fav-rose-gold { background-color: var(--fav-rose-gold); }
+.bg-fav-olive { background-color: var(--fav-olive); }
+
+.text-fav-maroon { color: var(--fav-maroon); }
+.text-fav-gold { color: var(--fav-gold); }
+.text-fav-soft-gold { color: var(--fav-soft-gold); }
+.text-fav-blush { color: var(--fav-blush); }
+.text-fav-beige { color: var(--fav-beige); }
+.text-fav-rust { color: var(--fav-rust); }
+.text-fav-charcoal { color: var(--fav-charcoal); }
+.text-fav-warm-gray { color: var(--fav-warm-gray); }
+.text-fav-off-white { color: var(--fav-off-white); }
+.text-fav-plum { color: var(--fav-plum); }
+.text-fav-rose-gold { color: var(--fav-rose-gold); }
+.text-fav-olive { color: var(--fav-olive); }
+
+.border-fav-maroon { border-color: var(--fav-maroon); }
+.border-fav-gold { border-color: var(--fav-gold); }
+.border-fav-soft-gold { border-color: var(--fav-soft-gold); }
+.border-fav-blush { border-color: var(--fav-blush); }
+.border-fav-beige { border-color: var(--fav-beige); }
+.border-fav-rust { border-color: var(--fav-rust); }
+
+/* ⭐ Fav Gradient Utilities */
+.bg-fav-primary { background: var(--fav-gradient-primary); }
+.bg-fav-gold-gradient { background: var(--fav-gradient-gold); }
+.bg-fav-rose-gradient { background: var(--fav-gradient-rose); }
+
+/* ⭐ Fav Button Styles */
+.btn-fav-primary {
+  background: var(--fav-gradient-primary);
+  color: var(--fav-off-white);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-fav-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(122, 31, 42, 0.3);
+}
+
+.btn-fav-gold {
+  background: var(--fav-gradient-gold);
+  color: var(--fav-charcoal);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-fav-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(199, 138, 43, 0.3);
 }

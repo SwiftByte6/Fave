@@ -65,7 +65,7 @@ const HomePage = () => {
 					  titleTop={homeConfig?.hero?.titleTop ?? "Favee"}
 					  titleAccent={homeConfig?.hero?.titleAccent ?? "Fashion"}
 					  subtitle={homeConfig?.hero?.subtitle ?? "Discover your unique style with our curated collection of timeless pieces"}
-					  bgImage={homeConfig?.hero?.bgImage ?? "/banner.png"}
+					  bgImage={homeConfig?.hero?.bgImage ?? "/HomeBack.png"}
 					  features={homeConfig?.hero?.features ?? ["Free Shipping","Easy Returns","24/7 Support"]}
 					  primaryCta={homeConfig?.hero?.primaryCta ?? { label: "Shop Collection", href: "/collection" }}
 					  secondaryCta={homeConfig?.hero?.secondaryCta ?? { label: "Learn More", href: "/about" }}
@@ -89,14 +89,17 @@ const HomePage = () => {
               />
             </section>
           {/* Best Seller */}
-          <section className="py-12 flex flex-col items-center gap-6" aria-labelledby="bestsellers-heading">
-            <div className="px-6 py-2 rounded-full bg-[#F4DCDC] shadow-sm">
-              <h2 id="bestsellers-heading" className="dancing text-[2rem] md:text-[3.4rem] text-[#6f5a4d] font-bold">Bestsellers</h2>
+          <section className="py-16 flex flex-col items-center gap-8 bg-gradient-to-br from-fav-off-white via-fav-beige/30 to-fav-blush/20" aria-labelledby="bestsellers-heading">
+            <div className="relative">
+              <div className="px-8 py-4 rounded-2xl bg-fav-gold-gradient shadow-xl">
+                <h2 id="bestsellers-heading" className="dancing text-[2.5rem] md:text-[4rem] text-fav-off-white font-bold">Bestsellers</h2>
+              </div>
+              <div className="absolute inset-0 bg-fav-gold-gradient rounded-2xl blur-xl opacity-30 -z-10"></div>
             </div>
-            <p className="text-center text-[#8A6F5C] max-w-3xl">
-              The pieces our community can't stop talking about. These favorites are loved for a reason.
+            <p className="text-center text-fav-charcoal max-w-4xl text-lg font-medium leading-relaxed px-4">
+              The pieces our community can't stop talking about. These ethnic treasures are loved for their timeless beauty and premium craftsmanship by FAVEE.
             </p>
-            <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8" role="list">
+            <div className="w-full max-w-[1300px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 px-4" role="list">
               {bestSellers.map((p: any) => (
                 <ProductCard
                   key={p.id}
@@ -105,17 +108,17 @@ const HomePage = () => {
                   showCategoryBadge={false}
                   showAddToCart={true}
                   addToCartItem={addToCartItem}
-                  currencySymbol="$"
+                  currencySymbol="₹"
                 />
               ))}
             </div>
-            <div className="mt-2 bg-white/80 py-3 px-6 rounded-2xl shadow-sm border border-[#F0E7DE] text-[#8A6F5C]">
-              <p>
-                Loved by <span className="dancing text-[#] text-xl">10,000+</span> happy customers
+            <div className="mt-6 bg-fav-off-white/90 backdrop-blur-sm py-4 px-8 rounded-2xl shadow-lg border border-fav-blush text-fav-charcoal">
+              <p className="text-center font-medium">
+                Loved by <span className="dancing text-fav-gold text-2xl font-bold">10,000+</span> happy customers across India
               </p>
             </div>
           </section>
-        <Story/>
+        {/* <Story/> */}
 			</main>
 		</>
 	);

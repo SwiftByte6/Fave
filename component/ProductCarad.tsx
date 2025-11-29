@@ -171,39 +171,30 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
 
   return (
     <div
-      className={`bg-white rounded-2xl lg:rounded-3xl border border-pink-100 shadow-[0_6px_30px_rgba(244,183,199,0.25)] overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-[0_8px_36px_rgba(244,183,199,0.35)] hover:-translate-y-0.5 ${className}`}
+      className={`bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-md group ${className}`}
     >
       {/* Wishlist Icon */}
       {showWishlist && (
-        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-10">
+        <div className="absolute top-3 right-3 z-20">
           {isFavourite ? (
             <FaHeart
-              size={28}
+              size={20}
               onClick={toggleFavourite}
-              className="bg-white text-pink-500 p-1.5 sm:p-2 rounded-full shadow-sm cursor-pointer transition"
+              className="text-red-500 cursor-pointer transition-all duration-200 hover:scale-110"
             />
           ) : (
             <CiHeart
-              size={28}
+              size={20}
               onClick={toggleFavourite}
-              className="bg-white text-pink-300 hover:text-pink-500 p-1.5 sm:p-2 rounded-full shadow-sm cursor-pointer transition"
+              className="text-gray-400 hover:text-red-500 cursor-pointer transition-all duration-200 hover:scale-110"
             />
           )}
         </div>
       )}
 
-      {/* Category Badge */}
-      {showCategoryBadge && (
-        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-10">
-          <span className="bg-pink-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs font-semibold">
-            {data.category}
-          </span>
-        </div>
-      )}
-
       {/* Image */}
       <div
-        className={`${getImageHeight()} bg-pink-50 cursor-pointer overflow-hidden`}
+        className={`${getImageHeight()} bg-gray-50 cursor-pointer overflow-hidden relative`}
         onClick={handleProductClick}
       >
         {data?.images?.[0] ? (
@@ -212,64 +203,41 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
             alt={data.title}
             width={400}
             height={400}
-            className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onClick={handleProductClick}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-sm text-gray-400">
+          <div className="flex items-center justify-center h-full text-sm text-gray-500">
             <div className="text-center">
-              <div className="text-4xl mb-2">🖼️</div>
-              <p>Image coming soon</p>
+              <p className="font-medium">Image coming soon</p>
             </div>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div
-        className={`p-3 sm:p-4 ${getContentHeight()} flex flex-col justify-between`}
-      >
-        <div>
-          <h3
-            className={`text-[#6f5a4d] ${
-              variant === "bestseller"
-                ? "text-base sm:text-md"
-                : "text-base sm:text-md"
-            } font-semibold mb-1 line-clamp-2`}
-          >
+      <div className="p-4 flex flex-col justify-between bg-white">
+        <div className="mb-3">
+          <h3 className="text-gray-900 text-sm font-medium mb-1 line-clamp-2 leading-tight">
             {data.title}
           </h3>
-          <p className="text-xs text-pink-400 mb-2 sm:mb-3">
-            {data.category ||
-              (variant === "search" ? "Elegance Boutique" : "Pookie Style")}
+          <p className="text-xs text-gray-500 font-normal">
+            {data.category || "Kurtis"}
           </p>
         </div>
 
         <div className="flex items-center justify-between">
-          <div
-            className={`font-bold ${
-              variant === "bestseller" ? "text-[#f9b8c3]" : "text-gray-800"
-            } text-base sm:text-lg lg:text-xl`}
-          >
-            {currencySymbol} {data.price?.toLocaleString()}
+          <div className="flex flex-col">
+            <div className="text-orange-600 font-semibold text-lg">
+              ₹ {data.price?.toLocaleString()}
+            </div>
+            <span className="text-xs text-gray-500">Bestseller</span>
           </div>
           {showAddToCart && addToCartItem && (
             <button
               onClick={handleAddToCart}
-              className={`
-    relative overflow-hidden
-    font-medium text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 
-    rounded-xl transition duration-300
-    ${
-      variant === "bestseller"
-        ? "bg-[#f9b8c3] text-white"
-        : "bg-[#f9b8c3] text-white hover:bg-pink-200"
-    }
-    before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full
-    before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent
-    before:transition-all before:duration-500 hover:before:left-[100%]
-  `}
+              className="group/btn relative overflow-hidden bg-red-800 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]"
             >
               Add to Cart
             </button>

@@ -54,6 +54,33 @@ export async function POST(request: Request) {
   }
 }
 
+// Add helper function for Shiprocket order creation
+async function triggerShiprocketOrderCreation(orderId: string) {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/shiprocket/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ orderId }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Failed to create Shiprocket order:', errorText)
+      return false
+    }
+
+    const result = await response.json()
+    console.log('Shiprocket order created successfully:', result)
+    return true
+  } catch (error) {
+    console.error('Error creating Shiprocket order:', error)
+    return false
+  }
+}
+
 async function handlePaymentCaptured(payment: any) {
   try {
     if (!supabaseAdmin) {
@@ -117,6 +144,21 @@ async function handlePaymentCaptured(payment: any) {
       }
     } catch (emailError) {
       console.error('Email service error:', emailError)
+    }
+
+    // 🚀 NEW: Auto-create Shiprocket order after successful payment
+    try {
+      console.log('Triggering Shiprocket order creation for order:', orderData.id)
+      const shiprocketSuccess = await triggerShiprocketOrderCreation(orderData.id)
+      
+      if (shiprocketSuccess) {
+        console.log('Shiprocket order created successfully for order:', orderData.id)
+      } else {
+        console.error('Shiprocket order creation failed for order:', orderData.id)
+      }
+    } catch (shiprocketError) {
+      console.error('Shiprocket order creation failed:', shiprocketError)
+      // Don't fail the payment process if Shiprocket fails
     }
 
     console.log('Payment captured and order updated successfully:', payment.id)

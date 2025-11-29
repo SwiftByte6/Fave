@@ -22,13 +22,13 @@ const CartSection = () => {
     }
 
     return (
-        <div className="bg-[#FBF8F6] min-h-screen">
+        <div className="bg-gray-50 min-h-screen">
             {/* Header */}
             <div className='py-8 flex flex-col justify-center items-center'>
-                <div className='px-6 py-2 rounded-full bg-[#F4DCDC] shadow-sm mb-2'>
-                    <h1 className='dancing text-[1.8rem] sm:text-[2.2rem] md:text-[2.6rem] text-[#6f5a4d]'>Shopping Cart</h1>
+                <div className='px-6 py-2 rounded-full bg-white shadow-sm mb-2 border border-gray-200'>
+                    <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900'>Shopping Cart</h1>
                 </div>
-                <h2 className='text-xs sm:text-sm text-[#8A6F5C]'>Home / cart</h2>
+                <h2 className='text-xs sm:text-sm text-gray-500'>Home / cart</h2>
             </div>
 
             {/* Cart Layout */}
@@ -37,12 +37,12 @@ const CartSection = () => {
                 <div className="w-full lg:w-[70%] p-0 sm:p-0">
                     <div className='w-full lg:w-[95%] mx-auto'>
                         {/* Table Header */}
-                        <div className='bg-white/90 border border-[#F0E7DE] p-2 sm:p-3 flex justify-between font-semibold text-xs sm:text-sm md:text-base rounded-xl'>
-                            <div className='w-[50%] text-[#6f5a4d]'>Products</div>
+                        <div className='bg-white border border-gray-200 p-2 sm:p-3 flex justify-between font-semibold text-xs sm:text-sm md:text-base rounded-xl'>
+                            <div className='w-[50%] text-gray-900'>Products</div>
                             <div className='w-[50%] flex justify-between'>
-                                <div className="text-[#6f5a4d]">Price</div>
-                                <div className="text-[#6f5a4d]">Qty</div>
-                                <div className="text-[#6f5a4d]">Subtotal</div>
+                                <div className="text-gray-900">Price</div>
+                                <div className="text-gray-900">Qty</div>
+                                <div className="text-gray-900">Subtotal</div>
                             </div>
                         </div>
 
@@ -51,16 +51,16 @@ const CartSection = () => {
                             cart.map((item, index) => (
                                 <div 
                                 onClick={() => router.push(`/products/${item.id}`)}
-                                key={index} className='flex flex-col lg:flex-row border-b border-pink-100 p-2 sm:p-3 bg-white hover:bg-[#FBF1F4] transition'>
+                                key={index} className='flex flex-col lg:flex-row border-b border-gray-100 p-2 sm:p-3 bg-white hover:bg-gray-50 transition'>
                                     {/* Left: Image and Info */}
                                     <div className='w-full lg:w-[50%] flex items-start gap-2 sm:gap-3'>
-                                        <button onClick={(e) => { e.stopPropagation(); RemoveProduct(item.id) }} className='text-pink-400 text-lg cursor-pointer hover:bg-pink-50 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center transition'>×</button>
-                                        <div className='w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] flex-shrink-0 rounded-lg bg-[#FFF7F5] border border-[#F0E7DE] flex items-center justify-center'>
+                                        <button onClick={(e) => { e.stopPropagation(); RemoveProduct(item.id) }} className='text-gray-400 hover:text-red-500 text-lg cursor-pointer hover:bg-red-50 rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center transition'>×</button>
+                                        <div className='w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] flex-shrink-0 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center'>
                                             <Image src={item.images?.[0]} width={100} height={100} alt="product" className="object-contain w-full h-full" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h2 className='font-semibold text-base sm:text-lg text-[#6f5a4d] line-clamp-2'>{item.title}</h2>
-                                            <p className='text-xs sm:text-sm text-[#8A6F5C] line-clamp-2'>
+                                            <h2 className='font-semibold text-base sm:text-lg text-gray-900 line-clamp-2'>{item.title}</h2>
+                                            <p className='text-xs sm:text-sm text-gray-500 line-clamp-2'>
                                                 {item.description && item.description.length > 100
                                                     ? item.description.slice(0, 100) + '...'
                                                     : item.description || ''}
@@ -70,9 +70,9 @@ const CartSection = () => {
 
                                     {/* Right: Price, Qty, Subtotal */}
                                     <div className='w-full lg:w-[50%] flex justify-between items-center mt-3 lg:mt-0'>
-                                        <span className="text-[#6f5a4d] text-sm sm:text-base">INR {typeof item.price === 'number' ? item.price.toFixed(2) : '0.00'}</span>
+                                        <span className="text-orange-600 font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? item.price.toFixed(0) : '0'}</span>
                                         <span>
-                                            <div className="bg-[#FBF1F4] text-[#6f5a4d] px-1 sm:px-2 py-1 rounded-full text-sm sm:text-base">
+                                            <div className="bg-gray-100 text-gray-900 px-1 sm:px-2 py-1 rounded-full text-sm sm:text-base">
                                                 <span className='p-1 sm:p-3 cursor-pointer' onClick={(e) => { e.stopPropagation(); dispatch(updateCartQuantity({ id: item.id, quantity: item.cartQuantity + 1 })) }}
                                                 >+</span>
                                                 <span className='p-1 sm:p-3'>{item.cartQuantity}</span>
@@ -80,16 +80,16 @@ const CartSection = () => {
                                                 >-</span>
                                             </div>
                                         </span>
-                                        <span className="text-[#6f5a4d] font-semibold text-sm sm:text-base">INR {typeof item.price === 'number' ? (item.price * (item.cartQuantity || 1)).toFixed(2) : '0.00'}</span>
+                                        <span className="text-orange-600 font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? (item.price * (item.cartQuantity || 1)).toFixed(0) : '0'}</span>
                                     </div>
                                 </div>
                             ))
                         ) : (
                             <div className="text-center py-12">
                                 <div className='text-5xl mb-2'>🛍️</div>
-                                <h2 className="text-lg sm:text-xl font-bold text-[#8A6F5C]">Your cart is feeling light</h2>
-                                <p className='text-sm text-[#8A6F5C] mb-4'>Add some favorites from New Arrivals!</p>
-                                <button onClick={()=>router.push('/')} className='px-6 py-2 rounded-full bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90'>Browse Collections</button>
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-600">Your cart is feeling light</h2>
+                                <p className='text-sm text-gray-500 mb-4'>Add some favorites from New Arrivals!</p>
+                                <button onClick={()=>router.push('/')} className='group/btn relative overflow-hidden px-6 py-2 rounded-md bg-red-800 text-white hover:bg-red-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]'>Browse Collections</button>
                             </div>
                         )}
                     </div>
@@ -97,24 +97,24 @@ const CartSection = () => {
 
                 {/* Right Side - Summary */}
                 <div className='w-full lg:w-[30%] p-0 sm:p-0'>
-                    <div className='border border-[#F0E7DE] p-3 sm:p-4 rounded-xl shadow-sm lg:sticky lg:top-20 bg-white/95'>
-                        <h2 className='text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-[#6f5a4d]'>Cart Summary</h2>
+                    <div className='border border-gray-200 p-3 sm:p-4 rounded-xl shadow-sm lg:sticky lg:top-20 bg-white'>
+                        <h2 className='text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900'>Cart Summary</h2>
                         <div className='flex justify-between mb-2 text-sm sm:text-base'>
-                            <span className="text-[#6f5a4d]">Subtotal</span>
-                            <span className="text-[#6f5a4d]">INR {calculateSubtotal().toFixed(2)}</span>
+                            <span className="text-gray-900">Subtotal</span>
+                            <span className="text-orange-600 font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
                         </div>
                         <div className='flex justify-between mb-2 text-sm sm:text-base'>
-                            <span className="text-[#6f5a4d]">Shipping</span>
-                            <span className="text-pink-400">Free</span>
+                            <span className="text-gray-900">Shipping</span>
+                            <span className="text-green-500">Free</span>
                         </div>
-                        <hr className='my-2 border-[#F0E7DE]' />
+                        <hr className='my-2 border-gray-200' />
                         <div className='flex justify-between font-bold text-base sm:text-lg'>
-                            <span className="text-[#6f5a4d]">Total</span>
-                            <span className="text-[#6f5a4d]">INR {calculateSubtotal().toFixed(2)}</span>
+                            <span className="text-gray-900">Total</span>
+                            <span className="text-orange-600 font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
                         </div>
                         <button 
                         onClick={()=>router.push('/checkout')}
-                        className='mt-3 sm:mt-4 w-full bg-[#F4DCDC] text-[#6f5a4d] py-2 rounded-full hover:opacity-90 transition duration-200 font-semibold shadow-sm text-sm sm:text-base'>Checkout</button>
+                        className='group/btn relative overflow-hidden mt-3 sm:mt-4 w-full bg-red-800 text-white py-2 rounded-md hover:bg-red-700 transition-all duration-300 font-semibold shadow-sm text-sm sm:text-base hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]'>Checkout</button>
                     </div>
                 </div>
             </div>

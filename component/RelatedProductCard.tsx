@@ -67,11 +67,11 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
 
   return (
     <div 
-      className="bg-white rounded-xl shadow-sm border border-[#F0E7DE] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group"
+      className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer group"
       onClick={handleCardClick}
     >
       {/* Image Container */}
-      <div className="relative h-48 sm:h-56 overflow-hidden bg-[#FBF1F4]">
+      <div className="relative h-48 sm:h-56 overflow-hidden bg-gray-50">
         {product.images && product.images.length > 0 ? (
           <Image
             src={product.images[0]}
@@ -80,45 +80,48 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <div className="text-4xl">👗</div>
-          </div>
-        )}
-        
-        {/* Category Badge */}
-        {product.category && (
-          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 text-xs font-semibold text-[#8A6F5C]">
-            {product.category}
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="text-center">
+              <p className="font-medium text-sm">Image coming soon</p>
+            </div>
           </div>
         )}
         
         {/* Wishlist Button */}
         <button
           onClick={handleToggleFavourite}
-          className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
+          className="absolute top-3 right-3 transition-all duration-200 hover:scale-110"
         >
           {isFavourite ? (
-            <FaHeart className="w-4 h-4 text-red-500" />
+            <FaHeart className="w-5 h-5 text-red-500" />
           ) : (
-            <CiHeart className="w-4 h-4 text-gray-600" />
+            <CiHeart className="w-5 h-5 text-gray-400 hover:text-red-500" />
           )}
         </button>
       </div>
       
       {/* Content */}
-      <div className="p-3 sm:p-4">
-        <h3 className="font-semibold text-[#6f5a4d] text-sm sm:text-base mb-1 line-clamp-2">
-          {product.title}
-        </h3>
+      <div className="p-4">
+        <div className="mb-3">
+          <h3 className="text-gray-900 text-sm font-medium mb-1 line-clamp-2 leading-tight">
+            {product.title}
+          </h3>
+          <p className="text-xs text-gray-500 font-normal">
+            {product.category || "Kurtis"}
+          </p>
+        </div>
         
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-lg sm:text-xl font-bold text-[#6f5a4d]">
-            ₹ {product.price?.toLocaleString()}
-          </span>
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="text-orange-600 font-semibold text-lg">
+              ₹ {product.price?.toLocaleString()}
+            </div>
+            <span className="text-xs text-gray-500">Bestseller</span>
+          </div>
           
           <button
             onClick={handleAddToCart}
-            className="bg-[#F4DCDC] text-[#6f5a4d] px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="group/btn relative overflow-hidden bg-red-800 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]"
           >
             Add to Cart
           </button>

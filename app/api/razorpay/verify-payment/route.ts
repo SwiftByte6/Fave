@@ -9,6 +9,10 @@ const getSupabaseAdmin = () => {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !serviceKey) {
+    console.error('Missing Supabase configuration:', { 
+      hasUrl: !!supabaseUrl, 
+      hasServiceKey: !!serviceKey 
+    })
     throw new Error('Supabase not configured')
   }
 
@@ -17,30 +21,53 @@ const getSupabaseAdmin = () => {
 
 export async function POST(request: Request) {
   try {
+    console.log('=== Payment Verification Started ===')
+    
+    // Check environment variables first
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      console.error('RAZORPAY_KEY_SECRET is not configured')
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+    }
+    
     const supabaseAdmin = getSupabaseAdmin()
     
     const { userId } = await auth()
+    console.log('User ID:', userId)
+    
     if (!userId) {
+      console.error('No user ID found in auth')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } =
-      await request.json()
+    const requestBody = await request.json()
+    console.log('Request body:', requestBody)
+    
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = requestBody
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
+      console.error('Missing required fields:', { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id })
       return NextResponse.json({ error: 'Missing payment verification data' }, { status: 400 })
     }
 
     // Recompute signature
     const body = razorpay_order_id + '|' + razorpay_payment_id
+    console.log('Signature verification body:', body)
+    console.log('Razorpay secret exists:', !!process.env.RAZORPAY_KEY_SECRET)
+    
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
       .update(body)
       .digest('hex')
 
+    console.log('Expected signature:', expectedSignature)
+    console.log('Received signature:', razorpay_signature)
+    
     const isAuthentic = expectedSignature === razorpay_signature
+    console.log('Signature is authentic:', isAuthentic)
+    
     if (!isAuthentic) {
-      return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 })
+      console.error('Signature verification failed')
+      return NextResponse.json({ error: 'Payment verification failed - Invalid signature' }, { status: 400 })
     }
 
     // Update order in Supabase
@@ -50,7 +77,8 @@ export async function POST(request: Request) {
         status: 'success',
         payment_status: 'success',
         payment_id: razorpay_payment_id,
-        payment_method: 'razorpay'
+        payment_method: 'razorpay',
+        razorpay_order_id: razorpay_order_id
       })
       .eq('id', order_id)
       .select()
@@ -90,7 +118,34 @@ export async function POST(request: Request) {
       // Don't fail the payment verification if email fails
     }
 
-    return NextResponse.json({ success: true, payment_id: razorpay_payment_id })
+    // 🚀 Trigger Shiprocket order creation after successful payment verification
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+      const shiprocketResponse = await fetch(`${baseUrl}/api/shiprocket/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderId: order_id }),
+      })
+
+      if (!shiprocketResponse.ok) {
+        const errorText = await shiprocketResponse.text()
+        console.error('Failed to create Shiprocket order:', errorText)
+      } else {
+        const shiprocketResult = await shiprocketResponse.json()
+        console.log('Shiprocket order created successfully:', shiprocketResult)
+      }
+    } catch (shiprocketError) {
+      console.error('Error creating Shiprocket order:', shiprocketError)
+      // Don't fail the payment verification if Shiprocket fails
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      payment_id: razorpay_payment_id,
+      order_number: updatedOrder?.order_number || `ORD-${order_id}`
+    })
   } catch (error: any) {
     console.error('Payment verification error:', error)
     return NextResponse.json({ error: error.message || 'Payment verification failed' }, { status: 500 })

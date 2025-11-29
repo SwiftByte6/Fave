@@ -94,6 +94,156 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   }
 }
 
+interface ShippingUpdateEmailData {
+  orderId: string
+  customerName: string
+  customerEmail: string
+  orderNumber: string
+  shippingStatus: string
+  awbCode?: string
+  courierName?: string
+  trackingUrl?: string
+  estimatedDelivery?: string
+}
+
+export async function sendShippingUpdateEmail(data: ShippingUpdateEmailData) {
+  try {
+    const transporter = await createTransporter()
+    const emailHtml = generateShippingUpdateHTML(data)
+    
+    const fromEmail = process.env.GMAIL_USER || process.env.SMTP_FROM_EMAIL || 'noreply@favee.com'
+    const fromName = process.env.SMTP_FROM_NAME || 'FAVEE'
+    
+    const statusMessages = {
+      picked_up: 'Your order has been picked up!',
+      out_for_delivery: 'Your order is out for delivery!', 
+      delivered: 'Your order has been delivered!'
+    }
+    
+    const mailOptions = {
+      from: `${fromName} <${fromEmail}>`,
+      to: data.customerEmail,
+      subject: `${statusMessages[data.shippingStatus as keyof typeof statusMessages] || 'Shipping Update'} - Order #${data.orderNumber}`,
+      html: emailHtml,
+    }
+
+    const info = await transporter.sendMail(mailOptions)
+    return { success: true, emailId: info.messageId }
+  } catch (error: any) {
+    console.error('Shipping update email error:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+function generateShippingUpdateHTML(data: ShippingUpdateEmailData): string {
+  const statusMessages = {
+    picked_up: { 
+      title: '📦 Your order has been picked up!',
+      message: 'Great news! Your order is now with our courier partner and on its way to you.',
+      color: '#3b82f6'
+    },
+    out_for_delivery: { 
+      title: '🚚 Your order is out for delivery!',
+      message: 'Your package is on the delivery vehicle and will reach you soon.',
+      color: '#f59e0b'
+    },
+    delivered: { 
+      title: '✅ Your order has been delivered!',
+      message: 'Your package has been successfully delivered. We hope you love your purchase!',
+      color: '#10b981'
+    }
+  }
+
+  const statusInfo = statusMessages[data.shippingStatus as keyof typeof statusMessages] || {
+    title: '📋 Shipping Status Update',
+    message: `Your order status has been updated to: ${data.shippingStatus}`,
+    color: '#6b7280'
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Shipping Update</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fbf8f6;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #f4dcdc 0%, #f0e7de 100%); padding: 30px; text-align: center;">
+          <h1 style="margin: 0; color: #6f5a4d; font-size: 28px; font-weight: 700;">FAVEE</h1>
+          <p style="margin: 10px 0 0 0; color: #8a6f5c; font-size: 16px;">Shipping Update</p>
+        </div>
+
+        <!-- Status Update -->
+        <div style="padding: 30px;">
+          <div style="background-color: ${statusInfo.color}20; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid ${statusInfo.color};">
+            <h2 style="margin: 0 0 15px 0; color: ${statusInfo.color}; font-size: 24px;">${statusInfo.title}</h2>
+            <p style="margin: 0; color: #374151; font-size: 16px; line-height: 1.5;">
+              Hi ${data.customerName}, ${statusInfo.message}
+            </p>
+          </div>
+
+          <!-- Order & Tracking Info -->
+          <div style="margin-bottom: 30px;">
+            <h3 style="color: #6f5a4d; font-size: 20px; margin-bottom: 20px; border-bottom: 2px solid #f4dcdc; padding-bottom: 10px;">Tracking Information</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                <p style="margin: 0 0 5px 0; color: #8a6f5c; font-size: 14px; font-weight: 600;">Order Number</p>
+                <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 700;">#${data.orderNumber}</p>
+              </div>
+              ${data.awbCode ? `
+              <div>
+                <p style="margin: 0 0 5px 0; color: #8a6f5c; font-size: 14px; font-weight: 600;">AWB Number</p>
+                <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 700;">${data.awbCode}</p>
+              </div>
+              ` : ''}
+            </div>
+
+            ${data.courierName ? `
+            <div style="margin-bottom: 20px;">
+              <p style="margin: 0 0 5px 0; color: #8a6f5c; font-size: 14px; font-weight: 600;">Courier Partner</p>
+              <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 700;">${data.courierName}</p>
+            </div>
+            ` : ''}
+
+            ${data.estimatedDelivery ? `
+            <div style="margin-bottom: 20px;">
+              <p style="margin: 0 0 5px 0; color: #8a6f5c; font-size: 14px; font-weight: 600;">Expected Delivery</p>
+              <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 700;">${new Date(data.estimatedDelivery).toLocaleDateString()}</p>
+            </div>
+            ` : ''}
+
+            ${data.trackingUrl ? `
+            <div style="text-align: center; margin-top: 30px;">
+              <a href="${data.trackingUrl}" target="_blank" style="display: inline-block; background-color: ${statusInfo.color}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Track Your Package →
+              </a>
+            </div>
+            ` : ''}
+          </div>
+
+          <!-- Contact Info -->}
+          <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
+            <p style="margin: 0 0 10px 0; color: #8a6f5c; font-size: 14px;">Questions about your order?</p>
+            <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 600;">Contact us at support@favee.com</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #6f5a4d; padding: 20px; text-align: center;">
+          <p style="margin: 0; color: white; font-size: 14px;">© 2024 Elegance Boutique. All rights reserved.</p>
+          <p style="margin: 10px 0 0 0; color: #f4dcdc; font-size: 12px;">Thank you for choosing Elegance Boutique!</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+}
+
 function generateOrderConfirmationHTML(data: OrderEmailData): string {
   const itemsHtml = data.items.map(item => `
     <tr>
@@ -128,7 +278,7 @@ function generateOrderConfirmationHTML(data: OrderEmailData): string {
         
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #f4dcdc 0%, #f0e7de 100%); padding: 30px; text-align: center;">
-          <h1 style="margin: 0; color: #6f5a4d; font-size: 28px; font-weight: 700;">Elegance Boutique</h1>
+          <h1 style="margin: 0; color: #6f5a4d; font-size: 28px; font-weight: 700;">FAVEE</h1>
           <p style="margin: 10px 0 0 0; color: #8a6f5c; font-size: 16px;">Thank you for your order!</p>
         </div>
 
@@ -206,7 +356,7 @@ function generateOrderConfirmationHTML(data: OrderEmailData): string {
           <!-- Contact Info -->
           <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
             <p style="margin: 0 0 10px 0; color: #8a6f5c; font-size: 14px;">Need help with your order?</p>
-            <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 600;">Contact us at support@eleganceboutique.com</p>
+            <p style="margin: 0; color: #6f5a4d; font-size: 16px; font-weight: 600;">Contact us at support@favee.com</p>
           </div>
         </div>
 

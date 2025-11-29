@@ -132,6 +132,9 @@ const CheckoutPage = () => {
 
   const handlePaymentSuccess = async (paymentData) => {
     try {
+      console.log('Payment success data:', paymentData);
+      console.log('Order ID:', orderId);
+      
       // Verify payment with backend
       const response = await fetch('/api/razorpay/verify-payment', {
         method: 'POST',
@@ -147,7 +150,9 @@ const CheckoutPage = () => {
       })
 
       if (!response.ok) {
-        throw new Error('Payment verification failed')
+        const errorText = await response.text();
+        console.error('Payment verification response:', response.status, errorText);
+        throw new Error(`Payment verification failed: ${response.status}`)
       }
 
       const result = await response.json()
@@ -173,19 +178,19 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="bg-[#FBF8F6] min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="py-8 flex flex-col justify-center items-center">
-        <div className="px-6 py-2 rounded-full bg-[#F4DCDC] shadow-sm mb-2">
-          <h1 className="dancing text-[1.8rem] sm:text-[2.2rem] md:text-[2.6rem] text-[#6f5a4d]">Checkout</h1>
+        <div className="px-6 py-2 rounded-full bg-white shadow-sm mb-2 border border-gray-200">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Checkout</h1>
         </div>
-        <h2 className="text-xs sm:text-sm text-[#8A6F5C]">Home / Checkout</h2>
+        <h2 className="text-xs sm:text-sm text-gray-500">Home / Checkout</h2>
       </div>
 
       <div className="flex flex-col md:flex-row w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 pb-10 gap-6">
         {/* Billing Form */}
-        <div className="w-full md:w-[65%] bg-white p-6 rounded-xl shadow-sm border border-[#F0E7DE]">
-          <h2 className="text-xl font-semibold mb-4 text-[#6f5a4d]">Billing & Shipping Details</h2>
+        <div className="w-full md:w-[65%] bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Billing & Shipping Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {['name', 'email', 'phone', 'city'].map((field) => (
               <input
@@ -195,7 +200,7 @@ const CheckoutPage = () => {
                 placeholder={field.charAt(0).toUpperCase() + field.slice(1) + (['name', 'email', 'phone'].includes(field) ? '*' : '')}
                 value={form[field]}
                 onChange={handleChange}
-                className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
+                className="border border-gray-200 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
               />
             ))}
           </div>
@@ -206,7 +211,7 @@ const CheckoutPage = () => {
             value={form.address}
             onChange={handleChange}
             rows={3}
-            className="border border-[#F0E7DE] p-3 rounded w-full mt-4 focus:outline-none focus:ring-2 focus:ring-rose-200"
+            className="border border-gray-200 p-3 rounded-md w-full mt-4 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
           ></textarea>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
@@ -216,7 +221,7 @@ const CheckoutPage = () => {
               placeholder="Pincode"
               value={form.pincode}
               onChange={handleChange}
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
+              className="border border-gray-200 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
             />
             <input
               type="text"
@@ -224,39 +229,39 @@ const CheckoutPage = () => {
               placeholder="Country"
               value={form.country}
               onChange={handleChange}
-              className="border border-[#F0E7DE] p-3 rounded focus:outline-none focus:ring-2 focus:ring-rose-200"
+              className="border border-gray-200 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
             />
           </div>
         </div>
 
         {/* Order Summary */}
-        <div className="w-full md:w-[35%] bg-white border border-[#F0E7DE] p-6 rounded-xl shadow-sm">
-          <h2 className="text-xl font-semibold mb-4 text-[#6f5a4d]">Order Summary</h2>
+        <div className="w-full md:w-[35%] bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900">Order Summary</h2>
           <div className="space-y-3">
             {cart.length > 0 ? (
               cart.map((item, index) => (
-                <div key={index} className="flex justify-between items-center bg-[#FBF1F4] p-3 rounded">
-                  <span className="text-[#6f5a4d]">{item.title} x {item.cartQuantity}</span>
-                  <span className="text-[#6f5a4d] font-semibold">INR {(item.price * (item.cartQuantity || 1)).toFixed(2)}</span>
+                <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-md">
+                  <span className="text-gray-900">{item.title} x {item.cartQuantity}</span>
+                  <span className="text-orange-600 font-semibold">₹ {(item.price * (item.cartQuantity || 1)).toFixed(0)}</span>
                 </div>
               ))
             ) : (
-              <p className="text-[#8A6F5C]">Your cart is empty</p>
+              <p className="text-gray-500">Your cart is empty</p>
             )}
           </div>
-          <hr className="my-4 border-[#F0E7DE]" />
-          <div className="flex justify-between text-lg font-bold text-[#6f5a4d]">
+          <hr className="my-4 border-gray-200" />
+          <div className="flex justify-between text-lg font-bold text-gray-900">
             <span>Total</span>
-            <span>INR {calculateSubtotal().toFixed(2)}</span>
+            <span className="text-orange-600">₹ {calculateSubtotal().toFixed(0)}</span>
           </div>
           {!showPayment ? (
             <button
               onClick={handleCreateOrder}
               disabled={isProcessing || cart.length === 0}
-              className={`mt-4 w-full py-3 rounded-full font-semibold shadow-sm transition ${
+              className={`group/btn relative overflow-hidden mt-4 w-full py-3 rounded-md font-semibold transition-all duration-300 ${
                 isProcessing || cart.length === 0
                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-[#F4DCDC] text-[#6f5a4d] hover:opacity-90'
+                  : 'bg-red-800 text-white hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]'
               }`}
             >
               {isProcessing ? 'Creating Order...' : 'Proceed to Payment'}
@@ -276,7 +281,7 @@ const CheckoutPage = () => {
               />
               <button
                 onClick={() => setShowPayment(false)}
-                className="mt-2 w-full py-2 text-sm text-[#8A6F5C] hover:text-[#6f5a4d] transition"
+                className="mt-2 w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
               >
                 ← Back to Order Details
               </button>
@@ -284,7 +289,7 @@ const CheckoutPage = () => {
           )}
 
           {cart.length > 0 && (
-            <p className="text-xs text-[#8A6F5C] mt-2 text-center">
+            <p className="text-xs text-gray-500 mt-2 text-center">
               Your order will automatically appear in your order history
             </p>
           )}

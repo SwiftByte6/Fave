@@ -157,7 +157,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </h2>
             <p className="text-[#8A6F5C] leading-relaxed">
               Our {categoryName.toLowerCase()} collection is carefully curated to bring you the finest 
-              pieces that blend traditional elegance with contemporary style. Each piece is crafted 
+              pieces that blend traditional beauty with contemporary style by FAVEE. Each piece is crafted 
               with attention to detail, using premium materials to ensure comfort and durability. 
               Whether you're looking for everyday wear or special occasion outfits, our collection 
               has something perfect for every woman.

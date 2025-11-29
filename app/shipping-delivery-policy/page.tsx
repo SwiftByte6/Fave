@@ -18,7 +18,7 @@ export default function ShippingDeliveryPolicy() {
                   <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Standard Shipping</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Delivery Time:</strong> 5-7 business days</li>
-                    <li><strong>Cost:</strong> $5.99 (Free on orders over $75)</li>
+                    <li><strong>Cost:</strong> ₹299 (Free on orders over ₹3999)</li>
                     <li><strong>Tracking:</strong> Included</li>
                     <li><strong>Signature Required:</strong> No</li>
                   </ul>
@@ -28,7 +28,7 @@ export default function ShippingDeliveryPolicy() {
                   <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Express Shipping</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Delivery Time:</strong> 2-3 business days</li>
-                    <li><strong>Cost:</strong> $12.99</li>
+                    <li><strong>Cost:</strong> ₹649</li>
                     <li><strong>Tracking:</strong> Included</li>
                     <li><strong>Signature Required:</strong> No</li>
                   </ul>
@@ -38,7 +38,7 @@ export default function ShippingDeliveryPolicy() {
                   <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Overnight Shipping</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li><strong>Delivery Time:</strong> Next business day</li>
-                    <li><strong>Cost:</strong> $24.99</li>
+                    <li><strong>Cost:</strong> ₹1249</li>
                     <li><strong>Tracking:</strong> Included</li>
                     <li><strong>Signature Required:</strong> Yes</li>
                     <li><strong>Cut-off Time:</strong> 2 PM EST</li>
@@ -172,7 +172,7 @@ export default function ShippingDeliveryPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#6f5a4d] mb-4">11. Free Shipping</h2>
               <div className="text-[#8A6F5C] space-y-4">
-                <p>Enjoy free standard shipping on orders over $75:</p>
+                <p>Enjoy free standard shipping on orders over ₹3999:</p>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Automatically applied at checkout</li>
                   <li>Valid for standard shipping only</li>
