@@ -1,7 +1,6 @@
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
-import type { Metadata } from 'next'
 
-export const metadata: Metadata = generateSEOMetadata({
+export const metadata = generateSEOMetadata({
   title: "Contact Us - Favee Fashion",
   description: "Get in touch with Favee for customer support, inquiries, or feedback. We're here to help with your fashion needs and shopping experience.",
   canonical: "/contact",

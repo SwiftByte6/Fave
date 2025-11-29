@@ -8,9 +8,9 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 const categoryMap: Record<string, string> = {
@@ -44,7 +44,8 @@ async function getCategoryProducts(slug: string) {
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-  const categoryName = categoryMap[params.slug];
+  const { slug } = await params;
+  const categoryName = categoryMap[slug];
   
   if (!categoryName) {
     return {
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   return generateSEOMetadata({
     title: `${categoryName} Collection | Favee`,
     description: `Discover our stunning collection of ${categoryName.toLowerCase()}. Premium quality, contemporary designs, and perfect for every occasion. Shop now at Favee.`,
-    canonical: `/categories/${params.slug}`,
+    canonical: `/categories/${slug}`,
     keywords: [
       categoryName.toLowerCase(),
       'fashion',
@@ -71,8 +72,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const products = await getCategoryProducts(params.slug);
-  const categoryName = categoryMap[params.slug];
+  const { slug } = await params;
+  const products = await getCategoryProducts(slug);
+  const categoryName = categoryMap[slug];
   
   if (!products || !categoryName) {
     notFound();
@@ -81,7 +83,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const breadcrumbs: BreadcrumbItem[] = [
     { name: 'Home', url: '/' },
     { name: 'Categories', url: '/collection' },
-    { name: categoryName, url: `/categories/${params.slug}` },
+    { name: categoryName, url: `/categories/${slug}` },
   ];
 
   return (

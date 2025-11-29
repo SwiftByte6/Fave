@@ -21,7 +21,7 @@ export default function TestShiprocketPage() {
       setLoginResult({ status: response.status, data: result })
       console.log('Login result:', result)
     } catch (error) {
-      setLoginResult({ error: error.message })
+      setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
       console.error('Login error:', error)
     }
     setLoading(false)
@@ -45,7 +45,7 @@ export default function TestShiprocketPage() {
       setCreateOrderResult({ status: response.status, data: result })
       console.log('Create order result:', result)
     } catch (error) {
-      setCreateOrderResult({ error: error.message })
+      setCreateOrderResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
       console.error('Create order error:', error)
     }
     setLoading(false)
@@ -74,7 +74,7 @@ export default function TestShiprocketPage() {
       })
       console.log('Direct API result:', result)
     } catch (error) {
-      setLoginResult({ error: error.message, type: 'Direct API Call' })
+      setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred', type: 'Direct API Call' })
       console.error('Direct API error:', error)
     }
     setLoading(false)

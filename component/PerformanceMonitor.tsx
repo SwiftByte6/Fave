@@ -6,57 +6,70 @@ export default function PerformanceMonitor() {
   useEffect(() => {
     // Core Web Vitals monitoring
     if (typeof window !== 'undefined') {
-      import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-        getCLS((metric) => {
-          console.log('CLS:', metric);
-          // Send to analytics
-          if (typeof gtag !== 'undefined') {
-            gtag('event', 'web_vitals', {
-              name: 'CLS',
-              value: Math.round(metric.value * 1000),
-            });
-          }
-        });
+      import('web-vitals').then((webVitals) => {
+        const { onCLS, onINP, onFCP, onLCP, onTTFB } = webVitals;
         
-        getFID((metric) => {
-          console.log('FID:', metric);
-          if (typeof gtag !== 'undefined') {
-            gtag('event', 'web_vitals', {
-              name: 'FID',
-              value: Math.round(metric.value),
-            });
-          }
-        });
+        if (onCLS) {
+          onCLS((metric) => {
+            console.log('CLS:', metric);
+            // Send to analytics
+            if (typeof window !== 'undefined' && 'gtag' in window) {
+              (window as any).gtag('event', 'web_vitals', {
+                name: 'CLS',
+                value: Math.round(metric.value * 1000),
+              });
+            }
+          });
+        }
         
-        getFCP((metric) => {
-          console.log('FCP:', metric);
-          if (typeof gtag !== 'undefined') {
-            gtag('event', 'web_vitals', {
-              name: 'FCP',
-              value: Math.round(metric.value),
-            });
-          }
-        });
+        if (onINP) {
+          onINP((metric) => {
+            console.log('INP:', metric);
+            // Send to analytics
+            if (typeof window !== 'undefined' && 'gtag' in window) {
+              (window as any).gtag('event', 'web_vitals', {
+                name: 'INP',
+                value: Math.round(metric.value),
+              });
+            }
+          });
+        }
         
-        getLCP((metric) => {
-          console.log('LCP:', metric);
-          if (typeof gtag !== 'undefined') {
-            gtag('event', 'web_vitals', {
-              name: 'LCP',
-              value: Math.round(metric.value),
-            });
-          }
-        });
+        if (onFCP) {
+          onFCP((metric) => {
+            console.log('FCP:', metric);
+            if (typeof window !== 'undefined' && 'gtag' in window) {
+              (window as any).gtag('event', 'web_vitals', {
+                name: 'FCP',
+                value: Math.round(metric.value),
+              });
+            }
+          });
+        }
         
-        getTTFB((metric) => {
-          console.log('TTFB:', metric);
-          if (typeof gtag !== 'undefined') {
-            gtag('event', 'web_vitals', {
-              name: 'TTFB',
-              value: Math.round(metric.value),
-            });
-          }
-        });
+        if (onLCP) {
+          onLCP((metric) => {
+            console.log('LCP:', metric);
+            if (typeof window !== 'undefined' && 'gtag' in window) {
+              (window as any).gtag('event', 'web_vitals', {
+                name: 'LCP',
+                value: Math.round(metric.value),
+              });
+            }
+          });
+        }
+        
+        if (onTTFB) {
+          onTTFB((metric) => {
+            console.log('TTFB:', metric);
+            if (typeof window !== 'undefined' && 'gtag' in window) {
+              (window as any).gtag('event', 'web_vitals', {
+                name: 'TTFB',
+                value: Math.round(metric.value),
+              });
+            }
+          });
+        }
       });
     }
 

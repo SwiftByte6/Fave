@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
 import { supabase } from '@/lib/supabase/products'
+
+export const dynamic = 'force-dynamic';
 import { removeEveryThing } from '@/Redux/cartSlice'
 import RazorpayPayment from '@/component/RazorpayPayment'
 import toast from 'react-hot-toast'

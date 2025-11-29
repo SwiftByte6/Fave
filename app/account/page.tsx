@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase/products";
 
+export const dynamic = 'force-dynamic';
+
 interface ProfileRow {
   id?: string;
   user_id: string;

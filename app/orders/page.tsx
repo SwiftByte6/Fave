@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase/products";
 import PaymentStatus from "@/component/PaymentStatus";
 import OrderTracking from "@/component/OrderTracking";
 
+export const dynamic = 'force-dynamic';
+
 interface OrderItem {
   id: string;
   title: string;

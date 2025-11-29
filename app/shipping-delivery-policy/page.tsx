@@ -1,5 +1,7 @@
 import React from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export default function ShippingDeliveryPolicy() {
   return (
     <div className="min-h-screen bg-[#FBF8F6] py-8 px-4">

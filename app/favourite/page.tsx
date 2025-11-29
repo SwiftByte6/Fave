@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/Redux/store";
 import ProductCard from "@/component/ProductCarad";
 
+export const dynamic = 'force-dynamic';
+
 const FavouritesPage = () => {
   const favourites = useSelector((state: RootState) => state.favourites.favourites);
   const dispatch = useDispatch();

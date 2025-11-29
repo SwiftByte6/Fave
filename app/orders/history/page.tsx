@@ -3,6 +3,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { supabase } from "@/lib/supabase/products";
 
+export const dynamic = 'force-dynamic';
+
 interface OrderItem {
   id: string;
   order_id: string;
