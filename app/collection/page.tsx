@@ -6,10 +6,29 @@ import type { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Shop All Products - Favee Fashion Collection",
-  description: "Browse our complete collection of premium women's fashion. Discover sarees, kurtas, western wear, and bridal collections. Quality clothing for every occasion.",
+  title: "Shop All Products - Premium Indian Fashion Collection | Favee",
+  description: "Browse our complete collection of premium Indian fashion for women. Discover designer sarees, elegant kurta sets, trendy western wear, and stunning bridal collections. Free shipping across India. Quality guaranteed.",
   canonical: "/collection",
-  keywords: ["women fashion", "clothing collection", "sarees", "kurtas", "western wear", "bridal", "premium fashion", "online shopping"],
+  keywords: [
+    "indian fashion collection",
+    "women clothing online india", 
+    "designer sarees online",
+    "kurta sets collection",
+    "western wear women",
+    "bridal collection india",
+    "ethnic wear online",
+    "premium fashion india",
+    "contemporary clothing",
+    "traditional wear online",
+    "festive wear women",
+    "party wear collection",
+    "casual wear online",
+    "formal wear women",
+    "quality clothing india",
+    "free shipping fashion",
+    "cod available",
+    "online shopping india"
+  ],
   ogType: "website",
 });
 

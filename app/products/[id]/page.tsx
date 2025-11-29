@@ -30,7 +30,7 @@ async function getProduct(id: string): Promise<ProductSEOData | null> {
       title: data.title,
       description: data.description || '',
       price: data.price,
-      currency: 'USD',
+      currency: 'INR',
       images: data.images || [],
       category: data.category || '',
       brand: 'Favee',

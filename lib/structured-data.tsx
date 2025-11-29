@@ -1,5 +1,15 @@
 import React from 'react';
-import { generateBreadcrumbStructuredData, generateProductStructuredData, generateOrganizationStructuredData, generateWebsiteStructuredData, BreadcrumbItem, ProductSEOData } from './seo';
+import { 
+  generateBreadcrumbStructuredData, 
+  generateProductStructuredData, 
+  generateOrganizationStructuredData, 
+  generateWebsiteStructuredData,
+  generateCollectionPageStructuredData,
+  generateFAQStructuredData,
+  generateLocalBusinessStructuredData,
+  BreadcrumbItem, 
+  ProductSEOData 
+} from './seo';
 
 interface StructuredDataProps {
   data: any;
@@ -41,5 +51,29 @@ export function OrganizationStructuredData() {
 
 export function WebsiteStructuredData() {
   const data = generateWebsiteStructuredData();
+  return <StructuredData data={data} />;
+}
+
+interface CollectionPageStructuredDataProps {
+  categoryName: string;
+  products: any[];
+}
+
+export function CollectionPageStructuredData({ categoryName, products }: CollectionPageStructuredDataProps) {
+  const data = generateCollectionPageStructuredData(categoryName, products);
+  return <StructuredData data={data} />;
+}
+
+interface FAQStructuredDataProps {
+  faqs: Array<{question: string, answer: string}>;
+}
+
+export function FAQStructuredData({ faqs }: FAQStructuredDataProps) {
+  const data = generateFAQStructuredData(faqs);
+  return <StructuredData data={data} />;
+}
+
+export function LocalBusinessStructuredData() {
+  const data = generateLocalBusinessStructuredData();
   return <StructuredData data={data} />;
 }

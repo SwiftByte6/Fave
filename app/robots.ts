@@ -5,20 +5,75 @@ export default function robots(): MetadataRoute.Robots {
   
   return {
     rules: [
+      // Main crawlers
       {
-        userAgent: '*',
+        userAgent: 'Googlebot',
         allow: '/',
         disallow: [
           '/api/',
           '/admin/',
           '/_next/',
           '/private/',
-          '/test-connection/',
-          '/test-data/',
-          '/test-products/',
-          '/test-supabase/',
+          '/test-*',
+          '/*.json$',
+          '/checkout',
+          '/cart',
+          '/account',
+          '/orders',
+          '/signin'
+        ],
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Bingbot',
+        allow: '/',
+        disallow: [
+          '/api/',
+          '/admin/',
+          '/_next/',
+          '/private/',
+          '/test-*',
+          '/checkout',
+          '/cart',
+          '/account'
+        ],
+        crawlDelay: 1,
+      },
+      // General bots
+      {
+        userAgent: '*',
+        allow: [
+          '/',
+          '/products/',
+          '/categories/',
+          '/collection',
+          '/about',
+          '/contact',
+          '/new-arrival',
+          '/search/',
+          '/*-policy',
+          '/terms-of-service',
+          '/disclaimer'
+        ],
+        disallow: [
+          '/api/',
+          '/admin/',
+          '/_next/',
+          '/private/',
+          '/test-*',
+          '/*.json$',
+          '/checkout*',
+          '/cart*',
+          '/account*',
+          '/orders*',
+          '/signin*',
+          '/favourite*',
+          '/*?*sort=',
+          '/*?*filter=',
+          '/*?*page=',
         ],
       },
+      // AI Training Bots - Block them
       {
         userAgent: 'GPTBot',
         disallow: '/',
@@ -39,6 +94,14 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Claude-Web',
         disallow: '/',
       },
+      {
+        userAgent: 'Meta-ExternalAgent',
+        disallow: '/',
+      },
+      {
+        userAgent: 'FacebookBot',
+        disallow: '/',
+      }
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,

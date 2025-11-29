@@ -111,18 +111,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     })) || [];
 
-    // Category pages (you might want to add these based on your categories)
-    const categories = ['saree', 'kurta', 'western', 'bridal'];
+    // Category pages with detailed subcategories
+    const categories = [
+      { slug: 'saree', name: 'Sarees', priority: 0.8 },
+      { slug: 'kurta', name: 'Kurtas', priority: 0.8 },
+      { slug: 'western', name: 'Western Wear', priority: 0.7 },
+      { slug: 'bridal', name: 'Bridal Collection', priority: 0.9 }
+    ];
+    
     const categoryPages = categories.map((category) => ({
-      url: `${baseUrl}/categories/${category}`,
+      url: `${baseUrl}/categories/${category.slug}`,
       lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
+      changeFrequency: 'daily' as const,
+      priority: category.priority,
     }));
 
-    return [...staticPages, ...productPages, ...categoryPages];
+    // Search pages for SEO
+    const searchKeywords = [
+      'sarees', 'kurtas', 'ethnic-wear', 'western-wear', 'bridal-wear',
+      'designer-sarees', 'silk-sarees', 'cotton-kurtas', 'party-wear',
+      'festive-wear', 'casual-wear', 'formal-wear'
+    ];
+    
+    const searchPages = searchKeywords.map((keyword) => ({
+      url: `${baseUrl}/search/${keyword}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.5,
+    }));
+
+    return [...staticPages, ...productPages, ...categoryPages, ...searchPages];
   } catch (error) {
     console.error('Error generating sitemap:', error);
-    return staticPages;
+    // Return at least static pages and category pages even if product fetch fails
+    const categories = [
+      { slug: 'saree', name: 'Sarees', priority: 0.8 },
+      { slug: 'kurta', name: 'Kurtas', priority: 0.8 },
+      { slug: 'western', name: 'Western Wear', priority: 0.7 },
+      { slug: 'bridal', name: 'Bridal Collection', priority: 0.9 }
+    ];
+    
+    const categoryPages = categories.map((category) => ({
+      url: `${baseUrl}/categories/${category.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: category.priority,
+    }));
+    
+    return [...staticPages, ...categoryPages];
   }
 }

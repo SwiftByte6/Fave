@@ -2,10 +2,25 @@ import React from 'react'
 import { generateMetadata as generateSEOMetadata } from '@/lib/seo'
 
 export const metadata = generateSEOMetadata({
-  title: "About Us - Favee Fashion",
-  description: "Learn about Favee's mission to bring you premium fashion and style. Discover our story, values, and commitment to quality women's clothing and accessories.",
+  title: "About Favee - Premium Indian Fashion Brand | Our Story",
+  description: "Learn about Favee's mission to bring premium Indian fashion to modern women. Discover our story, values, and commitment to quality ethnic wear, sarees, kurtas, and contemporary fashion with traditional roots.",
   canonical: "/about",
-  keywords: ["about favee", "fashion brand", "women clothing", "premium quality", "our story", "mission"],
+  keywords: [
+    "about favee",
+    "indian fashion brand",
+    "premium ethnic wear",
+    "women clothing india",
+    "traditional fashion",
+    "contemporary indian wear",
+    "quality sarees",
+    "designer kurtas",
+    "our story",
+    "mission vision",
+    "indian heritage fashion",
+    "craftsmanship",
+    "sustainable fashion",
+    "women empowerment"
+  ],
   ogType: "website",
 })
 
