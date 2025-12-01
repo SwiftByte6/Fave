@@ -33,8 +33,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['react-icons', 'lucide-react'],
     optimizeCss: true,
     scrollRestoration: true,
-    // Disable turbopack for now to avoid font loading issues
-    turbo: false,
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
