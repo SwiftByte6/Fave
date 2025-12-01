@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   try {
-    const config = {
+    const config: any = {
       hasKeyId: !!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
       keyIdLength: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.length || 0,
