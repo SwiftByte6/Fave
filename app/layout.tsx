@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Dancing_Script, Geist, Geist_Mono } from "next/font/google";
+import { Dancing_Script, Geist } from "next/font/google";
 import "./globals.css";
 import Header from "@/component/Header";
 import Providers from "@/app/provider"; // 👈 import the wrapper
@@ -37,11 +37,7 @@ const dancingScript = Dancing_Script({
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = generateSEOMetadata(defaultSEO);
@@ -144,7 +140,7 @@ export default function RootLayout({
           </Script>
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${dancingScript.variable} antialiased  ${playfair.variable}`}
+          className={`${geistSans.variable} ${dancingScript.variable} antialiased ${playfair.variable}`}
         >
           <Providers>
             {" "}
