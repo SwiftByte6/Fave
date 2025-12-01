@@ -9,7 +9,7 @@ const body = await request.json();
 const amount = body.amount;
 
 // Validate environment variables
-if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   console.error('Missing Razorpay environment variables');
   return NextResponse.json({ error: 'Razorpay configuration missing' }, { status: 500 });
 }
@@ -20,7 +20,7 @@ if (!amount || amount <= 0) {
 }
 
 const razorpay = new Razorpay({
-key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+key_id: process.env.RAZORPAY_KEY_ID,
 key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 

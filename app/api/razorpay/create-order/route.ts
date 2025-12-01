@@ -9,10 +9,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { amount, currency = 'INR', receipt } = body;
 
+    try {
+      console.log("ENV", {
+        id: process.env.RAZORPAY_KEY_ID,
+        secret: process.env.RAZORPAY_KEY_SECRET,
+      });
+
+      console.log("BODY", body);
+    } catch (e) {
+      console.log("ERROR in logging", e);
+    }
+
     console.log('=== RAZORPAY ORDER CREATION DEBUG ===');
     console.log('Request body:', { amount, currency, receipt });
     console.log('Environment variables:');
-    console.log('NEXT_PUBLIC_RAZORPAY_KEY_ID:', process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
+    console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID);
     console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? '[PRESENT]' : '[MISSING]');
 
     // Validate required fields
@@ -22,14 +33,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate environment variables
-    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       console.error('Missing Razorpay environment variables');
       return NextResponse.json({ error: 'Razorpay configuration missing' }, { status: 500 });
     }
 
     // Initialize Razorpay
     const razorpay = new Razorpay({
-      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key_id: process.env.RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
