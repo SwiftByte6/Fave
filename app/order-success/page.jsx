@@ -44,7 +44,9 @@ export default function OrderSuccess() {
       <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 text-center max-w-lg w-full border border-pink-100">
         
         {/* Success Icon */}
-        <div className="text-6xl mb-4 animate-bounce">🎉</div>
+        <div className="text-6xl mb-4 animate-bounce">
+          
+        </div>
         
         <h1 className="text-2xl md:text-3xl font-bold text-gray-700 mb-2">
           Payment Successful!

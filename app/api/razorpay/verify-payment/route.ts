@@ -120,24 +120,42 @@ export async function POST(request: Request) {
 
     // 🚀 Trigger Shiprocket order creation after successful payment verification
     try {
+      console.log('=== Triggering Shiprocket Order Creation ===')
+      console.log('Order ID for Shiprocket:', order_id)
+      
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-      const shiprocketResponse = await fetch(`${baseUrl}/api/shiprocket/create-order`, {
+      const shiprocketUrl = `${baseUrl}/api/shiprocket/create-order`
+      
+      console.log('Calling Shiprocket endpoint:', shiprocketUrl)
+      
+      const shiprocketResponse = await fetch(shiprocketUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Internal-Call': 'payment-verification', // Mark as internal call
         },
         body: JSON.stringify({ orderId: order_id }),
       })
 
+      console.log('Shiprocket response status:', shiprocketResponse.status)
+      
       if (!shiprocketResponse.ok) {
         const errorText = await shiprocketResponse.text()
-        console.error('Failed to create Shiprocket order:', errorText)
+        console.error('Failed to create Shiprocket order:', {
+          status: shiprocketResponse.status,
+          error: errorText,
+          orderId: order_id
+        })
       } else {
         const shiprocketResult = await shiprocketResponse.json()
         console.log('Shiprocket order created successfully:', shiprocketResult)
       }
     } catch (shiprocketError) {
-      console.error('Error creating Shiprocket order:', shiprocketError)
+      console.error('Error creating Shiprocket order:', {
+        error: shiprocketError.message,
+        orderId: order_id,
+        stack: shiprocketError.stack
+      })
       // Don't fail the payment verification if Shiprocket fails
     }
 

@@ -70,7 +70,7 @@ const CartSection = () => {
 
                                     {/* Right: Price, Qty, Subtotal */}
                                     <div className='w-full lg:w-[50%] flex justify-between items-center mt-3 lg:mt-0'>
-                                        <span className="text-orange-600 font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? item.price.toFixed(0) : '0'}</span>
+                                        <span className="text-black font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? item.price.toFixed(0) : '0'}</span>
                                         <span>
                                             <div className="bg-gray-100 text-gray-900 px-1 sm:px-2 py-1 rounded-full text-sm sm:text-base">
                                                 <span className='p-1 sm:p-3 cursor-pointer' onClick={(e) => { e.stopPropagation(); dispatch(updateCartQuantity({ id: item.id, quantity: item.cartQuantity + 1 })) }}
@@ -80,7 +80,7 @@ const CartSection = () => {
                                                 >-</span>
                                             </div>
                                         </span>
-                                        <span className="text-orange-600 font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? (item.price * (item.cartQuantity || 1)).toFixed(0) : '0'}</span>
+                                        <span className="text-black font-semibold text-sm sm:text-base">₹ {typeof item.price === 'number' ? (item.price * (item.cartQuantity || 1)).toFixed(0) : '0'}</span>
                                     </div>
                                 </div>
                             ))
@@ -101,7 +101,7 @@ const CartSection = () => {
                         <h2 className='text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900'>Cart Summary</h2>
                         <div className='flex justify-between mb-2 text-sm sm:text-base'>
                             <span className="text-gray-900">Subtotal</span>
-                            <span className="text-orange-600 font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
+                            <span className="text-black font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
                         </div>
                         <div className='flex justify-between mb-2 text-sm sm:text-base'>
                             <span className="text-gray-900">Shipping</span>
@@ -110,7 +110,7 @@ const CartSection = () => {
                         <hr className='my-2 border-gray-200' />
                         <div className='flex justify-between font-bold text-base sm:text-lg'>
                             <span className="text-gray-900">Total</span>
-                            <span className="text-orange-600 font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
+                            <span className="text-black font-semibold">₹ {calculateSubtotal().toFixed(0)}</span>
                         </div>
                         <button 
                         onClick={()=>router.push('/checkout')}

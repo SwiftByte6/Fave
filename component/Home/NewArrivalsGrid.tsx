@@ -28,7 +28,7 @@ const NewArrivalsGrid: React.FC<Props> = ({ addToCartItem, products, title = "Ne
     <section className="pb-8 md:pb-12 min-h-screen">
       <div className="mx-auto max-w-6xl px-4 md:px-6 space-y-6">
         <div>
-           <h1 className="text-[#f9b8c3] mt-10 text-center dancing mb-5 text-[2.5rem] md:text-[4rem] leading-tight md:leading-none">
+           <h1 className="text-[#CB9134] mt-10 md:mt-15 text-center dancing mb-5 text-[2.5rem] md:text-[4rem] leading-tight md:leading-none">
           {title}
         </h1>
           <p className="text-center">Fresh styles that speak to your heart. Discover pieces that make you feel confident and beautiful.</p>

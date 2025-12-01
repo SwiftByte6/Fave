@@ -54,39 +54,113 @@ const stateMapping: { [key: string]: string } = {
   'coimbatore': 'Tamil Nadu'
 }
 
-async function getValidToken() {
-  console.log('=== Getting Shiprocket Token ===')
+async function getValidShiprocketToken() {
+  console.log('=== Getting Valid Shiprocket Bearer Token ===')
   
-  const { data: settings, error: settingsError } = await supabaseAdmin
-    .from('shiprocket_settings')
-    .select('api_token, token_expires_at')
-    .single()
+  try {
+    // Check environment variables first
+    console.log('Checking environment variables...')
+    console.log('SHIPROCKET_API_EMAIL:', !!process.env.SHIPROCKET_API_EMAIL)
+    console.log('SHIPROCKET_API_PASSWORD:', !!process.env.SHIPROCKET_API_PASSWORD)
+    console.log('SHIPROCKET_BASE_URL:', process.env.SHIPROCKET_BASE_URL)
+    
+    if (!process.env.SHIPROCKET_API_EMAIL || !process.env.SHIPROCKET_API_PASSWORD || !process.env.SHIPROCKET_BASE_URL) {
+      throw new Error('Shiprocket API credentials not configured in environment variables')
+    }
 
-  console.log('Settings retrieved:', { hasToken: !!settings?.api_token, error: settingsError })
+    // Try to check if we have a valid stored token (ignore errors for now)
+    let settings = null
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('shiprocket_settings')
+        .select('api_token, token_expires_at')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (!error && data) {
+        settings = data
+        console.log('Token check:', { hasToken: !!settings.api_token, expiresAt: settings.token_expires_at })
+      } else {
+        console.log('No existing token found or table error:', error)
+      }
+    } catch (dbError) {
+      console.log('Database error checking token (will get fresh token):', dbError)
+    }
 
-  if (!settings?.api_token || new Date(settings.token_expires_at) <= new Date()) {
-    console.log('Token expired or missing, refreshing...')
+    // If no valid token, get a fresh one
+    const needNewToken = !settings?.api_token || new Date(settings.token_expires_at) <= new Date()
     
-    // Refresh token
-    const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shiprocket/login`, {
-      method: 'POST',
-    })
-    
-    const loginResponseText = await loginResponse.text()
-    console.log('Login response status:', loginResponse.status)
-    console.log('Login response:', loginResponseText)
-    
-    if (!loginResponse.ok) {
-      throw new Error(`Failed to refresh Shiprocket token: ${loginResponse.status} - ${loginResponseText}`)
+    if (needNewToken) {
+      console.log('Getting fresh token from Shiprocket API...')
+      
+      const loginUrl = `${process.env.SHIPROCKET_BASE_URL}/auth/login`
+      console.log('Login URL:', loginUrl)
+      
+      const loginResponse = await fetch(loginUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: process.env.SHIPROCKET_API_EMAIL,
+          password: process.env.SHIPROCKET_API_PASSWORD,
+        }),
+      })
+      
+      console.log('Login response status:', loginResponse.status)
+      
+      if (!loginResponse.ok) {
+        const errorText = await loginResponse.text()
+        console.error('Login failed:', errorText)
+        throw new Error(`Shiprocket authentication failed: ${loginResponse.status} - ${errorText}`)
+      }
+      
+      const loginData = await loginResponse.json()
+      console.log('Login response:', loginData)
+      
+      if (!loginData.token) {
+        throw new Error('No token received from Shiprocket API')
+      }
+
+      // Try to store the new token (don't fail if this fails)
+      try {
+        const expiresAt = new Date()
+        expiresAt.setHours(expiresAt.getHours() + 23)
+
+        // Insert new token record
+        await supabaseAdmin
+          .from('shiprocket_settings')
+          .insert({
+            api_token: loginData.token,
+            token_expires_at: expiresAt.toISOString(),
+            updated_at: new Date().toISOString(),
+            is_active: true
+          })
+
+        console.log('New token stored successfully')
+      } catch (storeError) {
+        console.error('Failed to store token (continuing anyway):', storeError)
+      }
+
+      console.log('Returning fresh token')
+      return loginData.token
     }
     
-    const loginData = JSON.parse(loginResponseText)
-    console.log('Login successful, token received')
-    return loginData.token
+    console.log('Using existing valid token')
+    return settings.api_token
+  } catch (error) {
+    console.error('Failed to get Shiprocket token:', error)
+    throw error
   }
-  
-  console.log('Using existing token')
-  return settings.api_token
+}
+
+function getShiprocketHeaders(token: string) {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  }
 }
 
 function getStateFromCity(city: string): string {
@@ -98,13 +172,22 @@ export async function POST(request: Request) {
   let orderId: string = ''
   
   try {
+    // Check if this is an internal call (from payment verification) or external call
+    const isInternalCall = request.headers.get('X-Internal-Call') === 'payment-verification'
     const { userId } = await auth()
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const requestBody = await request.json()
     orderId = requestBody.orderId
+    
+    console.log('Create order request:', { 
+      hasUserId: !!userId, 
+      orderId, 
+      isInternalCall 
+    })
+    
+    // Allow internal calls without user authentication, external calls need user auth
+    if (!isInternalCall && !userId) {
+      return NextResponse.json({ error: 'Unauthorized - user authentication required' }, { status: 401 })
+    }
     
     if (!orderId) {
       return NextResponse.json({ error: 'Order ID is required' }, { status: 400 })
@@ -161,22 +244,34 @@ export async function POST(request: Request) {
     maxBreadth = Math.max(15, maxBreadth)
     totalHeight = Math.max(5, totalHeight)
 
-    // Get pickup address from settings
-    const { data: settings } = await supabaseAdmin
-      .from('shiprocket_settings')
-      .select('pickup_address')
-      .single()
-
-    const pickupAddress = settings?.pickup_address || {
+    // Get pickup address from settings or use default
+    let pickupAddress = {
       pickup_location: "Primary",
-      name: "FAVEE",
-      email: "orders@favee.com",
+      name: "Elegance Boutique",
+      email: "orders@eleganceboutique.com",
       phone: "9876543210",
       address: "123 Fashion Street",
       city: "Mumbai",
       state: "Maharashtra",
       country: "India",
       pin_code: "400001"
+    }
+
+    try {
+      const { data: settings } = await supabaseAdmin
+        .from('shiprocket_settings')
+        .select('pickup_address')
+        .eq('is_active', true)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (settings?.pickup_address) {
+        pickupAddress = settings.pickup_address
+        console.log('Using pickup address from settings')
+      }
+    } catch (error) {
+      console.log('Using default pickup address')
     }
 
     // Determine state from city
@@ -262,14 +357,25 @@ export async function POST(request: Request) {
 
     console.log('Creating Shiprocket order with payload:', JSON.stringify(shiprocketPayload, null, 2))
 
-    const token = await getValidToken()
+    console.log('=== Getting Shiprocket Token ===')
+    let token
+    try {
+      token = await getValidShiprocketToken()
+      console.log('Token acquired successfully:', !!token)
+    } catch (tokenError) {
+      console.error('Failed to get Shiprocket token:', tokenError)
+      throw new Error(`Authentication failed: ${tokenError.message}`)
+    }
+
+    const headers = getShiprocketHeaders(token)
+    console.log('Request headers:', headers)
     
-    const response = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
+    const createOrderUrl = `${process.env.SHIPROCKET_BASE_URL}/orders/create/adhoc`
+    console.log('Making request to:', createOrderUrl)
+    
+    const response = await fetch(createOrderUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers,
       body: JSON.stringify(shiprocketPayload),
     })
 

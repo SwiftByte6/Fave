@@ -80,25 +80,41 @@ const Header = () => {
           <div className="flex items-center justify-end gap-3 md:gap-5">
             {/* Authentication */}
             <SignedOut>
-              <SignInButton mode="modal">
-                <button className="hidden md:block text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-beige text-fav-maroon hover:bg-fav-blush transition-all duration-300 hover:shadow-md">
-                  Sign In
+              <div className="hidden md:flex items-center space-x-2">
+                <button
+                  className="text-sm font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all duration-300"
+                  onClick={() => router.push("/track-order")}
+                >
+                  📦 Track Order
                 </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="hidden md:block text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-primary text-fav-off-white hover:bg-fav-maroon transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
-                  Join FAVEE
-                </button>
-              </SignUpButton>
+                <SignInButton mode="modal">
+                  <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-beige text-fav-maroon hover:bg-fav-blush transition-all duration-300 hover:shadow-md">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-primary text-fav-off-white hover:bg-fav-maroon transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+                    Join FAVEE
+                  </button>
+                </SignUpButton>
+              </div>
             </SignedOut>
             
             <SignedIn>
-              <button
-                className="hidden md:block text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-gold text-fav-charcoal hover:bg-fav-soft-gold transition-all duration-300 hover:shadow-md"
-                onClick={() => router.push("/orders")}
-              >
-                My Orders
-              </button>
+              <div className="hidden md:flex space-x-2">
+                <button
+                  className="text-sm font-semibold px-3 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all duration-300"
+                  onClick={() => router.push("/track-order")}
+                >
+                  📦 Track Order
+                </button>
+                <button
+                  className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-gold text-fav-charcoal hover:bg-fav-soft-gold transition-all duration-300 hover:shadow-md"
+                  onClick={() => router.push("/orders")}
+                >
+                  My Orders
+                </button>
+              </div>
               <UserButton 
                 afterSignOutUrl="/"
                 appearance={{
@@ -209,27 +225,43 @@ const Header = () => {
           </div>
           
           {/* Mobile Authentication */}
-          <div className="flex gap-3">
+          <div className="space-y-3">
             <SignedOut>
-              <SignInButton mode="modal">
-                <button className="flex-1 py-3 rounded-xl bg-fav-beige text-fav-maroon text-sm font-semibold hover:bg-fav-blush transition-colors duration-300">
-                  Sign In
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="flex-1 py-3 rounded-xl bg-fav-primary text-fav-off-white text-sm font-semibold hover:bg-fav-maroon transition-colors duration-300">
-                  Join FAVEE
-                </button>
-              </SignUpButton>
+              <button
+                className="w-full py-3 rounded-xl bg-blue-100 text-blue-700 text-sm font-semibold hover:bg-blue-200 transition-colors duration-300"
+                onClick={() => { setIsOpen(false); router.push("/track-order"); }}
+              >
+                📦 Track Order
+              </button>
+              <div className="flex gap-3">
+                <SignInButton mode="modal">
+                  <button className="flex-1 py-3 rounded-xl bg-fav-beige text-fav-maroon text-sm font-semibold hover:bg-fav-blush transition-colors duration-300">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex-1 py-3 rounded-xl bg-fav-primary text-fav-off-white text-sm font-semibold hover:bg-fav-maroon transition-colors duration-300">
+                    Join FAVEE
+                  </button>
+                </SignUpButton>
+              </div>
             </SignedOut>
             
             <SignedIn>
-              <button
-                className="w-full py-3 rounded-xl bg-fav-gold text-fav-charcoal text-sm font-semibold hover:bg-fav-soft-gold transition-colors duration-300"
-                onClick={() => { setIsOpen(false); router.push("/orders"); }}
-              >
-                View My Orders
-              </button>
+              <div className="space-y-2">
+                <button
+                  className="w-full py-3 rounded-xl bg-blue-100 text-blue-700 text-sm font-semibold hover:bg-blue-200 transition-colors duration-300"
+                  onClick={() => { setIsOpen(false); router.push("/track-order"); }}
+                >
+                  📦 Track Order
+                </button>
+                <button
+                  className="w-full py-3 rounded-xl bg-fav-gold text-fav-charcoal text-sm font-semibold hover:bg-fav-soft-gold transition-colors duration-300"
+                  onClick={() => { setIsOpen(false); router.push("/orders"); }}
+                >
+                  View My Orders
+                </button>
+              </div>
             </SignedIn>
           </div>
         </div>

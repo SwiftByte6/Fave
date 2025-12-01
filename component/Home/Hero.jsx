@@ -43,11 +43,11 @@ const Hero = ({
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             
             {/* Click Indicator */}
-            <div className="absolute bottom-4 right-4 z-30 bg-black/30 backdrop-blur-sm rounded-full p-2 opacity-60 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
+            {/* <div className="absolute bottom-4 right-4 z-30 bg-black/30 backdrop-blur-sm rounded-full p-2 opacity-60 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
               <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

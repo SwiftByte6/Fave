@@ -129,6 +129,30 @@ const OrdersPage: React.FC = () => {
           <h1 className="dancing text-[2rem] md:text-[3rem] text-[#6f5a4d] font-bold">Your Orders & History</h1>
         </div>
       </div>
+
+      {/* Quick Tracking Info */}
+      <div className="bg-gradient-to-r from-[#F4DCDC] to-[#F0E7DE] rounded-xl p-6 mb-8 border border-[#F0E7DE]">
+        <div className="flex items-start space-x-4">
+          <div className="text-3xl">📦</div>
+          <div className="flex-1">
+            <h2 className="text-lg font-semibold text-[#6f5a4d] mb-2">Order Tracking Information</h2>
+            <div className="grid md:grid-cols-3 gap-4 text-sm text-[#8A6F5C]">
+              <div>
+                <p className="font-medium text-[#6f5a4d]">🎯 Real-time Updates</p>
+                <p>Orders update automatically every 15 seconds</p>
+              </div>
+              <div>
+                <p className="font-medium text-[#6f5a4d]">📱 Shiprocket Integration</p>
+                <p>Full tracking once shipping starts</p>
+              </div>
+              <div>
+                <p className="font-medium text-[#6f5a4d]">📞 Need Help?</p>
+                <p>Email support@favee.com with Order ID</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <SignedOut>
         <div className="bg-white/90 shadow-sm rounded-xl p-6 border border-[#F0E7DE]">
@@ -236,7 +260,7 @@ const OrdersPage: React.FC = () => {
                         </div>
 
                         {/* Shiprocket Tracking */}
-                        {(order.shipping_status && order.shipping_status !== 'pending') && (
+                        {(order.shipping_status && order.shipping_status !== 'pending') ? (
                           <OrderTracking order={{
                             id: order.id,
                             shipping_status: order.shipping_status,
@@ -246,6 +270,34 @@ const OrdersPage: React.FC = () => {
                             expected_delivery_date: order.expected_delivery_date,
                             actual_delivery_date: order.actual_delivery_date
                           }} />
+                        ) : (
+                          /* Show tracking placeholder for orders without Shiprocket data */
+                          <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium text-blue-900 mb-1">Order Tracking</h4>
+                                <p className="text-sm text-blue-700">
+                                  {order.status === 'pending' && 'Your order is being prepared for shipment'}
+                                  {order.status === 'processing' && 'Your order is being processed and will be shipped soon'}
+                                  {order.status === 'shipped' && 'Your order has been shipped and is on its way'}
+                                  {order.status === 'delivered' && 'Your order has been delivered successfully'}
+                                </p>
+                              </div>
+                              <div className="text-2xl">
+                                {order.status === 'pending' && '⏳'}
+                                {order.status === 'processing' && '📦'}
+                                {order.status === 'shipped' && '🚚'}
+                                {order.status === 'delivered' && '✅'}
+                              </div>
+                            </div>
+                            {order.status !== 'pending' && (
+                              <div className="mt-3 pt-3 border-t border-blue-200">
+                                <p className="text-xs text-blue-600">
+                                  📞 For detailed tracking information, contact customer support with Order ID: #{order.id}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         )}
 
                         {/* Order Items */}
@@ -261,6 +313,32 @@ const OrdersPage: React.FC = () => {
                                 <div className="text-[#6f5a4d] font-medium">₹ {(item.price * item.quantity).toLocaleString()}</div>
                               </div>
                             ))}
+                          </div>
+                        </div>
+
+                        {/* Tracking Actions */}
+                        <div className="border-t pt-4 mt-4">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => window.location.href = `/orders?track=${order.id}`}
+                              className="text-sm px-4 py-2 bg-[#F4DCDC] text-[#6f5a4d] rounded-lg hover:bg-[#F0E7DE] transition font-medium"
+                            >
+                              📍 Track This Order
+                            </button>
+                            {order.awb_code && (
+                              <button
+                                onClick={() => navigator.clipboard.writeText(order.awb_code || '')}
+                                className="text-sm px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-medium"
+                              >
+                                📋 Copy AWB: {order.awb_code}
+                              </button>
+                            )}
+                            <a
+                              href={`mailto:support@favee.com?subject=Order Tracking - ${order.id}&body=Hi, I would like to track my order ${order.id}. Please provide tracking details.`}
+                              className="text-sm px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition font-medium"
+                            >
+                              📧 Email Support
+                            </a>
                           </div>
                         </div>
 

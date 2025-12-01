@@ -5,6 +5,8 @@ import { useState } from 'react'
 export default function TestShiprocketPage() {
   const [loginResult, setLoginResult] = useState<any>(null)
   const [createOrderResult, setCreateOrderResult] = useState<any>(null)
+  const [serviceabilityResult, setServiceabilityResult] = useState<any>(null)
+  const [trackingResult, setTrackingResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
 
   const testShiprocketLogin = async () => {
@@ -54,7 +56,7 @@ export default function TestShiprocketPage() {
   const testDirectShiprocketAPI = async () => {
     setLoading(true)
     try {
-      // Test direct API call to Shiprocket
+      // Test direct API call to Shiprocket using Bearer token authentication
       const response = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
         method: 'POST',
         headers: {
@@ -70,12 +72,61 @@ export default function TestShiprocketPage() {
       setLoginResult({ 
         status: response.status, 
         data: result,
-        type: 'Direct API Call'
+        type: 'Direct Bearer Token Auth'
       })
       console.log('Direct API result:', result)
     } catch (error) {
-      setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred', type: 'Direct API Call' })
+      setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred', type: 'Direct Bearer Token Auth' })
       console.error('Direct API error:', error)
+    }
+    setLoading(false)
+  }
+
+  const testServiceability = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/shiprocket/serviceability', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pickup_postcode: '400001',
+          delivery_postcode: '110001',
+          weight: 0.5,
+          length: 10,
+          breadth: 10,
+          height: 5,
+          cod: 0
+        })
+      })
+      
+      const result = await response.json()
+      setServiceabilityResult({ status: response.status, data: result })
+      console.log('Serviceability result:', result)
+    } catch (error) {
+      setServiceabilityResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
+      console.error('Serviceability error:', error)
+    }
+    setLoading(false)
+  }
+
+  const testTracking = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/shiprocket/track?awb=1234567890', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      const result = await response.json()
+      setTrackingResult({ status: response.status, data: result })
+      console.log('Tracking result:', result)
+    } catch (error) {
+      setTrackingResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
+      console.error('Tracking error:', error)
     }
     setLoading(false)
   }
@@ -100,7 +151,7 @@ export default function TestShiprocketPage() {
             disabled={loading}
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
           >
-            {loading ? 'Testing...' : 'Test Direct Shiprocket API'}
+            {loading ? 'Testing...' : 'Test Bearer Token Auth'}
           </button>
           
           <button
@@ -110,14 +161,31 @@ export default function TestShiprocketPage() {
           >
             {loading ? 'Testing...' : 'Test Create Order'}
           </button>
+          
+          <button
+            onClick={testServiceability}
+            disabled={loading}
+            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            {loading ? 'Testing...' : 'Test Serviceability'}
+          </button>
+          
+          <button
+            onClick={testTracking}
+            disabled={loading}
+            className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            {loading ? 'Testing...' : 'Test Tracking'}
+          </button>
         </div>
 
         {/* Environment Variables Display */}
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Environment Variables Check</h3>
+          <h3 className="text-lg font-semibold mb-2">Environment Variables Check (Bearer Token Auth)</h3>
           <div className="text-sm space-y-1">
-            <div>SHIPROCKET_EMAIL: favestore06@gmail.com</div>
-            <div>SHIPROCKET_PASSWORD: WP#a6ebXMZm@oTS8FGz4uGQvM*A!5iI5</div>
+            <div>SHIPROCKET_API_EMAIL: favestore06@gmail.com</div>
+            <div>SHIPROCKET_API_PASSWORD: WP#a6ebXMZm@oTS8FGz4uGQvM*A!5iI5</div>
+            <div>SHIPROCKET_BASE_URL: https://apiv2.shiprocket.in/v1/external</div>
             <div>NEXT_PUBLIC_BASE_URL: http://localhost:3000</div>
           </div>
         </div>
@@ -144,13 +212,35 @@ export default function TestShiprocketPage() {
           </div>
         )}
 
+        {/* Serviceability Results */}
+        {serviceabilityResult && (
+          <div className="bg-white border rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2">Serviceability Test Results</h3>
+            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
+              {JSON.stringify(serviceabilityResult, null, 2)}
+            </pre>
+          </div>
+        )}
+
+        {/* Tracking Results */}
+        {trackingResult && (
+          <div className="bg-white border rounded-lg p-4">
+            <h3 className="text-lg font-semibold mb-2">Tracking Test Results</h3>
+            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
+              {JSON.stringify(trackingResult, null, 2)}
+            </pre>
+          </div>
+        )}
+
         {/* Instructions */}
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <h3 className="text-lg font-semibold mb-2">Instructions</h3>
+          <h3 className="text-lg font-semibold mb-2">Testing Instructions (Bearer Token Auth)</h3>
           <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>First, test the "Direct Shiprocket API" to verify your credentials work</li>
-            <li>Then test "Shiprocket Login (via API)" to check if the backend endpoint works</li>
-            <li>Finally, test "Create Order" to see the full integration</li>
+            <li>First, test "Bearer Token Auth" to verify your API User credentials work</li>
+            <li>Then test "Shiprocket Login (via API)" to check if backend authentication works</li>
+            <li>Test "Serviceability" to check courier availability for pickup/delivery pincodes</li>
+            <li>Test "Create Order" to create a shipment order</li>
+            <li>Test "Tracking" with a real AWB code when available</li>
             <li>Check the browser console and server logs for detailed error messages</li>
           </ol>
         </div>
