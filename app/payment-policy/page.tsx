@@ -22,27 +22,30 @@ export default function PaymentPolicy() {
                     <li>Visa</li>
                     <li>Mastercard</li>
                     <li>American Express</li>
-                    <li>Discover</li>
+                    <li>RuPay</li>
                     <li>Diners Club</li>
                   </ul>
                 </div>
 
                 <div className="bg-[#FBF8F6] p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Digital Wallets</h3>
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">UPI & Digital Wallets</h3>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>PayPal</li>
-                    <li>Apple Pay</li>
-                    <li>Google Pay</li>
-                    <li>Samsung Pay</li>
+                    <li>Google Pay (GPay)</li>
+                    <li>PhonePe</li>
+                    <li>Paytm</li>
+                    <li>BHIM UPI</li>
+                    <li>Amazon Pay</li>
+                    <li>MobiKwik</li>
                   </ul>
                 </div>
 
                 <div className="bg-[#FBF8F6] p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Bank Transfers</h3>
+                  <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Net Banking & EMI</h3>
                   <ul className="list-disc pl-6 space-y-2">
-                    <li>ACH Direct Debit</li>
-                    <li>Wire Transfer (for large orders)</li>
-                    <li>Bank Transfer (international)</li>
+                    <li>Net Banking (All major Indian banks)</li>
+                    <li>EMI options (3, 6, 9, 12 months)</li>
+                    <li>No Cost EMI on select cards</li>
+                    <li>NEFT/RTGS for bulk orders</li>
                   </ul>
                 </div>
               </div>
@@ -79,13 +82,14 @@ export default function PaymentPolicy() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#6f5a4d] mb-4">4. Currency and Pricing</h2>
               <div className="text-[#8A6F5C] space-y-4">
-                <p>All prices are displayed in USD unless otherwise specified:</p>
+                <p>All prices are displayed in Indian Rupees (₹ INR):</p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Prices include applicable taxes where required</li>
-                  <li>International customers may see prices in local currency</li>
-                  <li>Exchange rates are updated regularly</li>
-                  <li>Final charges may vary due to currency fluctuations</li>
+                  <li>Prices include GST (Goods and Services Tax) as applicable</li>
+                  <li>No additional taxes for domestic Indian orders</li>
+                  <li>International customers will see converted prices</li>
+                  <li>Exchange rates for international orders are updated daily</li>
                   <li>Customs duties and taxes are additional for international orders</li>
+                  <li>Free shipping on orders above ₹999 within India</li>
                 </ul>
               </div>
             </section>
@@ -166,7 +170,7 @@ export default function PaymentPolicy() {
               <div className="text-[#8A6F5C] space-y-4">
                 <p>If you have a payment dispute:</p>
                 <ul className="list-disc pl-6 space-y-2">
-                  <li>Contact us immediately at payments@favee.com</li>
+                  <li>Contact us immediately at favestore06@gmail.com</li>
                   <li>Provide order number and payment details</li>
                   <li>We'll investigate and resolve within 5 business days</li>
                   <li>Documentation may be required for verification</li>
@@ -194,12 +198,13 @@ export default function PaymentPolicy() {
               <div className="text-[#8A6F5C] space-y-4">
                 <p>For payment-related questions or issues:</p>
                 <div className="bg-[#FBF8F6] p-4 rounded-lg">
-                  <p><strong>Email:</strong> payments@favee.com</p>
-                  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                  <p><strong>Email:</strong> favestore06@gmail.com</p>
+                  <p><strong>Phone:</strong> +91-79772-62706</p>
+                  <p><strong>WhatsApp:</strong> +91-79772-62706</p>
                   <p><strong>Live Chat:</strong> Available on our website</p>
-                  <p><strong>Address:</strong> Favee Fashion House, 123 Fashion Street, Style City, SC 12345</p>
+                  <p><strong>Address:</strong> Favee Fashion Private Limited, 123 Fashion Street, Bandra West, Mumbai, Maharashtra 400050, India</p>
                 </div>
-                <p className="mt-4"><strong>Business Hours:</strong> Monday-Friday, 9 AM - 6 PM EST</p>
+                <p className="mt-4"><strong>Business Hours:</strong> Monday-Friday, 10 AM - 7 PM IST</p>
               </div>
             </section>
           </div>

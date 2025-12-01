@@ -104,7 +104,7 @@ export default function PrivacyPolicy() {
                   <li>Objection to processing</li>
                   <li>Withdrawal of consent</li>
                 </ul>
-                <p>To exercise these rights, please contact us at privacy@favee.com</p>
+                <p>To exercise these rights, please contact us at favestore06@gmail.com</p>
               </div>
             </section>
 
@@ -134,9 +134,9 @@ export default function PrivacyPolicy() {
               <div className="text-[#8A6F5C] space-y-4">
                 <p>If you have any questions about this Privacy Policy, please contact us:</p>
                 <div className="bg-[#FBF8F6] p-4 rounded-lg">
-                  <p><strong>Email:</strong> privacy@favee.com</p>
-                  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-                  <p><strong>Address:</strong> Favee Fashion House, 123 Fashion Street, Style City, SC 12345</p>
+                  <p><strong>Email:</strong> favestore06@gmail.com</p>
+                  <p><strong>Phone:</strong> +91-79772-62706</p>
+                  <p><strong>Address:</strong> Favee Fashion Private Limited, 123 Fashion Street, Bandra West, Mumbai, Maharashtra 400050, India</p>
                 </div>
               </div>
             </section>

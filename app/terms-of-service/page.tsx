@@ -75,7 +75,15 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#6f5a4d] mb-4">6. Payment Terms</h2>
               <div className="text-[#8A6F5C] space-y-4">
-                <p>Payment for all orders must be made at the time of purchase. We accept various payment methods through our secure payment processor, Razorpay. By providing payment information, you represent and warrant that:</p>
+                <p>Payment for all orders must be made at the time of purchase. We accept various payment methods through our secure payment processor, Razorpay, including:</p>
+                <ul className="list-disc pl-6 space-y-1 mb-4">
+                  <li>Credit and Debit Cards (Visa, MasterCard, American Express, RuPay)</li>
+                  <li>UPI (Google Pay, PhonePe, Paytm, BHIM)</li>
+                  <li>Net Banking</li>
+                  <li>Digital Wallets</li>
+                  <li>EMI options for eligible cards</li>
+                </ul>
+                <p>By providing payment information, you represent and warrant that:</p>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>You have the legal right to use the payment method</li>
                   <li>The payment information is accurate and complete</li>
@@ -109,7 +117,7 @@ export default function TermsOfService() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#6f5a4d] mb-4">10. Governing Law</h2>
               <div className="text-[#8A6F5C] space-y-4">
-                <p>These terms and conditions are governed by and construed in accordance with the laws of the jurisdiction in which Favee operates and you irrevocably submit to the exclusive jurisdiction of the courts in that state or location.</p>
+                <p>These terms and conditions are governed by and construed in accordance with the laws of India. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts in Mumbai, Maharashtra, India.</p>
               </div>
             </section>
 
@@ -125,9 +133,9 @@ export default function TermsOfService() {
               <div className="text-[#8A6F5C] space-y-4">
                 <p>If you have any questions about these Terms of Service, please contact us:</p>
                 <div className="bg-[#FBF8F6] p-4 rounded-lg">
-                  <p><strong>Email:</strong> legal@favee.com</p>
-                  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-                  <p><strong>Address:</strong> Favee Fashion House, 123 Fashion Street, Style City, SC 12345</p>
+                  <p><strong>Email:</strong> favestore06@gmail.com</p>
+                  <p><strong>Phone:</strong> +91-79772-62706</p>
+                  <p><strong>Address:</strong> Favee Fashion Private Limited, 123 Fashion Street, Bandra West, Mumbai, Maharashtra 400050, India</p>
                 </div>
               </div>
             </section>

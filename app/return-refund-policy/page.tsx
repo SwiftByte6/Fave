@@ -54,14 +54,14 @@ export default function ReturnRefundPolicy() {
                   <li>Package the items securely with the return label</li>
                   <li>Drop off at any authorized shipping location</li>
                 </ol>
-                <p className="mt-4"><strong>Alternative:</strong> Contact our customer service team at returns@favee.com or call +1 (555) 123-4567</p>
+                <p className="mt-4"><strong>Alternative:</strong> Contact our customer service team at favestore06@gmail.com or call +91-79772-62706</p>
               </div>
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#6f5a4d] mb-4">4. Return Shipping</h2>
               <div className="text-[#8A6F5C] space-y-4">
-                <p>We provide free return shipping for eligible returns within the United States. For international returns, return shipping costs are the customer's responsibility unless the return is due to our error.</p>
+                <p>We provide free return shipping for eligible returns within India. For international returns, return shipping costs are the customer's responsibility unless the return is due to our error.</p>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Return labels are valid for 14 days from generation</li>
                   <li>Use the provided packaging when possible</li>
@@ -107,7 +107,7 @@ export default function ReturnRefundPolicy() {
                   <li>Exchanges are subject to availability</li>
                   <li>Price differences will be charged or refunded accordingly</li>
                   <li>If the desired item is out of stock, we'll process a refund</li>
-                  <li>Exchange shipping is free for domestic orders</li>
+                  <li>Exchange shipping is free for domestic orders within India</li>
                 </ul>
               </div>
             </section>
@@ -157,12 +157,13 @@ export default function ReturnRefundPolicy() {
               <div className="text-[#8A6F5C] space-y-4">
                 <p>If you have any questions about returns or refunds, please contact us:</p>
                 <div className="bg-[#FBF8F6] p-4 rounded-lg">
-                  <p><strong>Email:</strong> returns@favee.com</p>
-                  <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                  <p><strong>Email:</strong> favestore06@gmail.com</p>
+                  <p><strong>Phone:</strong> +91-79772-62706</p>
+                  <p><strong>WhatsApp:</strong> +91-79772-62706</p>
                   <p><strong>Live Chat:</strong> Available on our website</p>
-                  <p><strong>Address:</strong> Favee Fashion House, 123 Fashion Street, Style City, SC 12345</p>
+                  <p><strong>Address:</strong> Favee Fashion Private Limited, 123 Fashion Street, Bandra West, Mumbai, Maharashtra 400050, India</p>
                 </div>
-                <p className="mt-4"><strong>Business Hours:</strong> Monday-Friday, 9 AM - 6 PM EST</p>
+                <p className="mt-4"><strong>Business Hours:</strong> Monday-Friday, 10 AM - 7 PM IST</p>
               </div>
             </section>
           </div>
