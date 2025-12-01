@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { sendOrderConfirmationEmail } from '../../../lib/email-service'
 
+// Ensure Node.js runtime for crypto and external API calls
+export const runtime = 'nodejs';
+
 const getSupabaseAdmin = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

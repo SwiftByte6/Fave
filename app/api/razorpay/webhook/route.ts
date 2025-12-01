@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
 import { sendOrderConfirmationEmail } from '@/lib/email-service'
 
+// Ensure Node.js runtime for crypto and webhook processing
+export const runtime = 'nodejs';
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string | undefined
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined
 

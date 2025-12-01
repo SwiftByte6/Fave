@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Razorpay from 'razorpay';
+
+// Ensure Node.js runtime for Razorpay compatibility
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,8 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Razorpay configuration missing' }, { status: 500 });
     }
 
-    // Import and initialize Razorpay
-    const Razorpay = require('razorpay');
+    // Initialize Razorpay
     const razorpay = new Razorpay({
       key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -55,16 +58,41 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('=== RAZORPAY ORDER CREATION ERROR ===');
-    console.error('Error type:', error.constructor.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
-    console.error('Full error:', error);
+    console.error('Error type:', error?.constructor?.name || 'Unknown');
+    console.error('Error message:', error?.message || 'No message');
+    console.error('Error code:', error?.code || 'No code');
+    console.error('Error status:', error?.status || 'No status');
+    console.error('Full error object:', JSON.stringify(error, null, 2));
+
+    // Handle specific Razorpay errors
+    if (error?.code === 'ECONNREFUSED' || error?.code === 'ETIMEDOUT') {
+      return NextResponse.json(
+        { 
+          error: 'Network error connecting to Razorpay', 
+          details: 'Please check your internet connection and try again',
+          code: error.code
+        },
+        { status: 503 }
+      );
+    }
+
+    if (error?.status === 400 || error?.status === 401) {
+      return NextResponse.json(
+        { 
+          error: 'Razorpay authentication error', 
+          details: 'Please check your Razorpay credentials',
+          status: error.status
+        },
+        { status: 401 }
+      );
+    }
 
     return NextResponse.json(
       { 
         error: 'Failed to create Razorpay order', 
-        details: error.message,
-        type: error.constructor.name 
+        details: error?.message || 'Unknown error occurred',
+        type: error?.constructor?.name || 'Unknown',
+        code: error?.code
       },
       { status: 500 }
     );
