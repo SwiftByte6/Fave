@@ -90,7 +90,7 @@ async function getValidShiprocketToken() {
     }
 
     // If no valid token, get a fresh one
-    const needNewToken = !settings?.api_token || new Date(settings.token_expires_at) <= new Date()
+    const needNewToken = !settings?.api_token || (settings.token_expires_at ? new Date(settings.token_expires_at) <= new Date() : true)
     
     if (needNewToken) {
       console.log('Getting fresh token from Shiprocket API...')
@@ -149,7 +149,7 @@ async function getValidShiprocketToken() {
     }
     
     console.log('Using existing valid token')
-    return settings.api_token
+    return settings?.api_token || ''
   } catch (error) {
     console.error('Failed to get Shiprocket token:', error)
     throw error
@@ -362,9 +362,9 @@ export async function POST(request: Request) {
     try {
       token = await getValidShiprocketToken()
       console.log('Token acquired successfully:', !!token)
-    } catch (tokenError) {
+    } catch (tokenError: any) {
       console.error('Failed to get Shiprocket token:', tokenError)
-      throw new Error(`Authentication failed: ${tokenError.message}`)
+      throw new Error(`Authentication failed: ${tokenError?.message || 'Unknown authentication error'}`)
     }
 
     const headers = getShiprocketHeaders(token)

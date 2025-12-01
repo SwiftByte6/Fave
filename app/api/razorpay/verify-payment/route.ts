@@ -150,11 +150,12 @@ export async function POST(request: Request) {
         const shiprocketResult = await shiprocketResponse.json()
         console.log('Shiprocket order created successfully:', shiprocketResult)
       }
-    } catch (shiprocketError) {
+    } catch (shiprocketError: any) {
       console.error('Error creating Shiprocket order:', {
-        error: shiprocketError.message,
+        error: shiprocketError?.message || 'Unknown error',
         orderId: order_id,
-        stack: shiprocketError.stack
+        stack: shiprocketError?.stack || 'No stack trace',
+        fullError: shiprocketError
       })
       // Don't fail the payment verification if Shiprocket fails
     }
