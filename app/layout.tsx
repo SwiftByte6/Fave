@@ -7,6 +7,7 @@ import Providers from "@/app/provider"; // 👈 import the wrapper
 import { Playfair_Display } from "next/font/google";
 import Footer from "@/component/Footer";
 import { Toaster } from "react-hot-toast";
+import FloatingWhatsApp from "@/component/FloatingWhatsApp";
 import {
   ClerkProvider,
   SignInButton,
@@ -148,6 +149,7 @@ export default function RootLayout({
             <PerformanceMonitor />
             <Header />
             <Toaster position="top-center" />
+            <FloatingWhatsApp />
             {children}
             <Footer />
           </Providers>

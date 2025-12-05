@@ -65,6 +65,9 @@ const CartSection = () => {
                                                     ? item.description.slice(0, 100) + '...'
                                                     : item.description || ''}
                                             </p>
+                                            {item.selectedSize && (
+                                                <p className='text-xs sm:text-sm text-fav-maroon font-semibold mt-1'>Size: {item.selectedSize}</p>
+                                            )}
                                         </div>
                                     </div>
 

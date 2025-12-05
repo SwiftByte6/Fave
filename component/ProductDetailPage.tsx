@@ -28,6 +28,7 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
     const router = useRouter();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [selectedSize, setSelectedSize] = useState(''); // Size state
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -58,12 +59,20 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
     };
 
     const handleAddToCart = () => {
+        // Validate size selection
+        if (!selectedSize) {
+            toast.error('Please select a size before adding to cart');
+            return;
+        }
+
         if (productData) {
             const productWithQuantity = {
                 ...productData,
-                cartQuantity: quantity
+                cartQuantity: quantity,
+                selectedSize: selectedSize
             };
             dispatch(addToCart(productWithQuantity));
+            toast.success(`Added to cart! Size: ${selectedSize}`);
         }
     };
 
@@ -273,6 +282,28 @@ const ProductDetailPage = ({ filterId }: ProductDetailPageProps) => {
                             <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
                                 <p className='text-green-600 font-medium text-sm sm:text-base'>In stock - Ready to ship</p>
+                            </div>
+
+                            {/* Size Selector Dropdown */}
+                            <div className="space-y-4">
+                                <label className='text-xl font-bold text-fav-charcoal'>Select Size <span className='text-fav-maroon'>*</span></label>
+                                <select 
+                                    value={selectedSize}
+                                    onChange={(e) => setSelectedSize(e.target.value)}
+                                    className='w-full px-4 py-3 border-2 border-fav-beige rounded-2xl text-fav-charcoal font-semibold bg-fav-off-white focus:outline-none focus:border-fav-maroon transition-all duration-300 hover:border-fav-gold'
+                                >
+                                    <option value="">-- Choose Size --</option>
+                                    <option value="XS (Free Size - Saree)">XS (Free Size - Saree)</option>
+                                    <option value="S (Free Size - Saree)">S (Free Size - Saree)</option>
+                                    <option value="M (Free Size - Saree)">M (Free Size - Saree)</option>
+                                    <option value="L (Free Size - Saree)">L (Free Size - Saree)</option>
+                                    <option value="XL (Free Size - Saree)">XL (Free Size - Saree)</option>
+                                    <option value="XXL (Free Size - Saree)">XXL (Free Size - Saree)</option>
+                                    <option value="Free Size - Saree">Free Size - Saree</option>
+                                </select>
+                                {selectedSize && (
+                                    <p className='text-sm text-green-600 font-medium'>✓ Size selected: {selectedSize}</p>
+                                )}
                             </div>
 
                             {/* Premium Quantity Selector */}

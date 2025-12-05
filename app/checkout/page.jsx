@@ -83,7 +83,7 @@ const CheckoutPage = () => {
           : (item.image ? [item.image] : (item.thumbnail ? [item.thumbnail] : [])),
         description: item.description || '',
         category: item.category || '',
-        size: item.size || '',
+        size: item.selectedSize || item.size || '', // Use selectedSize first, fallback to size
         color: item.color || '',
         sku: item.sku || '',
         total_price: parseFloat(item.price) * (parseInt(item.cartQuantity) || 1)
@@ -242,9 +242,17 @@ const CheckoutPage = () => {
           <div className="space-y-3">
             {cart.length > 0 ? (
               cart.map((item, index) => (
-                <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-md">
-                  <span className="text-gray-900">{item.title} x {item.cartQuantity}</span>
-                  <span className="text-orange-600 font-semibold">₹ {(item.price * (item.cartQuantity || 1)).toFixed(0)}</span>
+                <div key={index} className="bg-gray-50 p-3 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-gray-900 font-medium">{item.title}</span>
+                      {item.selectedSize && (
+                        <p className="text-sm text-gray-600">Size: {item.selectedSize}</p>
+                      )}
+                      <span className="text-sm text-gray-600"> x {item.cartQuantity}</span>
+                    </div>
+                    <span className="text-orange-600 font-semibold">₹ {(item.price * (item.cartQuantity || 1)).toFixed(0)}</span>
+                  </div>
                 </div>
               ))
             ) : (

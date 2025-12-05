@@ -13,6 +13,7 @@ interface OrderItem {
   price: number;
   quantity: number;
   images?: string[];
+  size?: string; // Added size field
 }
 
 interface OrderRow {
@@ -305,12 +306,17 @@ const OrdersPage: React.FC = () => {
                           <h4 className="font-medium text-[#6f5a4d] mb-3">Order Items:</h4>
                           <div className="space-y-2">
                             {order.items.map((item) => (
-                              <div key={item.id} className="flex items-center justify-between text-sm bg-[#F7F2EE] p-3 rounded-md">
-                                <div className="flex items-center space-x-3">
-                                  <div className="text-[#6f5a4d] font-medium">{item.title}</div>
-                                  <span className="text-[#8A6F5C]">x{item.quantity}</span>
+                              <div key={item.id} className="flex items-start justify-between text-sm bg-[#F7F2EE] p-3 rounded-md">
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-3 mb-1">
+                                    <div className="text-[#6f5a4d] font-medium">{item.title}</div>
+                                    <span className="text-[#8A6F5C]">x{item.quantity}</span>
+                                  </div>
+                                  {item.size && (
+                                    <p className="text-xs text-[#8A6F5C] ml-0">Size: {item.size}</p>
+                                  )}
                                 </div>
-                                <div className="text-[#6f5a4d] font-medium">₹ {(item.price * item.quantity).toLocaleString()}</div>
+                                <div className="text-[#6f5a4d] font-medium whitespace-nowrap ml-2">₹ {(item.price * item.quantity).toLocaleString()}</div>
                               </div>
                             ))}
                           </div>
@@ -409,7 +415,10 @@ const OrdersPage: React.FC = () => {
                                 <div className="text-sm text-[#6f5a4d]">
                                   {order.items.slice(0, 2).map((item, index) => (
                                     <div key={item.id} className="mb-1">
-                                      {item.title} x{item.quantity}
+                                      <div>{item.title} x{item.quantity}</div>
+                                      {item.size && (
+                                        <div className="text-xs text-[#8A6F5C]">Size: {item.size}</div>
+                                      )}
                                     </div>
                                   ))}
                                   {order.items.length > 2 && (

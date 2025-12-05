@@ -8,6 +8,7 @@ interface CartItem {
   description: string;
   stock: number;         // available stock (mapped from backend quantity if provided)
   cartQuantity: number;  // how many in cart
+  selectedSize?: string; // size selection (optional)
 }
 
 interface CartState {
