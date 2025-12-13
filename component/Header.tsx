@@ -87,12 +87,12 @@ const Header = () => {
                 >
                   📦 Track Order
                 </button>
-                <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
+                <SignInButton mode="redirect">
                   <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-beige text-fav-maroon hover:bg-fav-blush transition-all duration-300 hover:shadow-md">
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="redirect" redirectUrl="/sign-up" forceRedirectUrl="/" fallbackRedirectUrl="/">
+                <SignUpButton mode="redirect">
                   <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-primary text-fav-off-white hover:bg-fav-maroon transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
                     Join FAVEE
                   </button>
@@ -234,12 +234,12 @@ const Header = () => {
                 📦 Track Order
               </button>
               <div className="flex gap-3">
-                <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
+                <SignInButton mode="redirect">
                   <button className="flex-1 py-3 rounded-xl bg-fav-beige text-fav-maroon text-sm font-semibold hover:bg-fav-blush transition-colors duration-300">
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="redirect" redirectUrl="/sign-up" forceRedirectUrl="/" fallbackRedirectUrl="/">
+                <SignUpButton mode="redirect">
                   <button className="flex-1 py-3 rounded-xl bg-fav-primary text-fav-off-white text-sm font-semibold hover:bg-fav-maroon transition-colors duration-300">
                     Join FAVEE
                   </button>
