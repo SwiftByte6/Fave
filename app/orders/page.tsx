@@ -158,7 +158,7 @@ const OrdersPage: React.FC = () => {
       <SignedOut>
         <div className="bg-white/90 shadow-sm rounded-xl p-6 border border-[#F0E7DE]">
           <p className="mb-4 text-[#8A6F5C]">Please sign in to view your orders and history.</p>
-          <SignInButton>
+          <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
             <button className="text-sm font-medium px-5 py-2.5 rounded-full bg-[#F4B7C7] text-[#3a2a24] hover:bg-[#f1aabf] transition">
               Sign In
             </button>

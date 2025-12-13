@@ -128,7 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
   const getCardHeight = () => {
     switch (variant) {
       case "bestseller":
-        return "h-[420px] sm:h-[400px] lg:h-[400px]";
+        return "h-[400px] sm:h-[400px] lg:h-[400px]";
       case "compact":
         return "h-[400px] sm:h-[450px] lg:h-[500px]";
       case "search":

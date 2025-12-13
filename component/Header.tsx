@@ -40,7 +40,7 @@ const Header = () => {
       {/* Main Navbar */}
       <nav className="sticky top-0 left-0 z-[999] bg-fav-off-white/90 backdrop-blur-md supports-[backdrop-filter]:bg-fav-off-white/85  shadow-[0_4px_20px_rgba(122,31,42,0.08)] md:px-10 px-4 ">
         {/* Row 1: Logo • Search • Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-3 items-center gap-4 md:gap-8">
+        <div className="grid md:p-2 grid-cols-2 md:grid-cols-3 items-center gap-4 md:gap-8">
           {/* Logo */}
           <div className="flex items-center">
             <button
@@ -50,8 +50,8 @@ const Header = () => {
             >
               <Image
               src={'/logo.png'}
-                height={100}
-                width={100}
+                height={50}
+                width={50}
                 alt="logo"
 />
             </button>
@@ -70,7 +70,7 @@ const Header = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="no-focus p-1.5 w-full text-fav-charcoal bg-transparent outline-none focus:outline-none placeholder:text-fav-warm-gray font-medium"
+                className="no-focus p-1 w-full text-fav-charcoal bg-transparent outline-none focus:outline-none placeholder:text-fav-warm-gray font-medium"
                 placeholder="Search FAVEE collection..."
               />
             </div>
@@ -87,12 +87,12 @@ const Header = () => {
                 >
                   📦 Track Order
                 </button>
-                <SignInButton mode="modal">
+                <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
                   <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-beige text-fav-maroon hover:bg-fav-blush transition-all duration-300 hover:shadow-md">
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="modal">
+                <SignUpButton mode="redirect" redirectUrl="/sign-up" forceRedirectUrl="/" fallbackRedirectUrl="/">
                   <button className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-fav-primary text-fav-off-white hover:bg-fav-maroon transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
                     Join FAVEE
                   </button>
@@ -234,12 +234,12 @@ const Header = () => {
                 📦 Track Order
               </button>
               <div className="flex gap-3">
-                <SignInButton mode="modal">
+                <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
                   <button className="flex-1 py-3 rounded-xl bg-fav-beige text-fav-maroon text-sm font-semibold hover:bg-fav-blush transition-colors duration-300">
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="modal">
+                <SignUpButton mode="redirect" redirectUrl="/sign-up" forceRedirectUrl="/" fallbackRedirectUrl="/">
                   <button className="flex-1 py-3 rounded-xl bg-fav-primary text-fav-off-white text-sm font-semibold hover:bg-fav-maroon transition-colors duration-300">
                     Join FAVEE
                   </button>

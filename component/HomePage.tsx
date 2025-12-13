@@ -10,6 +10,11 @@ import Story from "@/component/Home/Story"
 import NewArrivalsGrid from "@/component/Home/NewArrivalsGrid"
 import ThingsULike from '@/component/Home/ThingsULike'
 import Hero from '@/component/Home/Hero'
+import dynamic from 'next/dynamic'
+
+const DeferredProductsGrid = dynamic(() => import('@/component/DeferredProductsGrid'), {
+  ssr: false,
+});
 
 
 
@@ -71,31 +76,8 @@ const HomePage = () => {
 					  secondaryCta={homeConfig?.hero?.secondaryCta ?? { label: "Learn More", href: "/about" }}
 					/>
 
-            {/* All Products Grid */}
-            <section className="py-16 flex flex-col items-center gap-8 bg-gradient-to-br from-fav-off-white via-fav-beige/30 to-fav-blush/20" aria-labelledby="all-products-heading">
-              <div className="relative">
-                <div className="px-8 py-4 rounded-2xl bg-fav-gold-gradient shadow-xl">
-                  <h2 id="all-products-heading" className="dancing text-[2.5rem] md:text-[4rem] text-fav-off-white font-bold">Our Collection</h2>
-                </div>
-                <div className="absolute inset-0 bg-fav-gold-gradient rounded-2xl blur-xl opacity-30 -z-10"></div>
-              </div>
-              <p className="text-center text-fav-charcoal max-w-4xl text-lg font-medium leading-relaxed px-4">
-                Explore our complete collection of premium ethnic wear, handpicked for their timeless beauty and exceptional craftsmanship.
-              </p>
-              <div className="w-full max-w-[1300px] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
-                {products.map((p: any) => (
-                  <ProductCard
-                    key={p.id}
-                    data={p}
-                    variant="bestseller"
-                    showCategoryBadge={true}
-                    showAddToCart={true}
-                    addToCartItem={addToCartItem}
-                    currencySymbol="₹"
-                  />
-                ))}
-              </div>
-            </section>
+            {/* All Products Grid (deferred) */}
+            <DeferredProductsGrid products={products} addToCartItem={addToCartItem} />
 
             {/* Commented Sections
             <section aria-labelledby="new-arrivals-heading">

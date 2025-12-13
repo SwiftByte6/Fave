@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase/products";
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+const CACHE_KEY = 'fave_products_cache_v1';
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 export const useSupabase=  ()=>{
     const [products,setProducts]=useState<any>([]);
@@ -8,15 +11,52 @@ export const useSupabase=  ()=>{
     const [relatedProducts, setRelatedProducts] = useState<any>([]);
 
     const getDataFromSupabase= async()=>{
+        try {
+            // Try cache first
+            const cached = typeof window !== 'undefined' ? window.sessionStorage.getItem(CACHE_KEY) : null;
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && Array.isArray(parsed.data) && typeof parsed.ts === 'number') {
+                    const fresh = Date.now() - parsed.ts < CACHE_TTL_MS;
+                    if (fresh) {
+                        setProducts(parsed.data);
+                    }
+                }
+            }
 
-        let{data,error}=await supabase.from('product').select("id, title, price, images, category, description, created_at, rating, quantity, sizes")
-        if(data){
-            setProducts(data);
-         
-        }else{
-            console.log(error)
+            const { data, error } = await supabase
+                .from('product')
+                .select("id, title, price, images, category, description, created_at, rating, quantity, sizes")
+                .order('created_at', { ascending: false });
+
+            if (data) {
+                setProducts(data);
+                // Update cache in background
+                if (typeof window !== 'undefined') {
+                    window.sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+                }
+            } else if (error) {
+                console.log(error);
+            }
+        } catch (e) {
+            console.log(e);
         }
     }
+
+    // Warm cache on first mount if present
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const cached = window.sessionStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (parsed && Array.isArray(parsed.data)) {
+                        setProducts(parsed.data);
+                    }
+                } catch {}
+            }
+        }
+    }, []);
     const getFilteredData= async(query:string)=>{
 
         let{data,error}=await supabase.from('product').select("id, title, price, images, category, description, created_at, rating, quantity, sizes").or(`title.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%`)

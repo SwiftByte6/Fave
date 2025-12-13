@@ -97,7 +97,7 @@ const OrderHistoryPage: React.FC = () => {
       <SignedOut>
         <div className="bg-white shadow rounded-lg p-6">
           <p className="mb-4 text-gray-600">Please sign in to view your order history.</p>
-          <SignInButton>
+          <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
             <button className="text-sm font-medium px-4 py-2 rounded-full bg-pink-600 text-white hover:bg-pink-700 transition">
               Sign In
             </button>

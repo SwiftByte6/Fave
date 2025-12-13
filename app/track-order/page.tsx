@@ -238,7 +238,7 @@ export default function TrackOrderPage() {
             <p className="text-[#8A6F5C] mb-6">
               Sign in to access your complete order history, detailed tracking, and account management features.
             </p>
-            <SignInButton>
+            <SignInButton mode="redirect" redirectUrl="/signin" forceRedirectUrl="/" fallbackRedirectUrl="/">
               <button className="px-6 py-3 bg-[#F4DCDC] text-[#6f5a4d] rounded-lg hover:bg-[#F0E7DE] transition font-medium">
                 Sign In to View All Orders
               </button>
