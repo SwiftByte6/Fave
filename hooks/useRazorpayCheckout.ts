@@ -147,7 +147,7 @@ export function useRazorpayCheckout(options: UseRazorpayCheckoutOptions = {}) {
               const errorMsg =
                 error instanceof Error ? error.message : 'Verification failed';
               console.error('Payment verification error:', errorMsg);
-              onError?.(error || errorMsg);
+              onError?.(error instanceof Error ? error : errorMsg);
             } finally {
               isLoadingRef.current = false;
             }
@@ -187,7 +187,7 @@ export function useRazorpayCheckout(options: UseRazorpayCheckoutOptions = {}) {
       } catch (error) {
         isLoadingRef.current = false;
         console.error('Checkout open error:', error);
-        onError?.(error || 'Failed to open checkout');
+        onError?.(error instanceof Error ? error : 'Failed to open checkout');
       }
     },
     [onSuccess, onError, onDismiss]

@@ -16,12 +16,10 @@ interface RazorpayPaymentProps {
   onError: (error: any) => void
 }
 
-declare global {
-  interface Window {
-    Razorpay: any
-  }
-}
-
+/**
+ * @deprecated Use useRazorpayCheckout hook instead
+ * This component is kept for backward compatibility only
+ */
 const RazorpayPayment = ({ amount, orderId, userDetails, onSuccess, onError }: RazorpayPaymentProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -58,6 +56,7 @@ const RazorpayPayment = ({ amount, orderId, userDetails, onSuccess, onError }: R
         description: `Order #${orderId}`,
         image: '/favicon.ico',
         order_id: '', // Will be set after creating order
+        upi: { flow: 'intent' as const }, // Default intent flow
         handler: function (response: any) {
           console.log('Payment successful:', response)
           onSuccess(response)
@@ -128,7 +127,7 @@ const RazorpayPayment = ({ amount, orderId, userDetails, onSuccess, onError }: R
         // Don't fail the payment process for this
       }
 
-      const razorpay = new window.Razorpay(options)
+      const razorpay = new window.Razorpay(options as any)
       razorpay.on('payment.failed', function (response: any) {
         console.error('Payment failed:', response)
         onError(response)
