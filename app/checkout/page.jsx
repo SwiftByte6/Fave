@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
@@ -8,7 +8,9 @@ import { supabase } from '@/lib/supabase/products'
 
 export const dynamic = 'force-dynamic';
 import { removeEveryThing } from '@/Redux/cartSlice'
-import RazorpayPayment from '@/component/RazorpayPayment'
+import SavedAddressesSection from '@/component/SavedAddressesSection'
+import { useSavedAddresses } from '@/hooks/useSavedAddresses'
+import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout'
 import toast from 'react-hot-toast'
 
 const CheckoutPage = () => {
@@ -17,6 +19,7 @@ const CheckoutPage = () => {
   const cart = useSelector((state) => state.cart.cart)
 
   const { userId, isLoaded } = useAuth() // ✅ safe in client component
+  const { saveAddress, getDefaultAddress, getRecentAddress } = useSavedAddresses()
 
   // Quick runtime sanity checks for Supabase client config (anon key usage)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -34,13 +37,64 @@ const CheckoutPage = () => {
 
   const [isProcessing, setIsProcessing] = useState(false)
   const [orderId, setOrderId] = useState(null)
+  const [razorpayOrder, setRazorpayOrder] = useState(null)
   const [showPayment, setShowPayment] = useState(false)
+  const [saveCurrentAddress, setSaveCurrentAddress] = useState(false)
+
+  // Initialize Razorpay hook with callbacks
+  const { openCheckout } = useRazorpayCheckout({
+    onSuccess: (response) => {
+      console.log('Razorpay payment successful:', response)
+      handlePaymentSuccess(response)
+    },
+    onError: (error) => {
+      console.error('Razorpay payment error:', error)
+      handlePaymentError(error)
+    },
+    onDismiss: () => {
+      console.log('Payment dismissed by user')
+      toast.info('Payment cancelled. You can retry anytime.')
+      setIsProcessing(false)
+    },
+  })
+
+  // Load default address on mount
+  useEffect(() => {
+    const defaultAddr = getDefaultAddress()
+    const recentAddr = getRecentAddress()
+    const addrToUse = defaultAddr || recentAddr
+
+    if (addrToUse) {
+      setForm({
+        name: addrToUse.name,
+        email: addrToUse.email,
+        phone: addrToUse.phone,
+        address: addrToUse.address,
+        city: addrToUse.city,
+        pincode: addrToUse.pincode,
+        country: addrToUse.country,
+      })
+    }
+  }, [])
 
   const calculateSubtotal = () =>
     cart.reduce((total, item) => total + item.price * (item.cartQuantity || 1), 0)
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
+  }
+
+  const handleSelectSavedAddress = (address) => {
+    setForm({
+      name: address.name,
+      email: address.email,
+      phone: address.phone,
+      address: address.address,
+      city: address.city,
+      pincode: address.pincode,
+      country: address.country,
+    })
+    toast.success('Address loaded!')
   }
 
   const handleCreateOrder = async () => {
@@ -117,11 +171,63 @@ const CheckoutPage = () => {
         return
       }
 
+      // Save address if user opted to save it
+      if (saveCurrentAddress) {
+        saveAddress({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          pincode: form.pincode,
+          country: form.country,
+          isDefault: false,
+        })
+      }
+
       console.log('Order created successfully:', order)
       console.log('Order items:', order.items)
       console.log('Items count:', order.items?.length || 0)
+
+      // Create Razorpay order
+      const razorpayResponse = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: calculateSubtotal(),
+          currency: 'INR',
+          receipt: order.id,
+        }),
+      })
+
+      if (!razorpayResponse.ok) {
+        const errorData = await razorpayResponse.json()
+        throw new Error(errorData.error || 'Failed to create Razorpay order')
+      }
+
+      const razorpayOrderData = await razorpayResponse.json()
+
+      // Update order with Razorpay order ID
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          razorpay_order_id: razorpayOrderData.id,
+        })
+        .eq('id', order.id)
+
+      if (updateError) {
+        console.error('Failed to update order with Razorpay ID:', updateError)
+        throw new Error('Failed to save Razorpay order ID')
+      }
       
       setOrderId(order.id)
+      setRazorpayOrder({
+        id: razorpayOrderData.id,
+        amount: calculateSubtotal() * 100, // Convert to paise
+        currency: 'INR',
+      })
       setShowPayment(true)
       setIsProcessing(false)
       toast.success('Order created! Please complete payment.')
@@ -137,46 +243,51 @@ const CheckoutPage = () => {
       console.log('Payment success data:', paymentData);
       console.log('Order ID:', orderId);
       
-      // Verify payment with backend
-      const response = await fetch('/api/razorpay/verify-payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Update order status to paid in database
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          payment_status: 'completed',
           razorpay_order_id: paymentData.razorpay_order_id,
           razorpay_payment_id: paymentData.razorpay_payment_id,
-          razorpay_signature: paymentData.razorpay_signature,
-          order_id: orderId,
-        }),
-      })
+        })
+        .eq('id', orderId)
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Payment verification response:', response.status, errorText);
-        throw new Error(`Payment verification failed: ${response.status}`)
+      if (updateError) {
+        console.error('Failed to update order status:', updateError)
+        throw new Error('Failed to update order status')
       }
 
-      const result = await response.json()
-      
       // Store order details for success page
       localStorage.setItem('lastOrder', JSON.stringify({
-        orderNumber: result.order_number,
+        orderNumber: orderId,
         paymentId: paymentData.razorpay_payment_id
       }))
 
       dispatch(removeEveryThing())
       toast.success('Payment successful! Order confirmed.')
-      router.push(`/order-success?order=${result.order_number}&payment=${paymentData.razorpay_payment_id}`)
+      router.push(`/order-success?order=${orderId}&payment=${paymentData.razorpay_payment_id}`)
     } catch (error) {
-      console.error('Payment verification error:', error)
-      toast.error('Payment verification failed. Please contact support.')
+      console.error('Payment success handling error:', error)
+      toast.error('There was an issue updating your order. Please contact support.')
     }
   }
 
   const handlePaymentError = (error) => {
     console.error('Payment error:', error)
-    toast.error('Payment failed. Please try again.')
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    toast.error(errorMessage)
+    setIsProcessing(false)
+  }
+
+  const handleProceedToPayment = async () => {
+    if (!orderId || !razorpayOrder) {
+      toast.error('Order not ready. Please try again.')
+      return
+    }
+
+    setIsProcessing(true)
+    await openCheckout(razorpayOrder)
   }
 
   return (
@@ -191,9 +302,13 @@ const CheckoutPage = () => {
 
       <div className="flex flex-col md:flex-row w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 pb-10 gap-6">
         {/* Billing Form */}
-        <div className="w-full md:w-[65%] bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900">Billing & Shipping Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="w-full md:w-[65%]">
+          {/* Saved Addresses Section */}
+          <SavedAddressesSection onSelectAddress={handleSelectSavedAddress} />
+
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Billing & Shipping Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {['name', 'email', 'phone', 'city'].map((field) => (
               <input
                 key={field}
@@ -233,6 +348,21 @@ const CheckoutPage = () => {
               onChange={handleChange}
               className="border border-gray-200 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
             />
+          </div>
+
+          {/* Save Address Checkbox */}
+          <div className="mt-5 flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <input
+              type="checkbox"
+              id="saveAddress"
+              checked={saveCurrentAddress}
+              onChange={(e) => setSaveCurrentAddress(e.target.checked)}
+              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            />
+            <label htmlFor="saveAddress" className="text-sm text-gray-700 cursor-pointer">
+              Save this address for future orders
+            </label>
+          </div>
           </div>
         </div>
 
@@ -277,21 +407,25 @@ const CheckoutPage = () => {
               {isProcessing ? 'Creating Order...' : 'Proceed to Payment'}
             </button>
           ) : (
-            <div className="mt-4">
-              <RazorpayPayment
-                amount={calculateSubtotal()}
-                orderId={orderId}
-                userDetails={{
-                  name: form.name,
-                  email: form.email,
-                  phone: form.phone,
-                }}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-              />
+            <div className="mt-4 space-y-3">
               <button
-                onClick={() => setShowPayment(false)}
-                className="mt-2 w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
+                onClick={handleProceedToPayment}
+                disabled={isProcessing || !razorpayOrder}
+                className={`w-full py-3 rounded-md font-semibold transition-all duration-300 ${
+                  isProcessing || !razorpayOrder
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700 hover:shadow-lg hover:-translate-y-0.5'
+                }`}
+              >
+                {isProcessing ? 'Processing...' : 'Pay Now with Razorpay'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPayment(false)
+                  setOrderId(null)
+                  setRazorpayOrder(null)
+                }}
+                className="w-full py-2 text-sm text-gray-500 hover:text-gray-700 transition"
               >
                 ← Back to Order Details
               </button>
