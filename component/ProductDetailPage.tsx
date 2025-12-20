@@ -61,10 +61,16 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     const toggleFavourite = () => {
         const isFav = favourites.some(fav => fav.id === product.id);
         if (isFav) {
-            dispatch(removeFromFavourites(product.id));
+            dispatch(removeFromFavourites(String(product.id)));
             toast.success('Removed from favourites');
         } else {
-            dispatch(addToFavourites(product));
+            // Ensure 'stock' is present for FavouriteItem
+            const favouriteProduct = {
+                ...product,
+                id: String(product.id),
+                stock: 'stock' in product && typeof (product as any).stock === 'number' ? (product as any).stock : 1 // Default to 1 if not present
+            };
+            dispatch(addToFavourites(favouriteProduct));
             toast.success('Added to favourites');
         }
     }
@@ -300,7 +306,7 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
                 </div>
 
                 {/* Customer Review Section */}
-                <ProductComments productId={product.id} />
+                <ProductComments productId={typeof product.id === 'number' ? product.id : Number(product.id)} />
 
                 {/* Premium Related Products Section */}
                 {/* TODO: Render related products from server props */}

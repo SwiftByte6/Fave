@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
      🚫 DISABLE TURBOPACK (CRITICAL)
   ---------------------------------- */
   experimental: {
-    turbo: false, // ⛔ REQUIRED on Windows + pnpm
     optimizePackageImports: ["react-icons", "lucide-react"],
     optimizeCss: true,
     scrollRestoration: true,
