@@ -7,8 +7,11 @@ interface Props {
   addToCartItem: (product: any) => void;
 }
 
+const LOAD_COUNT = 20;
+
 const DeferredProductsGrid: React.FC<Props> = ({ products, addToCartItem }) => {
   const [ready, setReady] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(LOAD_COUNT);
 
   useEffect(() => {
     const onIdle = () => setReady(true);
@@ -31,6 +34,12 @@ const DeferredProductsGrid: React.FC<Props> = ({ products, addToCartItem }) => {
     }
   }, []);
 
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => Math.min(prev + LOAD_COUNT, products.length));
+  };
+
+  const visibleProducts = products.slice(0, visibleCount);
+
   return (
     <section className="py-16 flex flex-col items-center gap-8 bg-linear-to-br from-fav-off-white via-fav-beige/30 to-fav-blush/20" aria-labelledby="all-products-heading">
       <div className="relative">
@@ -50,19 +59,29 @@ const DeferredProductsGrid: React.FC<Props> = ({ products, addToCartItem }) => {
           ))}
         </div>
       ) : (
-        <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
-          {products.map((p: any) => (
-            <ProductCard
-              key={p.id}
-              data={p}
-              variant="bestseller"
-              showCategoryBadge={true}
-              showAddToCart={true}
-              addToCartItem={addToCartItem}
-              currencySymbol="₹"
-            />
-          ))}
-        </div>
+        <>
+          <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
+            {visibleProducts.map((p: any) => (
+              <ProductCard
+                key={p.id}
+                data={p}
+                variant="bestseller"
+                showCategoryBadge={true}
+                showAddToCart={true}
+                addToCartItem={addToCartItem}
+                currencySymbol="₹"
+              />
+            ))}
+          </div>
+          {visibleCount < products.length && (
+            <button
+              onClick={handleLoadMore}
+              className="mt-6 px-6 py-2 rounded-lg bg-fav-gold-gradient text-white font-semibold shadow"
+            >
+              Load More
+            </button>
+          )}
+        </>
       )}
     </section>
   );

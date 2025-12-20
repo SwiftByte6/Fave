@@ -1,5 +1,4 @@
 'use client';
-import { useSupabase } from '@/hooks/useSupabase';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,13 +8,21 @@ import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import { IoSearch, IoClose } from "react-icons/io5";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
-const CollectionPageClient = () => {
+
+/**
+ * @param {{
+ *   products: any[],
+ *   total: number,
+ *   page: number,
+ *   pageSize: number
+ * }} props
+ */
+
+const CollectionPageClient = ({ products, total, page, pageSize }) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const favourites = useSelector((state) => state.favourites.favourites);
-  const { products, getDataFromSupabase } = useSupabase();
-  const [isLoading, setIsLoading] = useState(true);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedFabric, setSelectedFabric] = useState('All');
@@ -23,15 +30,62 @@ const CollectionPageClient = () => {
   const [priceRange, setPriceRange] = useState(50000);
   const [sortBy, setSortBy] = useState('random');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+
+  // Reset showAll to false whenever filters/search change
+  useEffect(() => {
+    setShowAll(false);
+  }, [searchQuery, selectedCategory, selectedFabric, selectedOccasion, priceRange, sortBy, products]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      await getDataFromSupabase();
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
+    let filtered = [...products];
+    if (searchQuery) {
+      filtered = filtered.filter(product =>
+        product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(product =>
+        product.category?.toLowerCase().includes(selectedCategory.toLowerCase())
+      );
+    }
+    if (selectedFabric !== 'All') {
+      filtered = filtered.filter(product =>
+        product.description?.toLowerCase().includes(selectedFabric.toLowerCase())
+      );
+    }
+    if (selectedOccasion !== 'All') {
+      filtered = filtered.filter(product =>
+        product.description?.toLowerCase().includes(selectedOccasion.toLowerCase())
+      );
+    }
+    filtered = filtered.filter(product => product.price <= priceRange);
+    switch (sortBy) {
+      case 'random':
+        for (let i = filtered.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+        }
+        break;
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+        break;
+      default:
+        break;
+    }
+    setFilteredProducts(filtered);
+  }, [products, searchQuery, selectedCategory, selectedFabric, selectedOccasion, priceRange, sortBy]);
 
   useEffect(() => {
     let filtered = [...products];
@@ -110,16 +164,6 @@ const CollectionPageClient = () => {
     setSortBy('newest');
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FBF8F6]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#f9b8c3] mx-auto mb-4"></div>
-          <p className="playfair text-lg font-semibold text-[#6f5a4d]">Loading our beautiful collection...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#FBF8F6]">
@@ -131,7 +175,8 @@ const CollectionPageClient = () => {
             Discover our complete range of exquisite sarees and lehengas
           </p>
           <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            {/* <div className="relative flex-1">
+            {/* Search Bar */}
+            <div className="relative flex-1">
               <input
                 type="text"
                 value={searchQuery}
@@ -140,7 +185,7 @@ const CollectionPageClient = () => {
                 className="w-full px-4 py-3 pl-12 border-2 border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
               />
               <IoSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-400" size={20} />
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
@@ -418,17 +463,19 @@ const CollectionPageClient = () => {
           {/* Products Grid */}
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  data={p}
-                  variant="bestseller"
-                  showCategoryBadge={false}
-                  showAddToCart={true}
-                  addToCartItem={addToCartItem}
-                  currencySymbol="₹"
-                />
-              ))}
+              {filteredProducts
+                .slice(0, showAll ? filteredProducts.length : 20)
+                .map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    data={p}
+                    variant="bestseller"
+                    showCategoryBadge={false}
+                    showAddToCart={true}
+                    addToCartItem={addToCartItem}
+                    currencySymbol="₹"
+                  />
+                ))}
             </div>
           ) : (
             <div className="text-center py-16">
@@ -440,6 +487,18 @@ const CollectionPageClient = () => {
                 className="bg-[#f9b8c3] text-white px-6 py-3 rounded-full hover:bg-[#f7a8b8] transition"
               >
                 Clear Filters
+              </button>
+            </div>
+          )}
+
+          {/* Show All Button */}
+          {filteredProducts.length > 20 && !showAll && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => setShowAll(true)}
+                className="bg-[#f9b8c3] text-white px-6 py-3 rounded-full hover:bg-[#f7a8b8] transition"
+              >
+                Show All Products
               </button>
             </div>
           )}

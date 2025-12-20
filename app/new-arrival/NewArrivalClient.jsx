@@ -1,5 +1,4 @@
 "use client";
-import { useSupabase } from "@/hooks/useSupabase";
 import React, { useEffect, useMemo, useState } from "react";
 import ProductCard from "@/component/ProductCarad";
 import { useDispatch } from "react-redux";
@@ -7,7 +6,7 @@ import { addToCart } from "@/Redux/cartSlice";
 
 export default function NewArrivalClient() {
   const dispatch = useDispatch();
-  const { products, getDataFromSupabase } = useSupabase();
+  // TODO: Refactor to receive products as props from server component
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

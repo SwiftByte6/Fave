@@ -1,43 +1,7 @@
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend';
+import { orderConfirmationTemplate } from './email-template';
 
-// Create Nodemailer transporter
-const createTransporter = async () => {
-  // Option 1: Use Gmail SMTP if credentials are provided
-  if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-      }
-    })
-  }
-
-  // Option 2: For development/testing without real credentials, use Ethereal Email
-  if (process.env.NODE_ENV === 'development' || !process.env.SMTP_HOST) {
-    const testAccount = await nodemailer.createTestAccount()
-    return nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass
-      }
-    })
-  }
-
-  // Option 3: For production, use configured SMTP
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  })
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface OrderEmailData {
   orderId: string
@@ -64,33 +28,32 @@ interface OrderEmailData {
 
 export async function sendOrderConfirmationEmail(data: OrderEmailData) {
   try {
-    const transporter = await createTransporter()
-    const emailHtml = generateOrderConfirmationHTML(data)
-    
-    // Email configuration - use Gmail user if Gmail SMTP is configured
-    const fromEmail = process.env.GMAIL_USER || process.env.SMTP_FROM_EMAIL || 'noreply@favee.com'
-    const fromName = process.env.SMTP_FROM_NAME || 'Fave Store'
-    
-    const mailOptions = {
+    const html = orderConfirmationTemplate(data);
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@favee.com';
+    const fromName = process.env.RESEND_FROM_NAME || 'Fave Store';
+    const subject = `Order Confirmation - #${data.orderNumber || data.orderId}`;
+    const to = data.customerEmail;
+
+    const response = await resend.emails.send({
       from: `${fromName} <${fromEmail}>`,
-      to: data.customerEmail,
-      subject: `Order Confirmation - #${data.orderNumber || data.orderId}`,
-      html: emailHtml,
+      to,
+      subject,
+      html,
+    });
+
+    if (response.error) {
+      throw new Error(response.error.message || 'Resend API error');
     }
 
-    // Send email
-    const info = await transporter.sendMail(mailOptions)
-    
-    console.log('✅ Order confirmation email sent to:', data.customerEmail)
-    
-    return { 
-      success: true, 
-      emailId: info.messageId,
-      message: `Email sent successfully to ${data.customerEmail}`
-    }
+    console.log('✅ Order confirmation email sent to:', to);
+    return {
+      success: true,
+      emailId: response.id,
+      message: `Email sent successfully to ${to}`,
+    };
   } catch (error: any) {
-    console.error('❌ Email sending error:', error.message)
-    return { success: false, error: error.message }
+    console.error('❌ Email sending error:', error.message);
+    return { success: false, error: error.message };
   }
 }
 

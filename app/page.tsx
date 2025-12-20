@@ -1,4 +1,5 @@
 import HomePage from "@/component/HomePage";
+import { fetchProducts } from "@/lib/products";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -34,10 +35,12 @@ export const metadata: Metadata = generateSEOMetadata({
   ogType: "website",
 });
 
-export default function Home() {
+export default async function Home() {
+  // Fetch first page of products for homepage (customize pageSize as needed)
+const { products } = await fetchProducts({ page: 1, pageSize: 100 }); // or a number greater than your total products
   return (
     <>
-      <HomePage/>
+      <HomePage products={products} />
     </>
   );
 }

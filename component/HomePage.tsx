@@ -2,7 +2,6 @@
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/hooks/useSupabase";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/Redux/cartSlice";
 import ProductCard from "./ProductCarad";
@@ -19,19 +18,18 @@ const DeferredProductsGrid = dynamic(() => import('@/component/DeferredProductsG
 
 
 
-const HomePage = () => {
+interface HomePageProps {
+  products: any[];
+}
+
+const HomePage: React.FC<HomePageProps> = ({ products }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { products, getDataFromSupabase } = useSupabase();
   const [isLoading, setIsLoading] = useState(false);
   const [homeConfig, setHomeConfig] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Start Supabase fetch without blocking initial paint
-      getDataFromSupabase().finally(() => {
-        // no-op
-      });
       try {
         const res = await fetch('/home.json', { cache: 'force-cache' });
         if (res.ok) {
@@ -43,19 +41,10 @@ const HomePage = () => {
     fetchData();
   }, []);
 
-	const featuredProducts = products.slice(0, 8);
-
-	const newArrivals = [...products]
-		.map((p: any) => ({ ...p, _createdAt: p.created_at ? new Date(p.created_at).getTime() : 0 }))
-		.sort((a: any, b: any) => b._createdAt - a._createdAt)
-		.slice(0, 6);
-
-	const youWillLove = [...products].slice(6, 12);
-	// Robust bestseller selection: always show items even if dataset is small
-	const bestSellers = [...products]
-		.map((p: any) => ({ ...p, _popularity: 0, _createdAt: p.created_at ? new Date(p.created_at).getTime() : 0 }))
-		.sort((a: any, b: any) => (b._createdAt - a._createdAt))
-		.slice(0, 4);
+  // TODO: featuredProducts, newArrivals, youWillLove, bestSellers should be computed from products passed as props
+  // Example:
+  // const featuredProducts = products.slice(0, 8);
+  // ...
 
   const addToCartItem = (product: any) => {
     dispatch(addToCart({ ...product, cartQuantity: 1 }));
