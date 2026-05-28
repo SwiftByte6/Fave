@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserIdFromRequest } from '@/lib/supabase/auth'
 import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       console.error('Missing Supabase env: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
       return NextResponse.json({ error: 'Server not configured. Contact support.' }, { status: 500 })
     }
-    const { userId } = await auth()
+    const userId = await getUserIdFromRequest(request)
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

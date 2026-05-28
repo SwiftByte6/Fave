@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/products';
+import { supabase } from '@/lib/products';
 
 export default function TestSupabase() {
   const [data, setData] = useState<any>(null);

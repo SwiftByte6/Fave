@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
-import { supabase } from '@/lib/supabase/products'
+import { supabase } from '@/lib/products'
 
 export const dynamic = 'force-dynamic';
 import { removeEveryThing } from '@/Redux/cartSlice'
@@ -18,7 +17,23 @@ const CheckoutPage = () => {
   const dispatch = useDispatch()
   const cart = useSelector((state) => state.cart.cart)
 
-  const { userId, isLoaded } = useAuth() // ✅ safe in client component
+  const [userId, setUserId] = useState(null)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!mounted) return
+      setUserId(data?.user?.id ?? null)
+      setIsLoaded(true)
+    })()
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUserId(session?.user?.id ?? null)
+      setIsLoaded(true)
+    })
+    return () => { mounted = false; sub?.subscription.unsubscribe() }
+  }, [])
   const { saveAddress, getDefaultAddress, getRecentAddress } = useSavedAddresses()
 
   // Quick runtime sanity checks for Supabase client config (anon key usage)

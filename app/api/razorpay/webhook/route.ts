@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import { sendOrderConfirmationEmail } from '@/lib/email-service'
+import { mapOrderToEmailData, sendOrderConfirmationEmail } from '@/lib/email-service'
 
 // Ensure Node.js runtime for crypto and webhook processing
 export const runtime = 'nodejs';
@@ -124,23 +124,9 @@ async function handlePaymentCaptured(payment: any) {
 
     // Send confirmation email
     try {
-      const emailResult = await sendOrderConfirmationEmail({
-        orderId: orderData.id,
-        customerName: orderData.name,
-        customerEmail: orderData.email,
-        totalAmount: parseFloat(orderData.total_amount),
-        items: orderData.items || [],
-        paymentId: payment.id,
-        orderNumber: orderNumber,
-        address: {
-          name: orderData.name,
-          address: orderData.address,
-          city: orderData.city || '',
-          pincode: orderData.pincode || '',
-          country: orderData.country || 'India',
-          phone: orderData.phone
-        }
-      })
+      const emailResult = await sendOrderConfirmationEmail(
+        mapOrderToEmailData(orderData, payment.id, orderNumber)
+      )
 
       if (!emailResult.success) {
         console.error('Email sending failed:', emailResult.error)

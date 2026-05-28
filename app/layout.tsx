@@ -8,14 +8,7 @@ import { Playfair_Display } from "next/font/google";
 import Footer from "@/component/Footer";
 import { Toaster } from "react-hot-toast";
 import FloatingWhatsApp from "@/component/FloatingWhatsApp";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+// Auth handled via Supabase; Clerk removed
 import Script from "next/script";
 import { generateMetadata as generateSEOMetadata, defaultSEO } from "@/lib/seo";
 import { OrganizationStructuredData, WebsiteStructuredData, LocalBusinessStructuredData } from "@/lib/structured-data";
@@ -49,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <>
       <html lang="en">
         <head>
           {/* SEO Meta Tags */}
@@ -155,6 +148,6 @@ export default function RootLayout({
           </Providers>
         </body>
       </html>
-    </ClerkProvider>
+    </>
   ); 
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase/products';
+import { supabase } from '@/lib/products';
 import { generateMetadata as generateSEOMetadata, BreadcrumbItem } from '@/lib/seo';
 import { BreadcrumbStructuredData } from '@/lib/structured-data';
 import SearchResult from '@/component/SearchResult';

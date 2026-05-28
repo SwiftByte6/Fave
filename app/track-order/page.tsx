@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { supabase } from '@/lib/supabase/products'
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs"
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/products'
 import OrderTracking from '@/component/OrderTracking'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +25,18 @@ export default function TrackOrderPage() {
   const [trackingResult, setTrackingResult] = useState<TrackingResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!mounted) return
+      setUser(data?.user ?? null)
+    })()
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
+    return () => { mounted = false; sub?.subscription.unsubscribe() }
+  }, [])
 
   const handleTrackOrder = async () => {
     if (!orderId.trim()) {
@@ -229,7 +240,7 @@ export default function TrackOrderPage() {
         )}
 
         {/* Instructions for signed-out users */}
-        <SignedOut>
+        {!user && (
           <div className="bg-white rounded-2xl shadow-sm border border-[#F0E7DE] p-8 text-center">
             <div className="text-4xl mb-4">🔐</div>
             <h2 className="text-xl font-semibold text-[#6f5a4d] mb-3">
@@ -238,13 +249,11 @@ export default function TrackOrderPage() {
             <p className="text-[#8A6F5C] mb-6">
               Sign in to access your complete order history, detailed tracking, and account management features.
             </p>
-            <SignInButton mode="redirect">
-              <button className="px-6 py-3 bg-[#F4DCDC] text-[#6f5a4d] rounded-lg hover:bg-[#F0E7DE] transition font-medium">
-                Sign In to View All Orders
-              </button>
-            </SignInButton>
+            <button onClick={() => (window.location.href = '/signin')} className="px-6 py-3 bg-[#F4DCDC] text-[#6f5a4d] rounded-lg hover:bg-[#F0E7DE] transition font-medium">
+              Sign In to View All Orders
+            </button>
           </div>
-        </SignedOut>
+        )}
 
         {/* How to find Order ID */}
         <div className="mt-8 bg-white rounded-2xl shadow-sm border border-[#F0E7DE] p-6">

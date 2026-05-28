@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserIdFromRequest } from '@/lib/supabase/auth'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
-import { sendOrderConfirmationEmail } from '../../../lib/email-service'
+import { mapOrderToEmailData, sendOrderConfirmationEmail } from '@/lib/email-service'
 
 // Ensure Node.js runtime for crypto and external API calls
 export const runtime = 'nodejs';
@@ -34,9 +34,9 @@ export async function POST(request: Request) {
     
     const supabaseAdmin = getSupabaseAdmin()
     
-    const { userId } = await auth()
+    const userId = await getUserIdFromRequest(request)
     console.log('User ID:', userId)
-    
+
     if (!userId) {
       console.error('No user ID found in auth')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -95,23 +95,11 @@ export async function POST(request: Request) {
     // Send order confirmation email
     try {
       if (updatedOrder) {
-        const emailData = {
-          orderId: updatedOrder.id,
-          customerName: updatedOrder.name,
-          customerEmail: updatedOrder.email,
-          totalAmount: updatedOrder.total_amount,
-          items: updatedOrder.items || [],
-          paymentId: razorpay_payment_id,
-          orderNumber: `ORD-${updatedOrder.id}`,
-          address: {
-            name: updatedOrder.name,
-            address: updatedOrder.address,
-            city: updatedOrder.city,
-            pincode: updatedOrder.pincode,
-            country: updatedOrder.country,
-            phone: updatedOrder.phone
-          }
-        }
+        const emailData = mapOrderToEmailData(
+          updatedOrder,
+          razorpay_payment_id,
+          `ORD-${updatedOrder.id}`
+        )
 
         const emailResult = await sendOrderConfirmationEmail(emailData)
         console.log('Email sending result:', emailResult)

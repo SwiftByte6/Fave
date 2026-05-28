@@ -23,6 +23,22 @@ interface Address {
   phone: string;
 }
 
+interface OrderRecordLike {
+  id: string;
+  name?: string;
+  email?: string;
+  customer_email?: string;
+  registered_email?: string;
+  total_amount?: number | string;
+  items?: OrderItem[] | any[];
+  address?: string;
+  city?: string;
+  pincode?: string;
+  country?: string;
+  phone?: string;
+  order_number?: string;
+}
+
 export interface OrderEmailData {
   orderId: string;
   orderNumber?: string;
@@ -32,6 +48,36 @@ export interface OrderEmailData {
   items: OrderItem[];
   paymentId: string;
   address: Address;
+}
+
+export function mapOrderToEmailData(
+  order: OrderRecordLike,
+  paymentId: string,
+  fallbackOrderNumber?: string
+): OrderEmailData {
+  const customerEmail = order.email || order.customer_email || order.registered_email;
+
+  if (!customerEmail) {
+    throw new Error('Order email address is missing');
+  }
+
+  return {
+    orderId: order.id,
+    orderNumber: order.order_number || fallbackOrderNumber,
+    customerName: order.name || 'Customer',
+    customerEmail,
+    totalAmount: Number(order.total_amount) || 0,
+    items: Array.isArray(order.items) ? (order.items as OrderItem[]) : [],
+    paymentId,
+    address: {
+      name: order.name || 'Customer',
+      address: order.address || '',
+      city: order.city || '',
+      pincode: order.pincode || '',
+      country: order.country || 'India',
+      phone: order.phone || '',
+    },
+  };
 }
 
 export type ShippingStatus =

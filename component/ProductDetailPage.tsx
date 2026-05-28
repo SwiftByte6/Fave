@@ -2,7 +2,6 @@
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react'
 import { Playfair_Display } from 'next/font/google';
-import { useUser } from '@clerk/nextjs'
 import { addToCart } from '@/Redux/cartSlice';
 import { useDispatch } from 'react-redux';
 import { CiHeart } from 'react-icons/ci';
@@ -38,7 +37,6 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalImageIndex, setModalImageIndex] = useState(0);
     const favourites = useSelector((state: RootState) => state.favourites.favourites);
-    const { user } = useUser();
 
     const handleQuantityChange = (type: 'increase' | 'decrease') => {
         if (type === 'increase') {

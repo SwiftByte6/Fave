@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/products';
-import { useUser } from '@clerk/nextjs';
+import { supabase } from '@/lib/products';
 import toast from 'react-hot-toast';
 
 interface ProductComment {
@@ -19,7 +18,18 @@ interface ProductCommentsProps {
 }
 
 const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) => {
-    const { user } = useUser();
+    const [user, setUser] = useState<any>(null)
+
+    useEffect(() => {
+        let mounted = true
+        ;(async () => {
+            const { data } = await supabase.auth.getUser()
+            if (!mounted) return
+            setUser(data?.user ?? null)
+        })()
+        const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
+        return () => { mounted = false; sub?.subscription.unsubscribe() }
+    }, [])
     const [comments, setComments] = useState<ProductComment[]>([]);
     const [commentText, setCommentText] = useState('');
     const [isLoadingComments, setIsLoadingComments] = useState(false);
@@ -61,7 +71,7 @@ const ProductComments: React.FC<ProductCommentsProps> = ({ productId }) => {
             product_id: productId,
             user_id: user.id,
             content: commentText.trim(),
-            user_name: user.fullName || user.username || user.primaryEmailAddress?.emailAddress || null,
+            user_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'Customer',
         } as const;
         
         const { data, error } = await supabase

@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { supabase } from '@/lib/supabase/products';
+import { supabase } from '@/lib/products';
 import { generateMetadata as generateSEOMetadata, BreadcrumbItem } from '@/lib/seo';
 import { BreadcrumbStructuredData, CollectionPageStructuredData, FAQStructuredData } from '@/lib/structured-data';
 import ProductCard from '@/component/ProductCarad';

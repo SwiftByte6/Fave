@@ -1,7 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
-import { supabase } from "@/lib/supabase/products";
+import { supabase } from "@/lib/products";
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +22,7 @@ interface OrderRow {
 }
 
 const OrderHistoryPage: React.FC = () => {
-  const { user } = useUser();
+  const [user, setUser] = useState<any>(null)
   const [orders, setOrders] = useState<Array<OrderRow & { items: OrderItem[] }>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -74,6 +73,17 @@ const OrderHistoryPage: React.FC = () => {
   }, [user?.id]);
 
   useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      const { data } = await supabase.auth.getUser()
+      if (!mounted) return
+      setUser(data?.user ?? null)
+    })()
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setUser(session?.user ?? null))
+    return () => { mounted = false; sub?.subscription.unsubscribe() }
+  }, [])
+
+  useEffect(() => {
     if (!user?.id) return;
     fetchOrders();
   }, [user?.id, fetchOrders]);
@@ -89,85 +99,80 @@ const OrderHistoryPage: React.FC = () => {
         return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
+  const historySection = isLoading ? (
+    <div className="bg-white shadow rounded-lg p-6 text-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-2"></div>
+      <p className="text-gray-600">Loading history...</p>
+    </div>
+  ) : orders.length === 0 ? (
+    <div className="bg-white shadow rounded-lg p-8 text-center">
+      <div className="text-4xl mb-4">📚</div>
+      <h3 className="text-lg font-medium text-gray-800 mb-2">No Order History</h3>
+      <p className="text-gray-600">Your completed orders will appear here.</p>
+    </div>
+  ) : (
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {orders.map((order) => (
+              <tr key={order.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">#{order.id}</div>
+                  {order.name && <div className="text-sm text-gray-500">{order.name}</div>}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="text-sm text-gray-900">
+                    {order.items.slice(0, 2).map((item) => (
+                      <div key={item.id} className="mb-1">{item.title} x{item.quantity}</div>
+                    ))}
+                    {order.items.length > 2 && (
+                      <div className="text-gray-500 text-xs">+{order.items.length - 2} more items</div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">₹ {order.total_amount?.toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status || 'success')}`}>
+                    {order.status || 'success'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
       <h1 className="text-3xl font-semibold mb-6 text-gray-800">Order History</h1>
 
-      <SignedOut>
+      {!user && (
         <div className="bg-white shadow rounded-lg p-6">
           <p className="mb-4 text-gray-600">Please sign in to view your order history.</p>
-          <SignInButton mode="redirect">
-            <button className="text-sm font-medium px-4 py-2 rounded-full bg-pink-600 text-white hover:bg-pink-700 transition">
-              Sign In
-            </button>
-          </SignInButton>
+          <button onClick={() => window.location.href = '/signin'} className="text-sm font-medium px-4 py-2 rounded-full bg-pink-600 text-white hover:bg-pink-700 transition">Sign In</button>
         </div>
-      </SignedOut>
+      )}
 
-      <SignedIn>
-        {isLoading ? (
-          <div className="bg-white shadow rounded-lg p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto mb-2"></div>
-            <p className="text-gray-600">Loading history...</p>
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <div className="text-4xl mb-4">📚</div>
-            <h3 className="text-lg font-medium text-gray-800 mb-2">No Order History</h3>
-            <p className="text-gray-600">Your completed orders will appear here.</p>
-          </div>
-        ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">#{order.id}</div>
-                        {order.name && <div className="text-sm text-gray-500">{order.name}</div>}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">
-                          {order.items.slice(0, 2).map((item) => (
-                            <div key={item.id} className="mb-1">{item.title} x{item.quantity}</div>
-                          ))}
-                          {order.items.length > 2 && (
-                            <div className="text-gray-500 text-xs">+{order.items.length - 2} more items</div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">₹ {order.total_amount?.toLocaleString()}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(order.status || 'success')}`}>
-                          {order.status || 'success'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </SignedIn>
+      {user ? historySection : null}
     </div>
   );
 };

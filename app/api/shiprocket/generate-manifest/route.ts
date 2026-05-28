@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserIdFromRequest } from '@/lib/supabase/auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -72,7 +72,7 @@ function getShiprocketHeaders(token: string) {
 // Generate manifest
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth()
+    const userId = await getUserIdFromRequest(request)
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

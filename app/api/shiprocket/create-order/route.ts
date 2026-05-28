@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { getUserIdFromRequest } from '@/lib/supabase/auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
   try {
     // Check if this is an internal call (from payment verification) or external call
     const isInternalCall = request.headers.get('X-Internal-Call') === 'payment-verification'
-    const { userId } = await auth()
+    const userId = await getUserIdFromRequest(request)
     const requestBody = await request.json()
     orderId = requestBody.orderId
     

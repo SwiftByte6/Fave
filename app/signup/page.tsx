@@ -3,13 +3,12 @@ import React from 'react'
 
 export const dynamic = 'force-dynamic';
 
-const page = () => {
+const SignUpPage = () => {
   return (
     <div>
-      <Signin mode="signin" />
+      <Signin mode="signup" />
     </div>
   )
 }
-export default page
 
-
+export default SignUpPage
