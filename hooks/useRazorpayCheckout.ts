@@ -1,9 +1,11 @@
 import { useCallback, useRef } from 'react';
+import { supabase } from '@/lib/products';
 
 interface RazorpayOrder {
   id: string;
   amount: number;
   currency: string;
+  appOrderId?: string;
 }
 
 interface PaymentVerificationPayload {
@@ -11,6 +13,15 @@ interface PaymentVerificationPayload {
   razorpay_payment_id: string;
   razorpay_signature: string;
   order_id: string;
+  app_order_id?: string;
+}
+
+interface PaymentVerificationResult {
+  success?: boolean;
+  payment_id?: string;
+  order_number?: string;
+  shiprocket?: Record<string, unknown> | null;
+  error?: string;
 }
 
 interface RazorpayCheckoutError {
@@ -19,7 +30,7 @@ interface RazorpayCheckoutError {
 }
 
 interface UseRazorpayCheckoutOptions {
-  onSuccess?: (response: PaymentVerificationPayload) => void;
+  onSuccess?: (response: PaymentVerificationPayload & { verificationResult?: PaymentVerificationResult }) => void;
   onError?: (error: RazorpayCheckoutError | Error | string) => void;
   onDismiss?: () => void;
 }
@@ -119,8 +130,14 @@ export function useRazorpayCheckout(options: UseRazorpayCheckoutOptions = {}) {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                // Keep backward compatibility while preferring app_order_id on backend.
                 order_id: order.id,
+                app_order_id: order.appOrderId,
               };
+
+              const {
+                data: { session },
+              } = await supabase.auth.getSession();
 
               // Call backend verification API
               const verificationResponse = await fetch(
@@ -129,6 +146,9 @@ export function useRazorpayCheckout(options: UseRazorpayCheckoutOptions = {}) {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
+                    ...(session?.access_token
+                      ? { Authorization: `Bearer ${session.access_token}` }
+                      : {}),
                   },
                   body: JSON.stringify(verificationPayload),
                 }
@@ -141,8 +161,13 @@ export function useRazorpayCheckout(options: UseRazorpayCheckoutOptions = {}) {
                 );
               }
 
+              const verificationResult = (await verificationResponse.json()) as PaymentVerificationResult;
+
               // Verification successful
-              onSuccess?.(verificationPayload);
+              onSuccess?.({
+                ...verificationPayload,
+                verificationResult,
+              });
             } catch (error) {
               const errorMsg =
                 error instanceof Error ? error.message : 'Verification failed';

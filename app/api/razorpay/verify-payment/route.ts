@@ -33,19 +33,14 @@ export async function POST(request: Request) {
     }
     
     const supabaseAdmin = getSupabaseAdmin()
-    
-    const userId = await getUserIdFromRequest(request)
-    console.log('User ID:', userId)
-
-    if (!userId) {
-      console.error('No user ID found in auth')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
 
     const requestBody = await request.json()
     console.log('Request body:', requestBody)
     
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = requestBody
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id, app_order_id } = requestBody
+
+    const userId = await getUserIdFromRequest(request)
+    console.log('User ID:', userId)
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !order_id) {
       console.error('Missing required fields:', { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id })
@@ -73,6 +68,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Payment verification failed - Invalid signature' }, { status: 400 })
     }
 
+    // Resolve target order. Preferred: app_order_id. Fallbacks: order_id (legacy) then razorpay_order_id.
+    const candidateOrderId = app_order_id || order_id
+    let lookupQuery = supabaseAdmin
+      .from('orders')
+      .select('id, user_id, razorpay_order_id, status, payment_status')
+      .eq('id', candidateOrderId)
+      .limit(1)
+
+    if (userId) {
+      lookupQuery = lookupQuery.eq('user_id', userId)
+    }
+
+    let { data: existingOrder, error: lookupError } = await lookupQuery.maybeSingle()
+    let shiprocketResult: Record<string, any> | null = null
+
+    if (!existingOrder) {
+      const fallbackQuery = supabaseAdmin
+        .from('orders')
+        .select('id, user_id, razorpay_order_id, status, payment_status')
+        .eq('razorpay_order_id', razorpay_order_id)
+        .limit(1)
+
+      const fallbackResult = userId
+        ? await fallbackQuery.eq('user_id', userId).maybeSingle()
+        : await fallbackQuery.maybeSingle()
+
+      existingOrder = fallbackResult.data
+      lookupError = lookupError || fallbackResult.error
+    }
+
+    if (lookupError) {
+      console.error('Order lookup error:', lookupError)
+      return NextResponse.json({ error: 'Failed to verify order ownership' }, { status: 500 })
+    }
+
+    if (!existingOrder) {
+      console.error('Order not found for verification', { candidateOrderId, razorpay_order_id, userId })
+      return NextResponse.json({ error: 'Order not found for verification' }, { status: 404 })
+    }
+
+    if (existingOrder.razorpay_order_id && existingOrder.razorpay_order_id !== razorpay_order_id) {
+      console.error('Razorpay order mismatch', {
+        orderId: existingOrder.id,
+        expected: existingOrder.razorpay_order_id,
+        received: razorpay_order_id,
+      })
+      return NextResponse.json({ error: 'Payment verification failed - Order mismatch' }, { status: 400 })
+    }
+
     // Update order in Supabase
     const { data: updatedOrder, error: updateError } = await supabaseAdmin
       .from('orders')
@@ -83,7 +127,7 @@ export async function POST(request: Request) {
         payment_method: 'razorpay',
         razorpay_order_id: razorpay_order_id
       })
-      .eq('id', order_id)
+      .eq('id', existingOrder.id)
       .select()
       .single()
 
@@ -112,7 +156,7 @@ export async function POST(request: Request) {
     // 🚀 Trigger Shiprocket order creation after successful payment verification
     try {
       console.log('=== Triggering Shiprocket Order Creation ===')
-      console.log('Order ID for Shiprocket:', order_id)
+      console.log('Order ID for Shiprocket:', existingOrder.id)
       
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
       const shiprocketUrl = `${baseUrl}/api/shiprocket/create-order`
@@ -125,7 +169,7 @@ export async function POST(request: Request) {
           'Content-Type': 'application/json',
           'X-Internal-Call': 'payment-verification', // Mark as internal call
         },
-        body: JSON.stringify({ orderId: order_id }),
+        body: JSON.stringify({ orderId: existingOrder.id }),
       })
 
       console.log('Shiprocket response status:', shiprocketResponse.status)
@@ -135,16 +179,21 @@ export async function POST(request: Request) {
         console.error('Failed to create Shiprocket order:', {
           status: shiprocketResponse.status,
           error: errorText,
-          orderId: order_id
+          orderId: existingOrder.id
         })
+        shiprocketResult = {
+          success: false,
+          status: shiprocketResponse.status,
+          error: errorText,
+        }
       } else {
-        const shiprocketResult = await shiprocketResponse.json()
+        shiprocketResult = await shiprocketResponse.json()
         console.log('Shiprocket order created successfully:', shiprocketResult)
       }
     } catch (shiprocketError: any) {
       console.error('Error creating Shiprocket order:', {
         error: shiprocketError?.message || 'Unknown error',
-        orderId: order_id,
+        orderId: existingOrder.id,
         stack: shiprocketError?.stack || 'No stack trace',
         fullError: shiprocketError
       })
@@ -154,7 +203,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       payment_id: razorpay_payment_id,
-      order_number: updatedOrder?.order_number || `ORD-${order_id}`
+      order_number: updatedOrder?.order_number || `ORD-${existingOrder.id}`,
+      shiprocket: shiprocketResult,
     })
   } catch (error: any) {
     console.error('Payment verification error:', error)

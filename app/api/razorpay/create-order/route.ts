@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
+import { getRazorpayKeyId } from '@/lib/razorpay-config';
 
 // Ensure Node.js runtime for Razorpay compatibility
 export const runtime = 'nodejs';
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
     console.log('=== RAZORPAY ORDER CREATION DEBUG ===');
     console.log('Request body:', { amount, currency, receipt });
     console.log('Environment variables:');
-    console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID);
+    console.log('RAZORPAY_KEY_ID:', getRazorpayKeyId());
     console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? '[PRESENT]' : '[MISSING]');
 
     // Validate required fields
@@ -33,14 +34,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate environment variables
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    const razorpayKeyId = getRazorpayKeyId();
+    if (!razorpayKeyId || !process.env.RAZORPAY_KEY_SECRET) {
       console.error('Missing Razorpay environment variables');
       return NextResponse.json({ error: 'Razorpay configuration missing' }, { status: 500 });
     }
 
     // Initialize Razorpay
     const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
+      key_id: razorpayKeyId,
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 

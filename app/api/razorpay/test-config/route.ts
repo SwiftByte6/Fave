@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getRazorpayKeyId, hasRazorpayCredentials } from '@/lib/razorpay-config';
 
 // Ensure Node.js runtime
 export const runtime = 'nodejs';
@@ -6,11 +7,12 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const config: any = {
-      hasKeyId: !!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      hasKeyId: !!getRazorpayKeyId(),
       hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET,
-      keyIdLength: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.length || 0,
+      keyIdLength: getRazorpayKeyId().length,
       keySecretLength: process.env.RAZORPAY_KEY_SECRET?.length || 0,
-      keyIdPrefix: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.substring(0, 8) || 'N/A',
+      keyIdPrefix: getRazorpayKeyId().substring(0, 8) || 'N/A',
+      credentialsReady: hasRazorpayCredentials(),
       nodeVersion: process.version,
       platform: process.platform,
       runtime: 'nodejs'
@@ -24,7 +26,7 @@ export async function GET() {
       // Try to create instance
       if (config.hasKeyId && config.hasKeySecret) {
         new Razorpay({
-          key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+          key_id: getRazorpayKeyId(),
           key_secret: process.env.RAZORPAY_KEY_SECRET,
         });
         config.razorpayInstanceSuccess = true;

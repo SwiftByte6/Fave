@@ -1,13 +1,72 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/products'
+
+type SessionState = {
+  ready: boolean
+  userEmail: string
+  accessToken: string
+}
 
 export default function TestShiprocketPage() {
+  const [sessionState, setSessionState] = useState<SessionState>({
+    ready: false,
+    userEmail: '',
+    accessToken: '',
+  })
   const [loginResult, setLoginResult] = useState<any>(null)
   const [createOrderResult, setCreateOrderResult] = useState<any>(null)
   const [serviceabilityResult, setServiceabilityResult] = useState<any>(null)
   const [trackingResult, setTrackingResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [orderId, setOrderId] = useState('')
+  const [awbCode, setAwbCode] = useState('')
+  const [pickupPostcode, setPickupPostcode] = useState('400001')
+  const [deliveryPostcode, setDeliveryPostcode] = useState('110001')
+  const [weight, setWeight] = useState('0.5')
+  const [length, setLength] = useState('10')
+  const [breadth, setBreadth] = useState('10')
+  const [height, setHeight] = useState('5')
+  const [cod, setCod] = useState('0')
+
+  useEffect(() => {
+    let mounted = true
+
+    ;(async () => {
+      const { data } = await supabase.auth.getSession()
+      if (!mounted) return
+
+      setSessionState({
+        ready: true,
+        userEmail: data.session?.user?.email || '',
+        accessToken: data.session?.access_token || '',
+      })
+    })()
+
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSessionState({
+        ready: true,
+        userEmail: session?.user?.email || '',
+        accessToken: session?.access_token || '',
+      })
+    })
+
+    return () => {
+      mounted = false
+      subscription.subscription.unsubscribe()
+    }
+  }, [])
+
+  const buildAuthHeaders = (): HeadersInit => {
+    const headers: Record<string, string> = {}
+
+    if (sessionState.accessToken) {
+      headers.Authorization = `Bearer ${sessionState.accessToken}`
+    }
+
+    return headers
+  }
 
   const testShiprocketLogin = async () => {
     setLoading(true)
@@ -18,13 +77,11 @@ export default function TestShiprocketPage() {
           'Content-Type': 'application/json',
         },
       })
-      
+
       const result = await response.json()
       setLoginResult({ status: response.status, data: result })
-      console.log('Login result:', result)
     } catch (error) {
       setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
-      console.error('Login error:', error)
     }
     setLoading(false)
   }
@@ -32,52 +89,25 @@ export default function TestShiprocketPage() {
   const testCreateOrder = async () => {
     setLoading(true)
     try {
-      // You'll need to replace this with an actual order ID from your database
+      if (!orderId.trim()) {
+        setCreateOrderResult({ error: 'Enter a real order ID from your database first.' })
+        setLoading(false)
+        return
+      }
+
       const response = await fetch('/api/shiprocket/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...buildAuthHeaders(),
         },
-        body: JSON.stringify({
-          orderId: 'ebb9a99f-3cdf-405f-a263-382074f3408e' // Replace with actual order ID
-        })
+        body: JSON.stringify({ orderId: orderId.trim() }),
       })
-      
+
       const result = await response.json()
       setCreateOrderResult({ status: response.status, data: result })
-      console.log('Create order result:', result)
     } catch (error) {
       setCreateOrderResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
-      console.error('Create order error:', error)
-    }
-    setLoading(false)
-  }
-
-  const testDirectShiprocketAPI = async () => {
-    setLoading(true)
-    try {
-      // Test direct API call to Shiprocket using Bearer token authentication
-      const response = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: 'favestore06@gmail.com',
-          password: 'WP#a6ebXMZm@oTS8FGz4uGQvM*A!5iI5',
-        }),
-      })
-
-      const result = await response.json()
-      setLoginResult({ 
-        status: response.status, 
-        data: result,
-        type: 'Direct Bearer Token Auth'
-      })
-      console.log('Direct API result:', result)
-    } catch (error) {
-      setLoginResult({ error: error instanceof Error ? error.message : 'Unknown error occurred', type: 'Direct Bearer Token Auth' })
-      console.error('Direct API error:', error)
     }
     setLoading(false)
   }
@@ -89,24 +119,23 @@ export default function TestShiprocketPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...buildAuthHeaders(),
         },
         body: JSON.stringify({
-          pickup_postcode: '400001',
-          delivery_postcode: '110001',
-          weight: 0.5,
-          length: 10,
-          breadth: 10,
-          height: 5,
-          cod: 0
-        })
+          pickup_postcode: pickupPostcode.trim(),
+          delivery_postcode: deliveryPostcode.trim(),
+          weight: Number(weight),
+          length: Number(length),
+          breadth: Number(breadth),
+          height: Number(height),
+          cod: Number(cod),
+        }),
       })
-      
+
       const result = await response.json()
       setServiceabilityResult({ status: response.status, data: result })
-      console.log('Serviceability result:', result)
     } catch (error) {
       setServiceabilityResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
-      console.error('Serviceability error:', error)
     }
     setLoading(false)
   }
@@ -114,148 +143,199 @@ export default function TestShiprocketPage() {
   const testTracking = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/shiprocket/track?awb=1234567890', {
+      if (!awbCode.trim()) {
+        setTrackingResult({ error: 'Enter a real AWB code first.' })
+        setLoading(false)
+        return
+      }
+
+      const response = await fetch(`/api/shiprocket/track?awb=${encodeURIComponent(awbCode.trim())}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        }
+          ...buildAuthHeaders(),
+        },
       })
-      
+
       const result = await response.json()
       setTrackingResult({ status: response.status, data: result })
-      console.log('Tracking result:', result)
     } catch (error) {
       setTrackingResult({ error: error instanceof Error ? error.message : 'Unknown error occurred' })
-      console.error('Tracking error:', error)
     }
     setLoading(false)
   }
 
   return (
-    <div className="container mx-auto p-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Shiprocket Integration Test</h1>
-      
-      <div className="space-y-6">
-        {/* Test Buttons */}
-        <div className="flex gap-4 flex-wrap">
-          <button
-            onClick={testShiprocketLogin}
-            disabled={loading}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Testing...' : 'Test Shiprocket Login (via API)'}
-          </button>
-          
-          <button
-            onClick={testDirectShiprocketAPI}
-            disabled={loading}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Testing...' : 'Test Bearer Token Auth'}
-          </button>
-          
-          <button
-            onClick={testCreateOrder}
-            disabled={loading}
-            className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Testing...' : 'Test Create Order'}
-          </button>
-          
-          <button
-            onClick={testServiceability}
-            disabled={loading}
-            className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Testing...' : 'Test Serviceability'}
-          </button>
-          
-          <button
-            onClick={testTracking}
-            disabled={loading}
-            className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-          >
-            {loading ? 'Testing...' : 'Test Tracking'}
-          </button>
-        </div>
-
-        {/* Environment Variables Display */}
-        <div className="bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Environment Variables Check (Bearer Token Auth)</h3>
-          <div className="text-sm space-y-1">
-            <div>SHIPROCKET_API_EMAIL: favestore06@gmail.com</div>
-            <div>SHIPROCKET_API_PASSWORD: WP#a6ebXMZm@oTS8FGz4uGQvM*A!5iI5</div>
-            <div>SHIPROCKET_BASE_URL: https://apiv2.shiprocket.in/v1/external</div>
-            <div>NEXT_PUBLIC_BASE_URL: http://localhost:3000</div>
+    <div className="container mx-auto max-w-5xl p-6 md:p-8">
+      <div className="mb-8 rounded-3xl border border-fav-blush bg-white/90 p-6 shadow-[0_20px_60px_rgba(122,31,42,0.08)]">
+        <p className="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-fav-gold">
+          Shiprocket Backend Test
+        </p>
+        <h1 className="dancing text-5xl text-fav-maroon md:text-6xl">
+          Shiprocket Integration Test
+        </h1>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-fav-warm-gray md:text-base">
+          This page now talks to your backend routes only. It uses the current Supabase session for authenticated Shiprocket endpoints and no longer exposes hardcoded API credentials in the UI.
+        </p>
+        <div className="mt-4 rounded-2xl bg-fav-beige/50 p-4 text-sm text-fav-charcoal">
+          <div className="font-semibold">Signed in as:</div>
+          <div className="mt-1 text-fav-warm-gray">
+            {sessionState.userEmail || 'Not signed in'}
           </div>
-        </div>
-
-        {/* Login Results */}
-        {loginResult && (
-          <div className="bg-white border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">
-              Login Test Results {loginResult.type && `(${loginResult.type})`}
-            </h3>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
-              {JSON.stringify(loginResult, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {/* Create Order Results */}
-        {createOrderResult && (
-          <div className="bg-white border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Create Order Test Results</h3>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
-              {JSON.stringify(createOrderResult, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {/* Serviceability Results */}
-        {serviceabilityResult && (
-          <div className="bg-white border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Serviceability Test Results</h3>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
-              {JSON.stringify(serviceabilityResult, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {/* Tracking Results */}
-        {trackingResult && (
-          <div className="bg-white border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">Tracking Test Results</h3>
-            <pre className="bg-gray-100 p-3 rounded text-sm overflow-auto">
-              {JSON.stringify(trackingResult, null, 2)}
-            </pre>
-          </div>
-        )}
-
-        {/* Instructions */}
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <h3 className="text-lg font-semibold mb-2">Testing Instructions (Bearer Token Auth)</h3>
-          <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>First, test "Bearer Token Auth" to verify your API User credentials work</li>
-            <li>Then test "Shiprocket Login (via API)" to check if backend authentication works</li>
-            <li>Test "Serviceability" to check courier availability for pickup/delivery pincodes</li>
-            <li>Test "Create Order" to create a shipment order</li>
-            <li>Test "Tracking" with a real AWB code when available</li>
-            <li>Check the browser console and server logs for detailed error messages</li>
-          </ol>
-        </div>
-
-        {/* Common Issues */}
-        <div className="bg-red-50 border-l-4 border-red-400 p-4">
-          <h3 className="text-lg font-semibold mb-2">Common Issues</h3>
-          <ul className="list-disc list-inside space-y-1 text-sm">
-            <li><strong>401 Unauthorized:</strong> Incorrect email/password or account not activated</li>
-            <li><strong>CORS Error:</strong> Browser blocking direct API calls (normal for security)</li>
-            <li><strong>500 Server Error:</strong> Check server logs for detailed error messages</li>
-            <li><strong>Environment Variables:</strong> Make sure .env.local is properly loaded</li>
-          </ul>
         </div>
       </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-fav-blush bg-white p-6 shadow-[0_20px_60px_rgba(122,31,42,0.08)]">
+            <h2 className="text-lg font-semibold text-fav-charcoal">Actions</h2>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                onClick={testShiprocketLogin}
+                disabled={loading}
+                className="rounded-xl bg-fav-maroon px-4 py-3 text-sm font-semibold text-fav-off-white transition hover:bg-fav-rust disabled:opacity-50"
+              >
+                {loading ? 'Testing...' : 'Refresh Shiprocket Login'}
+              </button>
+
+              <button
+                onClick={testCreateOrder}
+                disabled={loading}
+                className="rounded-xl bg-fav-gold px-4 py-3 text-sm font-semibold text-fav-charcoal transition hover:opacity-90 disabled:opacity-50"
+              >
+                {loading ? 'Testing...' : 'Test Create Order'}
+              </button>
+
+              <button
+                onClick={testServiceability}
+                disabled={loading}
+                className="rounded-xl bg-fav-beige px-4 py-3 text-sm font-semibold text-fav-charcoal transition hover:bg-fav-blush disabled:opacity-50"
+              >
+                {loading ? 'Testing...' : 'Test Serviceability'}
+              </button>
+
+              <button
+                onClick={testTracking}
+                disabled={loading}
+                className="rounded-xl bg-fav-plum px-4 py-3 text-sm font-semibold text-fav-off-white transition hover:opacity-90 disabled:opacity-50"
+              >
+                {loading ? 'Testing...' : 'Test Tracking'}
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-fav-blush bg-white p-6 shadow-[0_20px_60px_rgba(122,31,42,0.08)]">
+            <h2 className="text-lg font-semibold text-fav-charcoal">Inputs</h2>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal sm:col-span-2">
+                <span>Order ID for /api/shiprocket/create-order</span>
+                <input
+                  value={orderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                  placeholder="Paste a real orders.id value"
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Pickup Postcode</span>
+                <input
+                  value={pickupPostcode}
+                  onChange={(e) => setPickupPostcode(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Delivery Postcode</span>
+                <input
+                  value={deliveryPostcode}
+                  onChange={(e) => setDeliveryPostcode(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Weight</span>
+                <input
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>COD</span>
+                <input
+                  value={cod}
+                  onChange={(e) => setCod(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Length</span>
+                <input
+                  value={length}
+                  onChange={(e) => setLength(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Breadth</span>
+                <input
+                  value={breadth}
+                  onChange={(e) => setBreadth(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+
+              <label className="space-y-2 text-sm font-medium text-fav-charcoal">
+                <span>Height</span>
+                <input
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  className="w-full rounded-2xl border border-fav-blush bg-fav-off-white px-4 py-3 outline-none transition focus:border-fav-gold"
+                />
+              </label>
+            </div>
+
+            <div className="mt-5 rounded-2xl bg-fav-beige/40 p-4 text-sm text-fav-warm-gray">
+              Create order, serviceability, and tracking requests all require a signed-in Supabase session because the backend routes enforce auth.
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <ResultCard title="Login Result" result={loginResult} />
+          <ResultCard title="Create Order Result" result={createOrderResult} />
+          <ResultCard title="Serviceability Result" result={serviceabilityResult} />
+          <ResultCard title="Tracking Result" result={trackingResult} />
+
+          <div className="rounded-3xl border border-fav-blush bg-fav-off-white p-6 shadow-[0_20px_60px_rgba(122,31,42,0.08)]">
+            <h2 className="text-lg font-semibold text-fav-charcoal">What this page fixes</h2>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-6 text-fav-warm-gray">
+              <li>No hardcoded order ID.</li>
+              <li>No hardcoded Shiprocket credentials in the UI.</li>
+              <li>Authenticated routes receive the current Supabase access token.</li>
+              <li>Uses your backend API routes instead of calling Shiprocket directly from the browser.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ResultCard({ title, result }: { title: string; result: any }) {
+  return (
+    <div className="rounded-3xl border border-fav-blush bg-white p-6 shadow-[0_20px_60px_rgba(122,31,42,0.08)]">
+      <h2 className="text-lg font-semibold text-fav-charcoal">{title}</h2>
+      <pre className="mt-4 max-h-80 overflow-auto rounded-2xl bg-fav-off-white p-4 text-xs leading-6 text-fav-charcoal">
+        {result ? JSON.stringify(result, null, 2) : 'No result yet.'}
+      </pre>
     </div>
   )
 }

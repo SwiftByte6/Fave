@@ -242,6 +242,7 @@ const CheckoutPage = () => {
         id: razorpayOrderData.id,
         amount: calculateSubtotal() * 100, // Convert to paise
         currency: 'INR',
+        appOrderId: order.id,
       })
       setShowPayment(true)
       setIsProcessing(false)
@@ -262,7 +263,7 @@ const CheckoutPage = () => {
       const { error: updateError } = await supabase
         .from('orders')
         .update({
-          payment_status: 'completed',
+          payment_status: 'success',
           razorpay_order_id: paymentData.razorpay_order_id,
           razorpay_payment_id: paymentData.razorpay_payment_id,
         })
@@ -416,7 +417,7 @@ const CheckoutPage = () => {
               className={`group/btn relative overflow-hidden mt-4 w-full py-3 rounded-md font-semibold transition-all duration-300 ${
                 isProcessing || cart.length === 0
                   ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-red-800 text-white hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]'
+                  : 'bg-red-800 text-white hover:bg-red-700 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-linear-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-full'
               }`}
             >
               {isProcessing ? 'Creating Order...' : 'Proceed to Payment'}
