@@ -1,7 +1,6 @@
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import cartReducer from '@/Redux/cartSlice';
-import favouriteReducer from '@/Redux/FavSlice';
 import {
   persistStore,
   persistReducer,
@@ -21,21 +20,12 @@ const cartPersistConfig = {
   storage,
 };
 
-// persist config for favourites
-const favouritePersistConfig = {
-  key: 'favourites',
-  version: 1,
-  storage,
-};
-
 // wrap reducers with persist
 const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
-const persistedFavouriteReducer = persistReducer(favouritePersistConfig, favouriteReducer);
 
 export const store = configureStore({
   reducer: {
     cart: persistedCartReducer,
-    favourites: persistedFavouriteReducer, // 👈 added favourites
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

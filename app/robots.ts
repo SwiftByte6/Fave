@@ -67,7 +67,6 @@ export default function robots(): MetadataRoute.Robots {
           '/account*',
           '/orders*',
           '/signin*',
-          '/favourite*',
           '/*?*sort=',
           '/*?*filter=',
           '/*?*page=',

@@ -1,12 +1,8 @@
 "use client";
 
 import React, { memo, useCallback } from "react";
-import { CiHeart } from "react-icons/ci";
-import { FaHeart } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/Redux/store";
-import { addToFavourites, removeFromFavourites } from "@/Redux/FavSlice";
+import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import ImageFallback from "./ImageFallback";
 
@@ -86,32 +82,7 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // get favourites from store
-  const favourites = useSelector(
-    (state: RootState) => state.favourites.favourites
-  );
-
-  // check if current product is already in favourites
-  const isFavourite = favourites.some((item) => item.id === data.id);
-
-  const toggleFavourite = useCallback(() => {
-    if (isFavourite) {
-      dispatch(removeFromFavourites(data.id.toString()));
-      toast("Removed from wishlist!");
-    } else {
-      dispatch(
-        addToFavourites({
-          id: data.id.toString(),
-          title: data.title,
-          images: data.images || [],
-          category: data.category,
-          price: data.price,
-          stock: 10,
-        })
-      );
-      toast.success("Added to wishlist!");
-    }
-  }, [isFavourite, dispatch, data.id, data.title, data.images, data.category, data.price]);
+  
 
   const handleAddToCart = useCallback(() => {
     if (addToCartItem) {
@@ -173,24 +144,7 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
     <div
       className={`bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-md group ${className}`}
     >
-      {/* Wishlist Icon */}
-      {showWishlist && (
-        <div className="absolute top-3 right-3 z-20">
-          {isFavourite ? (
-            <FaHeart
-              size={20}
-              onClick={toggleFavourite}
-              className="text-red-500 cursor-pointer transition-all duration-200 hover:scale-110"
-            />
-          ) : (
-            <CiHeart
-              size={20}
-              onClick={toggleFavourite}
-              className="text-gray-400 hover:text-red-500 cursor-pointer transition-all duration-200 hover:scale-110"
-            />
-          )}
-        </div>
-      )}
+      
 
       {/* Image */}
       <div

@@ -1,10 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addToCart } from '@/Redux/cartSlice';
 import ProductCard from '@/component/ProductCarad';
-import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import { IoSearch, IoClose } from "react-icons/io5";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
@@ -21,7 +20,7 @@ import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 const CollectionPageClient = ({ products, total, page, pageSize }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const favourites = useSelector((state) => state.favourites.favourites);
+  
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');

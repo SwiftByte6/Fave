@@ -97,7 +97,6 @@ The application automatically sends order confirmation emails after successful c
 ### Shopping Experience
 - Product browsing and search
 - Add to cart functionality
-- Wishlist management
 - Responsive product pages
 
 ### Checkout & Payments

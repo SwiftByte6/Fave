@@ -3,12 +3,10 @@
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { RootState } from '@/Redux/store';
-import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import { addToCart } from '@/Redux/cartSlice';
-import { CiHeart } from 'react-icons/ci';
-import { FaHeart } from 'react-icons/fa';
+// favourites UI removed
 import toast from 'react-hot-toast';
 
 interface RelatedProductCardProps {
@@ -25,29 +23,7 @@ interface RelatedProductCardProps {
 const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  const favourites = useSelector((state: RootState) => state.favourites.favourites);
   
-  const isFavourite = favourites.some((f) => f.id === String(product.id));
-  
-  const handleToggleFavourite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isFavourite) {
-      dispatch(removeFromFavourites(String(product.id)));
-      toast('Removed from wishlist!');
-    } else {
-      dispatch(addToFavourites({
-        id: String(product.id),
-        title: product.title,
-        images: product.images || [],
-        category: product.category,
-        price: product.price,
-        stock: 10
-      }));
-      toast.success('Added to wishlist!');
-    }
-  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -87,17 +63,7 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
           </div>
         )}
         
-        {/* Wishlist Button */}
-        <button
-          onClick={handleToggleFavourite}
-          className="absolute top-3 right-3 transition-all duration-200 hover:scale-110"
-        >
-          {isFavourite ? (
-            <FaHeart className="w-5 h-5 text-red-500" />
-          ) : (
-            <CiHeart className="w-5 h-5 text-gray-400 hover:text-red-500" />
-          )}
-        </button>
+        
       </div>
       
       {/* Content */}

@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { IoSearch, IoMenu } from "react-icons/io5";
 import { FaShoppingCart } from "react-icons/fa";
-import { CiHeart } from "react-icons/ci";
 import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Redux/store";
@@ -169,9 +168,7 @@ const Header = () => {
                           <button onClick={() => { setDropdownOpen(false); router.push('/account'); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-fav-charcoal hover:bg-fav-beige hover:text-fav-maroon transition-all duration-200 text-left">
                             <span>👤</span> My Account
                           </button>
-                          <button onClick={() => { setDropdownOpen(false); router.push('/favourite'); }} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-fav-charcoal hover:bg-fav-beige hover:text-fav-maroon transition-all duration-200 text-left">
-                            <span>❤️</span> Wishlist
-                          </button>
+                          
                           <div className="border-t border-fav-beige/60 my-1" />
                           <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-fav-rust hover:bg-red-50 transition-all duration-200 text-left">
                             <span>🚪</span> Sign Out
@@ -184,13 +181,7 @@ const Header = () => {
               </div>
             </div>
             
-            <div className="relative group">
-              <CiHeart
-                size={38}
-                onClick={() => router.push("/favourite")}
-                className="text-fav-warm-gray hover:text-fav-maroon cursor-pointer transition-all duration-300 hover:scale-110 p-1 rounded-lg hover:bg-fav-blush/50"
-              />
-            </div>
+            
             <div
               className="relative cursor-pointer group"
               onClick={() => router.push("/cart")}

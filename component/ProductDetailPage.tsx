@@ -4,12 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { Playfair_Display } from 'next/font/google';
 import { addToCart } from '@/Redux/cartSlice';
 import { useDispatch } from 'react-redux';
-import { CiHeart } from 'react-icons/ci';
 import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
 import ShareButton from './ShareButton';
-import { RootState } from '@/Redux/store';
-import { addToFavourites, removeFromFavourites } from '@/Redux/FavSlice';
 import toast from 'react-hot-toast';
 import ProductComments from './ProductComments';
 
@@ -36,7 +32,7 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     const [selectedSize, setSelectedSize] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalImageIndex, setModalImageIndex] = useState(0);
-    const favourites = useSelector((state: RootState) => state.favourites.favourites);
+    
 
     const handleQuantityChange = (type: 'increase' | 'decrease') => {
         if (type === 'increase') {
@@ -56,22 +52,7 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
         toast.success(`Added to cart! Size: ${selectedSize}`);
     };
 
-    const toggleFavourite = () => {
-        const isFav = favourites.some(fav => fav.id === product.id);
-        if (isFav) {
-            dispatch(removeFromFavourites(String(product.id)));
-            toast.success('Removed from favourites');
-        } else {
-            // Ensure 'stock' is present for FavouriteItem
-            const favouriteProduct = {
-                ...product,
-                id: String(product.id),
-                stock: 'stock' in product && typeof (product as any).stock === 'number' ? (product as any).stock : 1 // Default to 1 if not present
-            };
-            dispatch(addToFavourites(favouriteProduct));
-            toast.success('Added to favourites');
-        }
-    }
+    
 
     // Modal handlers for image zoom
     const openModal = (imageIndex: number = currentImageIndex) => {
@@ -255,18 +236,8 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                                 </button>
                                 
-                                <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                                    <button 
-                                        onClick={toggleFavourite} 
-                                        className="bg-fav-off-white hover:bg-fav-blush border-2 px-6 py-3 rounded-2xl font-semibold text-base transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-3"
-                                    >
-                                        <CiHeart size={24} />
-                                        {favourites.some(fav => fav.id === product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                                    </button>
-                                    
-                                    <div className='flex items-center'>
-                                        <ShareButton product={product} />
-                                    </div>
+                                <div className='flex items-center'>
+                                    <ShareButton product={product} />
                                 </div>
                             </div>
                         </div>
