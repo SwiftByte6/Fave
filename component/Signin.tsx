@@ -31,14 +31,15 @@ const Signin: React.FC<SigninProps> = ({ mode = 'signin' }) => {
     // Safety reset — if nothing happens in 8 seconds, reset the button
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-      toast.error('Google sign-in timed out. Check your Supabase dashboard: enable Google provider and whitelist http://localhost:3000/auth/callback under Authentication → URL Configuration.');
+      toast.error('Google sign-in timed out. Ensure the Google provider is enabled and the redirect URL https://favee.shop/auth/callback (and http://localhost:3000/auth/callback for local dev) is whitelisted in Supabase Authentication → URL Configuration.');
     }, 8000);
 
     try {
+      const redirectBase = (process.env.NEXT_PUBLIC_SITE_URL) ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${redirectBase}/auth/callback`,
         },
       });
 

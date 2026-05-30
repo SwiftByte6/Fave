@@ -124,16 +124,36 @@ export async function sendOrderConfirmationEmail(
     const fromName =
       process.env.RESEND_FROM_NAME ?? "Fave Store";
 
-    const response = await resend.emails.send({
+    const internalNotify = 'info@favee.shop';
+
+    // 1) Send to customer
+    const customerResponse = await resend.emails.send({
       from: `${fromName} <${fromEmail}>`,
       to: data.customerEmail,
       subject: `Order Confirmation - #${data.orderNumber ?? data.orderId}`,
       html,
     });
 
+    // 2) Send a separate internal notification so the subject/body can differ
+    let internalResponse: any = null;
+    try {
+      const internalSubject = `New order has appeared - #${data.orderNumber ?? data.orderId}`;
+      // reuse the same HTML for now; subject clarifies this is an internal notification
+      internalResponse = await resend.emails.send({
+        from: `${fromName} <${fromEmail}>`,
+        to: internalNotify,
+        subject: internalSubject,
+        html,
+      });
+    } catch (err) {
+      const details = extractErrorDetails(err);
+      console.error('❌ Internal order notification error:', err, 'details:', details);
+    }
+
     return {
       success: true,
-      emailId: response.data?.id ?? null,
+      emailId: customerResponse.data?.id ?? null,
+      internalEmailId: internalResponse?.data?.id ?? null,
     };
   } catch (error) {
     const details = extractErrorDetails(error);
