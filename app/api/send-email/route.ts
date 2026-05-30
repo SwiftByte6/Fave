@@ -11,6 +11,13 @@ const supabaseAdmin = supabaseUrl && serviceKey
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY');
+      return NextResponse.json({ success: false, error: 'Email service not configured (missing RESEND_API_KEY)' }, { status: 500 })
+    }
+    if (!process.env.RESEND_FROM_EMAIL) {
+      console.warn('RESEND_FROM_EMAIL not set; using default noreply@favee.com which may be unverified');
+    }
     const body = await request.json()
 
     if (body?.orderId) {

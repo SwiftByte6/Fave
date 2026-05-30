@@ -3,6 +3,18 @@ import { orderConfirmationTemplate } from "./email-template";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function extractErrorDetails(err: any) {
+  try {
+    if (!err) return null;
+    if (err.response) return err.response;
+    if (err.body) return err.body;
+    if (err.message) return { message: err.message };
+    return String(err);
+  } catch (e) {
+    return String(err);
+  }
+}
+
 /* ----------------------------------
    TYPES
 ----------------------------------- */
@@ -124,8 +136,9 @@ export async function sendOrderConfirmationEmail(
       emailId: response.data?.id ?? null,
     };
   } catch (error) {
-    console.error("❌ Order email error:", error);
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    const details = extractErrorDetails(error);
+    console.error("❌ Order email error:", error, "details:", details);
+    return { success: false, error: error instanceof Error ? error.message : String(error), details };
   }
 }
 
@@ -156,8 +169,9 @@ export async function sendShippingUpdateEmail(
       emailId: response.data?.id ?? null,
     };
   } catch (error) {
-    console.error("❌ Shipping email error:", error);
-    return { success: false, error: error instanceof Error ? error.message : String(error) };
+    const details = extractErrorDetails(error);
+    console.error("❌ Shipping email error:", error, "details:", details);
+    return { success: false, error: error instanceof Error ? error.message : String(error), details };
   }
 }
 
