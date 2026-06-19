@@ -131,7 +131,7 @@ export const MemoizedProductGrid = React.memo(({
   currencySymbol = "₹"
 }: {
   products: any[];
-  addToCartItem: (product: any) => void;
+  addToCartItem?: (product: any) => Promise<boolean | void>;
   variant?: "default" | "search" | "compact" | "bestseller";
   showCategoryBadge?: boolean;
   showAddToCart?: boolean;

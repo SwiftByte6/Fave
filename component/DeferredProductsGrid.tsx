@@ -4,7 +4,7 @@ import ProductCard from './ProductCarad';
 
 interface Props {
   products: any[];
-  addToCartItem: (product: any) => void;
+  addToCartItem?: (product: any) => Promise<boolean | void>;
 }
 
 const LOAD_COUNT = 20;

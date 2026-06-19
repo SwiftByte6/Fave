@@ -17,7 +17,7 @@ interface ProductData {
 
 interface ProductCardProps {
   data: ProductData;
-  addToCartItem?: (product: ProductData) => void;
+  addToCartItem?: (product: ProductData) => Promise<boolean | void>;
   variant?: "default" | "search" | "compact" | "bestseller";
   showCategoryBadge?: boolean;
   showWishlist?: boolean;

@@ -4,7 +4,7 @@ import ProductCard from "@/component/ProductCarad";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  addToCartItem: (p: any) => void;
+  addToCartItem?: (p: any) => Promise<boolean | void>;
   products: any[];
   title?: string;
   ctaLabel?: string;
