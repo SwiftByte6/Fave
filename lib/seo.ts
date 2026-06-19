@@ -77,7 +77,7 @@ export function generateMetadata(config: SEOConfig): Metadata {
   } = config;
 
   const fullTitle = title.includes('Favee') ? title : `${title} | Favee`;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
   const fullCanonical = canonical ? `${siteUrl}${canonical}` : siteUrl;
   const fullOgImage = ogImage ? `${siteUrl}${ogImage}` : `${siteUrl}/og-image.jpg`;
 
@@ -146,15 +146,27 @@ export function generateMetadata(config: SEOConfig): Metadata {
 }
 
 export function generateProductMetadata(product: ProductSEOData): Metadata {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
-  const productUrl = `${siteUrl}/products/${product.slug || product.id}`;
-  const productImage = product.images?.[0] ? `${siteUrl}${product.images[0]}` : `${siteUrl}/og-image.jpg`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  
+  const resolveImageUrl = (path: string | undefined | null): string => {
+    if (!path) return `${siteUrl}/og-image.jpg`;
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = path.replace(/^\/+/, '');
+    if (clean.startsWith('storage/v1/object/public/')) {
+      return supabaseUrl ? `${supabaseUrl}/${clean}` : `${siteUrl}/${clean}`;
+    }
+    if (supabaseUrl) {
+      return `${supabaseUrl}/storage/v1/object/public/${clean}`;
+    }
+    return `${siteUrl}/${clean}`;
+  };
 
   return generateMetadata({
     title: product.title,
     description: product.description,
     canonical: `/products/${product.slug || product.id}`,
-    ogImage: product.images?.[0] || '/og-image.jpg',
+    ogImage: product.images?.[0] ? resolveImageUrl(product.images[0]) : '/og-image.jpg',
     ogType: 'website', // Changed from 'product' to 'website'
     twitterCard: 'summary_large_image',
     keywords: [
@@ -183,16 +195,52 @@ export function generateBreadcrumbStructuredData(breadcrumbs: BreadcrumbItem[]) 
 }
 
 export function generateProductStructuredData(product: ProductSEOData) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const productUrl = `${siteUrl}/products/${product.slug || product.id}`;
-  const productImage = product.images?.[0] ? `${siteUrl}${product.images[0]}` : `${siteUrl}/og-image.jpg`;
+  
+  const resolveImageUrl = (path: string | undefined | null): string => {
+    if (!path) return `${siteUrl}/og-image.jpg`;
+    if (/^https?:\/\//i.test(path)) return path;
+    const clean = path.replace(/^\/+/, '');
+    if (clean.startsWith('storage/v1/object/public/')) {
+      return supabaseUrl ? `${supabaseUrl}/${clean}` : `${siteUrl}/${clean}`;
+    }
+    if (supabaseUrl) {
+      return `${supabaseUrl}/storage/v1/object/public/${clean}`;
+    }
+    return `${siteUrl}/${clean}`;
+  };
+
+  const productImage = resolveImageUrl(product.images?.[0]);
+  const images = product.images && Array.isArray(product.images) && product.images.length > 0
+    ? product.images.map(resolveImageUrl)
+    : [productImage];
+
+  // Determine availability
+  let schemaAvailability = 'InStock';
+  if ('quantity' in product) {
+    const qty = (product as any).quantity;
+    if (qty !== undefined && qty !== null && Number(qty) <= 0) {
+      schemaAvailability = 'OutOfStock';
+    }
+  } else if (product.availability) {
+    if (product.availability === 'out_of_stock') {
+      schemaAvailability = 'OutOfStock';
+    } else if (product.availability === 'preorder') {
+      schemaAvailability = 'PreOrder';
+    }
+  }
+
+  // Price validation date (end of next year)
+  const priceValidUntil = new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0];
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
     description: product.description,
-    image: product.images?.map(img => `${siteUrl}${img}`) || [productImage],
+    image: images,
     brand: {
       '@type': 'Brand',
       name: product.brand || 'Favee',
@@ -203,8 +251,9 @@ export function generateProductStructuredData(product: ProductSEOData) {
       '@type': 'Offer',
       price: product.price,
       priceCurrency: product.currency || 'INR',
-      availability: `https://schema.org/${product.availability || 'InStock'}`,
+      availability: `https://schema.org/${schemaAvailability}`,
       url: productUrl,
+      priceValidUntil,
       seller: {
         '@type': 'Organization',
         name: 'Favee',
@@ -236,6 +285,14 @@ export function generateProductStructuredData(product: ProductSEOData) {
             unitCode: 'DAY'
           }
         }
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'IN',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnPeriod',
+        merchantReturnDays: 7,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/FreeReturn'
       }
     },
     aggregateRating: product.rating && product.reviewCount ? {
@@ -249,7 +306,7 @@ export function generateProductStructuredData(product: ProductSEOData) {
 }
 
 export function generateOrganizationStructuredData() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
   
   return {
     '@context': 'https://schema.org',
@@ -300,7 +357,7 @@ export function generateOrganizationStructuredData() {
 }
 
 export function generateWebsiteStructuredData() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
   
   return {
     '@context': 'https://schema.org',
@@ -362,7 +419,7 @@ export function generateWebsiteStructuredData() {
 }
 
 export function generateCollectionPageStructuredData(categoryName: string, products: any[]) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
   
   return {
     '@context': 'https://schema.org',
@@ -409,7 +466,7 @@ export function generateFAQStructuredData(faqs: Array<{question: string, answer:
 }
 
 export function generateLocalBusinessStructuredData() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.com';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://favee.shop';
   
   return {
     '@context': 'https://schema.org',

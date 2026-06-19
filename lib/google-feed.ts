@@ -123,6 +123,12 @@ ${items.map((item) => `    <item>
       <g:condition>${escapeXml(item.condition)}</g:condition>
       <g:brand>${escapeXml(item.brand)}</g:brand>
       <g:google_product_category>${escapeXml(item.googleProductCategory)}</g:google_product_category>
+      <g:identifier_exists>false</g:identifier_exists>
+      <g:shipping>
+        <g:country>IN</g:country>
+        <g:service>Standard</g:service>
+        <g:price>0.00 INR</g:price>
+      </g:shipping>
     </item>`).join('\n')}
   </channel>
 </rss>
