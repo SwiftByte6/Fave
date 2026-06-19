@@ -11,6 +11,7 @@ import SavedAddressesSection from '@/component/SavedAddressesSection'
 import { useSavedAddresses } from '@/hooks/useSavedAddresses'
 import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout'
 import toast from 'react-hot-toast'
+import { openAuthPopup } from '@/lib/auth-popup'
 
 const CheckoutPage = () => {
   const router = useRouter()
@@ -126,7 +127,7 @@ const CheckoutPage = () => {
 
     if (!isLoaded || !userId) {
       toast.error('Please login to place an order')
-      router.push('/signin')
+      openAuthPopup('/checkout')
       return
     }
 

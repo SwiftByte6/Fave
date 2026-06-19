@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/Redux/cartSlice";
+import { supabase } from '@/lib/products';
 import ProductCard from "./ProductCarad";
 import Story from "@/component/Home/Story"
 import NewArrivalsGrid from "@/component/Home/NewArrivalsGrid"
@@ -46,8 +47,16 @@ const HomePage: React.FC<HomePageProps> = ({ products }) => {
   // const featuredProducts = products.slice(0, 8);
   // ...
 
-  const addToCartItem = (product: any) => {
+  const addToCartItem = async (product: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
     dispatch(addToCart({ ...product, cartQuantity: 1 }));
+    if (session) {
+      router.push('/checkout');
+      return true;
+    }
+
+    router.push('/signin');
+    return false;
   };
 
   // We don't block initial paint; sections that rely on data will render progressively
@@ -64,6 +73,56 @@ const HomePage: React.FC<HomePageProps> = ({ products }) => {
 					  primaryCta={homeConfig?.hero?.primaryCta ?? { label: "Shop Collection", href: "/collection" }}
 					  secondaryCta={homeConfig?.hero?.secondaryCta ?? { label: "Learn More", href: "/about" }}
 					/>
+
+            {/* Shop by Category */}
+            <section className="w-full bg-white py-16 md:py-24 border-b border-gray-100">
+              <div className="w-full px-4 sm:px-6 lg:px-8">
+                <div className="flex flex-col items-center justify-center mb-12">
+                  <h2 className="text-4xl md:text-5xl font-black text-[#2A2A2A] tracking-wider uppercase mb-4 text-center">
+                    Shop by Category
+                  </h2>
+                  <div className="w-24 h-1 bg-[#7A1F2A]"></div>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                  {/* Saree */}
+                  <div onClick={() => router.push('/collection?category=saree')} className="group relative aspect-[2/3] overflow-hidden cursor-pointer bg-[#f6efe5]">
+                    <Image src="/category/saree.jpg" alt="Saree" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-4/5 bg-white/95 backdrop-blur-md py-4 text-center transition-all duration-500 shadow-xl group-hover:-translate-y-2">
+                      <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] tracking-[0.2em] uppercase">Saree</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Kurti */}
+                  <div onClick={() => router.push('/collection?category=kurti')} className="group relative aspect-[2/3] overflow-hidden cursor-pointer bg-[#f6efe5]">
+                    <Image src="/category/kurti.jpg" alt="Kurti" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-4/5 bg-white/95 backdrop-blur-md py-4 text-center transition-all duration-500 shadow-xl group-hover:-translate-y-2">
+                      <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] tracking-[0.2em] uppercase">Kurti</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Lehenga */}
+                  <div onClick={() => router.push('/collection?category=lehenga')} className="group relative aspect-[2/3] overflow-hidden cursor-pointer bg-[#f6efe5]">
+                    <Image src="/category/lengha.jpg" alt="Lehenga" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-4/5 bg-white/95 backdrop-blur-md py-4 text-center transition-all duration-500 shadow-xl group-hover:-translate-y-2">
+                      <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] tracking-[0.2em] uppercase">Lehenga</h3>
+                    </div>
+                  </div>
+                  
+                  {/* Nighty */}
+                  <div onClick={() => router.push('/collection?category=nighty')} className="group relative aspect-[2/3] overflow-hidden cursor-pointer bg-[#f6efe5]">
+                    <Image src="/category/Nigty.jpeg" alt="Nighty" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw" className="object-cover object-top transition-transform duration-1000 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500"></div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-4/5 bg-white/95 backdrop-blur-md py-4 text-center transition-all duration-500 shadow-xl group-hover:-translate-y-2">
+                      <h3 className="text-lg md:text-xl font-bold text-[#2A2A2A] tracking-[0.2em] uppercase">Nighty</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
 
             {/* All Products Grid (deferred) */}
             <DeferredProductsGrid products={products} addToCartItem={addToCartItem} />

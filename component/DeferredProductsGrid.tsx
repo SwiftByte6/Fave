@@ -41,16 +41,13 @@ const DeferredProductsGrid: React.FC<Props> = ({ products, addToCartItem }) => {
   const visibleProducts = products.slice(0, visibleCount);
 
   return (
-    <section className="py-16 flex flex-col items-center gap-8 bg-linear-to-br from-fav-off-white via-fav-beige/30 to-fav-blush/20" aria-labelledby="all-products-heading">
-      <div className="relative">
-        <div className="px-8 py-4 rounded-2xl bg-fav-gold-gradient shadow-xl">
-          <h2 id="all-products-heading" className="dancing text-[2.5rem] md:text-[4rem] text-fav-off-white font-bold">Our Collection</h2>
-        </div>
-        <div className="absolute inset-0 bg-fav-gold-gradient rounded-2xl blur-xl opacity-30 -z-10"></div>
-      </div>
-      <p className="text-center text-fav-charcoal max-w-4xl text-lg font-medium leading-relaxed px-4">
-        Explore our complete collection of premium ethnic wear, handpicked for their timeless beauty and exceptional craftsmanship.
-      </p>
+    <section className="py-16 flex max-w-9xl mx-auto flex-col items-center gap-8 bg-linear-to-br from-fav-off-white via-fav-beige/30 to-fav-blush/20" aria-labelledby="all-products-heading">
+      <div className="flex flex-col items-center justify-center mb-12">
+                  <h2 className="text-4xl md:text-5xl font-black text-[#2A2A2A] tracking-wider uppercase mb-4 text-center">
+                    Our Collection
+                  </h2>
+                  <div className="w-24 h-1 bg-[#7A1F2A]"></div>
+                </div>
 
       {!ready ? (
         <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
@@ -60,7 +57,7 @@ const DeferredProductsGrid: React.FC<Props> = ({ products, addToCartItem }) => {
         </div>
       ) : (
         <>
-          <div className="w-full max-w-[1200px] grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
+          <div className="w-full  grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 px-4" role="list">
             {visibleProducts.map((p: any) => (
               <ProductCard
                 key={p.id}

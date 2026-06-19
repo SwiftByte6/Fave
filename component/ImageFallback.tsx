@@ -27,6 +27,16 @@ const ImageFallback: React.FC<ImageFallbackProps> = ({
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const normalizeSrc = (value: unknown) => {
+    if (typeof value !== 'string') return '';
+    return value.trim();
+  };
+
+  const isValidSrc = (value: string) => {
+    if (!value) return false;
+    return /^https?:\/\//i.test(value) || value.startsWith('/') || value.startsWith('data:image/');
+  };
+
   // Generate a placeholder based on the alt text
   const getPlaceholderUrl = (text: string) => {
     const colors = ['f87171', '60a5fa', '34d399', 'fbbf24', 'a78bfa', 'fb7185', '8b5cf6', '06b6d4'];
@@ -44,7 +54,8 @@ const ImageFallback: React.FC<ImageFallbackProps> = ({
     setIsLoading(false);
   };
 
-  const imageUrl = imageError ? getPlaceholderUrl(alt) : src;
+  const normalizedSrc = normalizeSrc(src);
+  const imageUrl = imageError || !isValidSrc(normalizedSrc) ? getPlaceholderUrl(alt) : normalizedSrc;
 
   return (
     <div className={`relative ${className}`} onClick={onClick}>
@@ -71,7 +82,7 @@ const ImageFallback: React.FC<ImageFallbackProps> = ({
       
       {/* Error state with better styling */}
       {imageError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-pink-50 to-purple-50 text-gray-400">
+        <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-pink-50 to-purple-50 text-gray-400">
           <div className="text-center">
             <div className="text-3xl mb-2">🖼️</div>
             <p className="text-xs font-medium">Image Preview</p>

@@ -13,7 +13,6 @@ import Script from "next/script";
 import { generateMetadata as generateSEOMetadata, defaultSEO } from "@/lib/seo";
 import { OrganizationStructuredData, WebsiteStructuredData, LocalBusinessStructuredData } from "@/lib/structured-data";
 import PerformanceMonitor from "@/component/PerformanceMonitor";
-
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -50,6 +49,7 @@ export default function RootLayout({
           <meta name="theme-color" content="#f4b7c7" />
           <meta name="msapplication-TileColor" content="#f4b7c7" />
           <meta name="application-name" content="Favee" />
+          <meta name="p:domain_verify" content="f2d8c10d985c08c21f0b59df4ac092f8" />
           <meta name="apple-mobile-web-app-capable" content="yes" />
           <meta name="apple-mobile-web-app-status-bar-style" content="default" />
           <meta name="apple-mobile-web-app-title" content="Favee" />

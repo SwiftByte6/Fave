@@ -4,10 +4,10 @@ import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
-import { RootState } from '@/Redux/store';
 import { addToCart } from '@/Redux/cartSlice';
 // favourites UI removed
 import toast from 'react-hot-toast';
+import { supabase } from '@/lib/products';
 
 interface RelatedProductCardProps {
   product: {
@@ -25,7 +25,7 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
   const dispatch = useDispatch();
   
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -33,8 +33,16 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
       ...product,
       cartQuantity: 1
     };
+    const { data: { session } } = await supabase.auth.getSession();
     dispatch(addToCart(productWithQuantity));
     toast.success('Added to cart!');
+    if (session) {
+      router.push('/checkout');
+      return true;
+    }
+
+    router.push('/signin');
+    return false;
   };
 
   const handleCardClick = () => {
@@ -87,7 +95,7 @@ const RelatedProductCard: React.FC<RelatedProductCardProps> = ({ product }) => {
           
           <button
             onClick={handleAddToCart}
-            className="group/btn relative overflow-hidden bg-red-800 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]"
+            className="group/btn relative overflow-hidden bg-red-800 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-linear-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-full"
           >
             Add to Cart
           </button>

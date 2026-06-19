@@ -31,7 +31,7 @@ const Hero = ({
               fill
               priority
               
-              src={'/HeroBack.png'}
+              src={'/Heroback.jpg'}
               alt="Fashion Banner - Click to explore collection"
               className='object-cover transition-transform duration-300 '
               quality={90}

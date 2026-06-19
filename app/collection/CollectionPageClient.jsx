@@ -1,8 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/Redux/cartSlice';
+import { supabase } from '@/lib/products';
 import ProductCard from '@/component/ProductCarad';
 import { IoSearch, IoClose } from "react-icons/io5";
 import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
@@ -19,11 +20,27 @@ import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 
 const CollectionPageClient = ({ products, total, page, pageSize }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Initialize with 'All', we'll update it in useEffect if category query param exists
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    const categoryQuery = searchParams?.get('category');
+    if (categoryQuery) {
+      const categoriesList = ['All', 'Saree', 'Kurti', 'Lehenga', 'Nighty', 'Bridal Collection', 'Party Wear', 'Casual Wear'];
+      const matchedCategory = categoriesList.find(c => c.toLowerCase() === categoryQuery.toLowerCase());
+      if (matchedCategory) {
+        setSelectedCategory(matchedCategory);
+      } else {
+        setSelectedCategory(categoryQuery.charAt(0).toUpperCase() + categoryQuery.slice(1));
+      }
+    }
+  }, [searchParams]);
   const [selectedFabric, setSelectedFabric] = useState('All');
   const [selectedOccasion, setSelectedOccasion] = useState('All');
   const [priceRange, setPriceRange] = useState(50000);
@@ -150,8 +167,16 @@ const CollectionPageClient = ({ products, total, page, pageSize }) => {
     setFilteredProducts(filtered);
   }, [products, searchQuery, selectedCategory, selectedFabric, selectedOccasion, priceRange, sortBy]);
 
-  const addToCartItem = (product) => {
+  const addToCartItem = async (product) => {
+    const { data: { session } } = await supabase.auth.getSession();
     dispatch(addToCart(product));
+    if (session) {
+      router.push('/checkout');
+      return true;
+    }
+
+    router.push('/signin');
+    return false;
   };
 
   const clearFilters = () => {
@@ -167,24 +192,15 @@ const CollectionPageClient = ({ products, total, page, pageSize }) => {
   return (
     <div className="min-h-screen bg-[#FBF8F6]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#F4DCDC] to-[#F0E7DE] py-16 px-6 lg:px-16">
+      <div className="bg-[#221512] py-16 px-6 lg:px-16 text-white">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="playfair text-4xl md:text-6xl font-bold text-[#6f5a4d] mb-4">Our Collection</h1>
-          <p className="text-xl text-[#8A6F5C] mb-8">
+          <h1 className="playfair text-4xl md:text-6xl font-bold  mb-4">Our Collection</h1>
+          <p className="text-xl text-gray-200 mb-8">
             Discover our complete range of exquisite sarees and lehengas
           </p>
           <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             {/* Search Bar */}
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full px-4 py-3 pl-12 border-2 border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
-              />
-              <IoSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-pink-400" size={20} />
-            </div>
+       
           </div>
         </div>
       </div>
@@ -203,7 +219,7 @@ const CollectionPageClient = ({ products, total, page, pageSize }) => {
 
         {/* Mobile Filter Overlay */}
         {showMobileFilters && (
-          <div className="lg:hidden fixed inset-0 bg-black/50 z-[60] animate-fadeIn" onClick={() => setShowMobileFilters(false)}>
+          <div className="lg:hidden fixed inset-0 bg-black/50 z-60 animate-fadeIn" onClick={() => setShowMobileFilters(false)}>
             <div 
               className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-2xl overflow-y-auto animate-slideInRight"
               onClick={(e) => e.stopPropagation()}
@@ -248,7 +264,7 @@ const CollectionPageClient = ({ products, total, page, pageSize }) => {
                 {/* Categories */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Categories</h3>
-                  {['All', 'Saree', 'Lehenga', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
+                  {['All', 'Saree', 'Kurti', 'Lehenga', 'Nighty', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
                     <label key={category} className="flex items-center gap-3 mb-2 cursor-pointer">
                       <input
                         type="radio"
@@ -360,7 +376,7 @@ const CollectionPageClient = ({ products, total, page, pageSize }) => {
             {/* Categories */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-[#6f5a4d] mb-3">Categories</h3>
-              {['All', 'Saree', 'Lehenga', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
+              {['All', 'Saree', 'Kurti', 'Lehenga', 'Nighty', 'Bridal Collection', 'Party Wear', 'Casual Wear'].map((category) => (
                 <label key={category} className="flex items-center gap-3 mb-2 cursor-pointer">
                   <input
                     type="radio"

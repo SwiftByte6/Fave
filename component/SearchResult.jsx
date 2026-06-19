@@ -6,15 +6,24 @@ import { addToCart } from '@/Redux/cartSlice'
 import Image from 'next/image';
 import { IoFilter } from "react-icons/io5";
 import ProductCard from './ProductCarad';
+import { supabase } from '@/lib/products';
 
 const SearchResult = ({ filterData }) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const addToCartItem = (item) => {
+  const addToCartItem = async (item) => {
     console.log('Add to cart:', item);
     dispatch(addToCart({ ...item, cartQuantity: 1 }))
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      router.push('/checkout');
+      return true;
+    }
+
+    router.push('/signin');
+    return false;
   };
 
   return (

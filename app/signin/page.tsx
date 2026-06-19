@@ -1,15 +1,12 @@
-import Signin from '@/component/Signin'
-import React from 'react'
+import Signin from '@/component/Signin';
+import React from 'react';
 
 export const dynamic = 'force-dynamic';
 
-const page = () => {
+export default function SigninPage() {
   return (
-    <div>
+    <div className="pt-24 pb-12 ">
       <Signin mode="signin" />
     </div>
-  )
+  );
 }
-export default page
-
-

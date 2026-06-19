@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import ShareButton from './ShareButton';
 import toast from 'react-hot-toast';
 import ProductComments from './ProductComments';
+import { supabase } from '@/lib/products';
+
 
 const playfair = Playfair_Display({ subsets: ['latin'], weight: ['800'] });
 
@@ -27,7 +29,6 @@ interface ProductDetailPageProps {
 const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     const dispatch = useDispatch();
     const router = useRouter();
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,20 +43,27 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
         }
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         // Validate size selection
         if (!selectedSize) {
             toast.error('Please select a size before adding to cart');
             return;
         }
+        const { data: { session } } = await supabase.auth.getSession();
         dispatch(addToCart({ ...product, cartQuantity: quantity, selectedSize }));
         toast.success(`Added to cart! Size: ${selectedSize}`);
+        if (session) {
+            router.push('/checkout');
+            return true;
+        }
+        router.push('/signin');
+        return false;
     };
 
     
 
     // Modal handlers for image zoom
-    const openModal = (imageIndex: number = currentImageIndex) => {
+    const openModal = (imageIndex: number) => {
         setModalImageIndex(imageIndex);
         setIsModalOpen(true);
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -67,11 +75,11 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     };
 
     const nextImage = () => {
-        setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+        setModalImageIndex((prev) => (prev + 1) % product.images.length);
     };
 
     const prevImage = () => {
-        setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+        setModalImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
     };
 
     // Handle keyboard navigation for modal
@@ -96,42 +104,38 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
     }, []);
 
     return (
-        <div className='w-full min-h-screen p-4 sm:p-6 bg-gradient-to-br from-fav-off-white via-fav-beige/20 to-fav-blush/10'>
-            <div className='max-w-7xl mx-auto'>
-                <div className='flex flex-col lg:flex-row gap-8 sm:gap-12 rounded-3xl overflow-hidden bg-fav-off-white/95 backdrop-blur-sm shadow-[0_20px_60px_rgba(122,31,42,0.15)] border border-fav-blush/30'>
+        <div className='w-full min-h-screen p-4 sm:p-6 lg:p-8 xl:p-12 bg-linear-to-br from-fav-off-white via-fav-beige/20 to-fav-blush/10'>
+            <div className='w-full'>
+                <div className='flex flex-col lg:flex-row gap-8 lg:gap-12 lg:items-start'>
                     {/* Product Image Section */}
-                    <div className="lg:w-1/2 w-full p-6 sm:p-8">
-                        <div className='w-full h-[400px] sm:h-[500px] lg:h-[600px] flex items-center justify-center bg-gradient-to-br from-fav-beige/50 to-fav-blush/30 rounded-2xl lg:rounded-3xl overflow-hidden cursor-zoom-in relative group shadow-lg'>
-                            {(product.images && product.images.length > 0) ? (
-                                <Image
-                                    src={product.images[currentImageIndex]}
-                                    alt={product.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                    style={{ objectFit: 'cover' }}
-                                    onClick={() => openModal(currentImageIndex)}
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-fav-warm-gray">
-                                    No image available
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex gap-2 mt-4">
-                            {product.images && product.images.map((img, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 cursor-pointer ${currentImageIndex === idx ? 'border-fav-gold' : 'border-fav-beige'}`}
-                                    onClick={() => setCurrentImageIndex(idx)}
-                                >
-                                    <Image src={img} alt={`Thumbnail ${idx + 1}`} width={64} height={64} style={{ objectFit: 'cover' }} />
-                                </div>
-                            ))}
-                        </div>
+                    <div className="lg:w-[55%] xl:w-[60%] w-full">
+                        {product.images && product.images.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {product.images.map((img, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className={`relative w-full aspect-[3/4] ${idx % 5 === 0 ? 'md:col-span-2 md:aspect-[4/5]' : 'col-span-1'} bg-linear-to-br from-fav-beige/50 to-fav-blush/30 overflow-hidden cursor-zoom-in shadow-sm`}
+                                        onClick={() => openModal(idx)}
+                                    >
+                                        <Image
+                                            src={img}
+                                            alt={`${product.title} - view ${idx + 1}`}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                            style={{ objectFit: 'cover' }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="w-full aspect-[3/4] flex items-center justify-center text-fav-warm-gray bg-fav-beige/30 rounded-2xl">
+                                No image available
+                            </div>
+                        )}
                     </div>
                     {/* Product Details Section */}
-                    <div className="lg:w-1/2 w-full p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
-                        <div className="space-y-6 sm:space-y-8">
+                    <div className="lg:w-[45%] xl:w-[40%] w-full lg:sticky lg:top-24 h-fit p-6 sm:p-8 rounded-3xl bg-fav-off-white/95 backdrop-blur-sm shadow-[0_20px_60px_rgba(122,31,42,0.15)]  -fav-blush/30">
+                        <div className="space-y-6 sm:space-y-8 flex flex-col h-full">
                             {/* Premium Header */}
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
@@ -156,21 +160,12 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
                             </div>
 
                             {/* Premium Price Section */}
-                            <div className="bg-gradient-to-r from-fav-beige/50 to-fav-blush/30 p-6 rounded-2xl border border-fav-blush/50">
-                                <div className="flex flex-wrap items-center gap-3 sm:gap-5 mb-3">
+                            <div className="bg-linear-to-r from-fav-beige/50 to-fav-blush/30 p-6 rounded-2xl  -fav-blush/50">
+                                <div className="flex flex-wrap items-center gap-3 sm:gap-5">
                                     <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-fav-maroon">
                                         ₹{product.price}
                                     </span>
-                                    {/* <span className="text-fav-warm-gray font-medium line-through text-xl sm:text-2xl">
-                                        {/* TODO: Render product price with markup from server props */}
-                                    {/* </span> */}
                                 </div>
-                                {/* <div className="flex items-center gap-3">
-                                    <span className="bg-fav-rust text-fav-off-white px-4 py-2 rounded-xl text-sm font-bold">
-                                        20% OFF
-                                    </span>
-                                    <span className="text-fav-charcoal font-semibold">Limited Time Offer!</span>
-                                </div> */}
                             </div>
 
                             {/* Stock Status */}
@@ -213,7 +208,7 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
                                         -
                                     </button>
                                     <div className='bg-fav-off-white border-2 border-fav-gold px-6 py-3 rounded-2xl'>
-                                        <span className='text-2xl font-bold text-fav-charcoal min-w-[48px] text-center block'>{quantity}</span>
+                                        <span className='text-2xl font-bold text-fav-charcoal min-w-12 text-center block'>{quantity}</span>
                                     </div>
                                     <button 
                                         onClick={() => handleQuantityChange('increase')}
@@ -233,40 +228,43 @@ const ProductDetailPage = ({ product }: ProductDetailPageProps) => {
                                     <span className="relative z-10 flex items-center justify-center gap-3">
                                         Add To Cart - ₹{product.price}
                                     </span>
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                                 </button>
                                 
-                                <div className='flex items-center'>
+                                <div className='flex flex-col gap-2 pt-2'>
+                                    <div className='flex items-center gap-2'>
+                                        <span className='text-sm text-fav-charcoal font-semibold'>Share this product:</span>
+                                    </div>
                                     <ShareButton product={product} />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Premium Product Details */}
-                        <div className='pt-6 border-t-2 border-fav-gold/30 mt-6'>
-                            <div className="flex items-center gap-3 mb-5">
-                                <h2 className={`text-2xl font-bold text-fav-charcoal ${playfair.className}`}>Product Details</h2>
-                            </div>
-                            <div className="space-y-5">
-                                <p className='text-fav-charcoal text-lg leading-relaxed font-medium'>
-                                    {product.description}
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <div className="bg-fav-beige/50 p-4 rounded-xl">
-                                        <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Category</span>
-                                        <p className="text-fav-charcoal font-semibold text-lg">{product.category}</p>
-                                    </div>
-                                    <div className="bg-fav-beige/50 p-4 rounded-xl">
-                                        <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Material</span>
-                                        <p className="text-fav-charcoal font-semibold text-lg">Premium Handwoven Fabric</p>
-                                    </div>
-                                    <div className="bg-fav-beige/50 p-4 rounded-xl">
-                                        <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Care Instructions</span>
-                                        <p className="text-fav-charcoal font-semibold text-lg">Dry Clean Only</p>
-                                    </div>
-                                    <div className="bg-fav-beige/50 p-4 rounded-xl">
-                                        <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Origin</span>
-                                        <p className="text-fav-charcoal font-semibold text-lg">Made in India</p>
+                            {/* Premium Product Details */}
+                            <div className='pt-6 border-t-2 border-fav-gold/30 mt-6'>
+                                <div className="flex items-center gap-3 mb-5">
+                                    <h2 className={`text-2xl font-bold text-fav-charcoal ${playfair.className}`}>Product Details</h2>
+                                </div>
+                                <div className="space-y-5">
+                                    <p className='text-fav-charcoal text-lg leading-relaxed font-medium'>
+                                        {product.description}
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                        <div className="bg-fav-beige/50 p-4 rounded-xl">
+                                            <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Category</span>
+                                            <p className="text-fav-charcoal font-semibold text-lg">{product.category}</p>
+                                        </div>
+                                        <div className="bg-fav-beige/50 p-4 rounded-xl">
+                                            <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Material</span>
+                                            <p className="text-fav-charcoal font-semibold text-lg">Premium Handwoven Fabric</p>
+                                        </div>
+                                        <div className="bg-fav-beige/50 p-4 rounded-xl">
+                                            <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Care Instructions</span>
+                                            <p className="text-fav-charcoal font-semibold text-lg">Dry Clean Only</p>
+                                        </div>
+                                        <div className="bg-fav-beige/50 p-4 rounded-xl">
+                                            <span className='font-bold text-fav-maroon text-sm uppercase tracking-wider'>Origin</span>
+                                            <p className="text-fav-charcoal font-semibold text-lg">Made in India</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

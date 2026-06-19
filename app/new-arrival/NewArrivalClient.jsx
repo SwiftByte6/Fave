@@ -4,22 +4,29 @@ import ProductCard from "@/component/ProductCarad";
 import { useDispatch } from "react-redux";
 import { addToCart } from "@/Redux/cartSlice";
 
+import { supabase } from "@/lib/products";
+
 export default function NewArrivalClient() {
   const dispatch = useDispatch();
-  // TODO: Refactor to receive products as props from server component
   const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true);
-      await getDataFromSupabase();
+      const { data, error } = await supabase.from('product').select('*');
+      if (data) {
+        setProducts(data);
+      } else if (error) {
+        console.error("Error fetching products:", error);
+      }
       setIsLoading(false);
     };
     load();
   }, []);
 
   const sortedProducts = useMemo(() => {
-    return [...products].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return [...products].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
   }, [products]);
 
   if (isLoading) {
@@ -32,7 +39,7 @@ export default function NewArrivalClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F9F5F0] to-[#F0E7DE] py-8">
-      <div className="container mx-auto px-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-[#6f5a4d] mb-4">

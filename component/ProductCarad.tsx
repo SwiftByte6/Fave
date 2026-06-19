@@ -26,49 +26,6 @@ interface ProductCardProps {
   currencySymbol?: string;
 }
 
-/**
- * Unified ProductCard Component
- *
- * This component handles all product card displays throughout the website with configurable variants:
- *
- * Variants:
- * - 'default': Standard product card (550px-700px height) - Used in HomePage, Favourites, New Arrivals
- * - 'search': Search results card (500px-650px height) - Used in SearchResult component
- * - 'compact': Compact card (400px-500px height) - For space-constrained layouts
- *
- * Props:
- * - data: Product information object
- * - addToCartItem: Function to add product to cart (optional)
- * - variant: Card variant type
- * - showCategoryBadge: Show category badge overlay (default: false)
- * - showWishlist: Show wishlist heart icon (default: true)
- * - showAddToCart: Show add to cart button (default: true)
- * - className: Additional CSS classes
- *
- * Usage Examples:
- *
- * // Default product card (HomePage, Favourites)
- * <ProductCard
- *   data={product}
- *   variant="default"
- *   addToCartItem={addToCartItem}
- * />
- *
- * // Search results card with category badge
- * <ProductCard
- *   data={product}
- *   variant="search"
- *   showCategoryBadge={true}
- *   addToCartItem={addToCartItem}
- * />
- *
- * // Compact card without add to cart
- * <ProductCard
- *   data={product}
- *   variant="compact"
- *   showAddToCart={false}
- * />
- */
 const ProductCard: React.FC<ProductCardProps> = memo(({
   data,
   addToCartItem,
@@ -82,12 +39,13 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
   const router = useRouter();
   const dispatch = useDispatch();
 
-  
-
-  const handleAddToCart = useCallback(() => {
+  const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (addToCartItem) {
-      addToCartItem(data);
-      toast.success("Added to cart!");
+      const result = await addToCartItem(data);
+      if (result !== false) {
+        toast.success("Added to cart!");
+      }
     }
   }, [addToCartItem, data]);
 
@@ -95,108 +53,66 @@ const ProductCard: React.FC<ProductCardProps> = memo(({
     router.push(`/products/${data.id}`);
   }, [router, data.id]);
 
-  // Determine card height based on variant
-  const getCardHeight = () => {
-    switch (variant) {
-      case "bestseller":
-        return "h-[400px] sm:h-[400px] lg:h-[400px]";
-      case "compact":
-        return "h-[400px] sm:h-[450px] lg:h-[500px]";
-      case "search":
-        return "h-[400px] sm:h-[400px] lg:h-[400px]";
-      case "default":
-      default:
-        return "h-[550px] sm:h-[600px] lg:h-[700px]";
-    }
-  };
-
-  // Determine image height based on variant
-  const getImageHeight = () => {
-    switch (variant) {
-      case "bestseller":
-        return "h-[62%]";
-      case "compact":
-        return "h-[70%]";
-      case "search":
-        return "h-[65%]";
-      case "default":
-      default:
-        return "h-[75%]";
-    }
-  };
-
-  // Determine content height based on variant
-  const getContentHeight = () => {
-    switch (variant) {
-      case "bestseller":
-        return "h-[25%]";
-      case "compact":
-        return "h-[30%]";
-      case "search":
-        return "h-[25%]";
-      case "default":
-      default:
-        return "h-[20%]";
-    }
-  };
+  // Design-specific mock data
+  const originalPrice = data.price * 1.2;
+  const isSale = true;
+  const isNew = true;
+  const isPopular = variant === "bestseller";
 
   return (
-    <div
-      className={`bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden ${getCardHeight()} relative transition-all duration-300 hover:shadow-md group ${className}`}
+    <div 
+      className={`group flex flex-col cursor-pointer ${className}`}
+      onClick={handleProductClick}
     >
-      
-
-      {/* Image */}
-      <div
-        className={`${getImageHeight()} bg-gray-50 cursor-pointer overflow-hidden relative`}
-        onClick={handleProductClick}
-      >
+      {/* Image Container */}
+      <div className="relative aspect-[3/4] bg-[#f2f2f2] overflow-hidden mb-4">
         {data?.images?.[0] ? (
           <ImageFallback
             src={data.images[0]}
             alt={data.title}
-            width={400}
-            height={400}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            width={600}
+            height={800}
+            className="w-full h-full [&>img]:w-full [&>img]:h-full [&>img]:object-cover [&>img]:object-top [&>img]:transition-transform [&>img]:duration-700 group-hover:[&>img]:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            onClick={handleProductClick}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-sm text-gray-500">
-            <div className="text-center">
-              <p className="font-medium">Image coming soon</p>
-            </div>
+          <div className="flex items-center justify-center w-full h-full text-sm text-gray-500">
+            Image coming soon
           </div>
+        )}
+
+
+        {/* Add to Cart Button (Circular) */}
+        {showAddToCart && addToCartItem && (
+          <button
+            onClick={handleAddToCart}
+            className="absolute hidden group-hover:flex bottom-3 right-3 w-10 h-10 bg-black text-white rounded-full flex items-center justify-center shadow-lg transition-transform duration-300 hover:scale-110 z-10"
+            aria-label="Add to Cart"
+          >
+            <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+          </button>
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col justify-between bg-white">
-        <div className="mb-3">
-          <h3 className="text-gray-900 text-sm font-medium mb-1 line-clamp-2 leading-tight">
-            {data.title}
-          </h3>
-          <p className="text-xs text-gray-500 font-normal">
-            {data.category || "Kurtis"}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <div className="text-orange-600 font-semibold text-lg">
-              ₹ {data.price?.toLocaleString()}
-            </div>
-            <span className="text-xs text-gray-500">Bestseller</span>
-          </div>
-          {showAddToCart && addToCartItem && (
-            <button
-              onClick={handleAddToCart}
-              className="group/btn relative overflow-hidden bg-red-800 hover:bg-red-700 text-white font-medium text-sm px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 before:absolute before:top-0 before:left-[-100%] before:w-full before:h-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-all before:duration-500 hover:before:left-[100%]"
-            >
-              Add to Cart
-            </button>
+      {/* Details Container */}
+      <div className="flex flex-col gap-1.5 px-0.5">
+        {/* Title */}
+        <h3 className="text-[13px] sm:text-sm font-bold text-gray-900 truncate tracking-tight">
+          {data.title}
+        </h3>
+        
+        {/* Price */}
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] sm:text-sm text-[#] font-bold">{currencySymbol}{data.price.toLocaleString()}</span>
+          {isSale && (
+            <span className="text-xs text-gray-400 line-through">{currencySymbol}{Math.round(originalPrice).toLocaleString()}</span>
           )}
         </div>
+
+      
+
+        {/* Sizes (Mock) */}
+       
       </div>
     </div>
   );
